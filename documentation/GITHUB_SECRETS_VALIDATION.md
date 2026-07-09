@@ -4,7 +4,7 @@
 
 | Setting | Exact value |
 |---------|-------------|
-| **FTP_REMOTE_PATH** | `public_html/` *(cPanel FTP — do NOT use `/home/...` full path)* |
+| **FTP_REMOTE_PATH** | `/public_html/` *(lftp absolute path for cPanel user `smartdms`)* |
 | **Public site** | `https://smartdms.me/` |
 | **XMONEY_APP_URL** | `https://smartdms.me/api` |
 | **XMONEY_DB_HOST** | `localhost` |
@@ -27,7 +27,7 @@
 | `FTP_PORT` | `21` |
 | `FTP_USERNAME` | FTP user for XMONEY (or account with access only as needed) |
 | `FTP_PASSWORD` | FTP password |
-| `FTP_REMOTE_PATH` | `public_html/` |
+| `FTP_REMOTE_PATH` | `/public_html/` |
 | `XMONEY_DB_HOST` | `localhost` |
 | `XMONEY_DB_NAME` | `smartdms_XMONEY` |
 | `XMONEY_DB_USER` | `smartdms_xmoney` |

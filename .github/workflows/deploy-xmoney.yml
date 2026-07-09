@@ -88,36 +88,13 @@ jobs:
               echo "PATH VALIDATION PASSED: deploy target is public_html (cPanel web root)."
               ;;
             /|/home/smartdms|/home/smartdms/smartdms.me)
-              echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' is not public_html. Use public_html/ or /public_html/"
+              echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' is not public_html. Use /public_html/"
               exit 1
               ;;
             *)
               echo "::warning::FTP_REMOTE_PATH='${PATH_RAW}' is non-standard — will attempt deploy anyway."
               ;;
           esac
-
-      - name: Resolve FTP deploy directory for cPanel (chroot-safe)
-        id: ftpdir
-        env:
-          FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
-        run: |
-          set -euo pipefail
-          RAW="$(echo -n "$FTP_REMOTE_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s#/$##')"
-          case "$RAW" in
-            public_html|/public_html|/home/smartdms/public_html)
-              DIR="public_html/"
-              ;;
-            *)
-              # Must not start with / for FTP-Deploy-Action; must end with /
-              DIR="${RAW#/}"
-              case "$DIR" in
-                */) ;;
-                *) DIR="${DIR}/" ;;
-              esac
-              ;;
-          esac
-          echo "FTP deploy directory (chroot-relative): ${DIR}"
-          echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
 
       - name: Validate XMONEY database + APP_URL (isolation)
         env:
@@ -303,25 +280,41 @@ jobs:
           test -d "$PKG/admin"
           echo "Package structure OK for XMONEY-only deploy."
 
-      - name: Deploy via FTP to XMONEY folder ONLY
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          port: ${{ secrets.FTP_PORT }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          local-dir: ./deploy/cpanel/dist/xmoney-cpanel-package/
-          # cPanel FTP: chroot-relative path only (no /home/... prefix)
-          server-dir: ${{ steps.ftpdir.outputs.dir }}
-          dangerous-clean-slate: false
-          timeout: 600000
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.env.example
-            **/DEPLOY_README.txt
+      - name: Resolve FTP deploy directory for cPanel (lftp)
+        id: ftpdir
+        env:
+          FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+          RAW="$(echo -n "$FTP_REMOTE_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s#/$##')"
+          case "$RAW" in
+            public_html|/public_html|/home/smartdms/public_html|'')
+              DIR="/public_html"
+              ;;
+            /*)
+              DIR="$RAW"
+              ;;
+            *)
+              DIR="/${RAW}"
+              ;;
+          esac
+          echo "FTP deploy directory (lftp): ${DIR}/"
+          echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Deploy package via FTPS (lftp — cPanel compatible)
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_REMOTE_PATH: ${{ steps.ftpdir.outputs.dir }}
+          FTP_MODE: ftps
+          LOCAL_DIR: deploy/cpanel/dist/xmoney-cpanel-package
+          DRY_RUN: "false"
+        run: bash deploy/cpanel/lftp-deploy.sh
 
       - name: Post-deploy health check (XMONEY API only)
         env:
