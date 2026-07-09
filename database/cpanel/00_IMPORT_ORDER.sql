@@ -5,9 +5,10 @@
 -- 2. In phpMyAdmin, SELECT database: {user}_xmoney_db
 -- 3. Import: 02_schema_no_create_db.sql
 -- 4. Import: 03_seed.sql
--- 5. Import: ../../migrations/000_schema_migrations.sql
--- 6. Import: ../../migrations/001_core_schema.sql
--- 7. On server: php api/scripts/seed-admin.php "StrongPassword"
+-- 5. Import: ../../migrations/000_schema_migrations.sql (if using incremental migrations)
+-- 6. Import: ../../migrations/002_transfer_daily_limit_setting.sql
+-- 7. Import: ../../migrations/003_wallet_payments_analytics.sql  (wallet_id, purpose on payments)
+-- 8. On server: php api/scripts/seed-admin.php "StrongPassword"
 --
 -- NEVER select your existing application database for these imports.
 SELECT 'Follow import order in comments — do not execute this file' AS notice;

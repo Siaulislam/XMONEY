@@ -31,5 +31,14 @@
   "hero.subtitle": "منصة تحويل أموال آمنة وشفافة مصممة للسرعة والامتثال وأسعار صرف عادلة.",
   "hero.cta.register": "إنشاء حساب مجاني",
   "hero.cta.login": "تسجيل الدخول",
-  "admin.tag": "الإدارة"
+  "admin.tag": "الإدارة",
+  "wallet.available": "الرصيد المتاح",
+  "wallet.devDeposit": "إيداع تجريبي",
+  "wallet.topUp": "شحن المحفظة",
+  "wallet.history": "السجل",
+  "transfer.selectBeneficiary": "اختر المستفيد",
+  "transfer.continue": "متابعة",
+  "transfer.review": "مراجعة",
+  "transfer.back": "رجوع",
+  "transfer.submit": "إرسال الأموال الآن"
 }

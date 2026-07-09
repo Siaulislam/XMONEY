@@ -25,32 +25,32 @@
   <div data-xm-shell>
     <div id="alert" hidden></div>
     <div class="xm-wallet-hero">
-      <div class="label">Available balance</div>
+      <div class="label" data-i18n="wallet.available">Available balance</div>
       <div class="balance" id="avail">—</div>
       <div style="opacity:0.85;font-size:0.9rem">Total <span id="bal">—</span> · Held <span id="held">—</span></div>
     </div>
     <div class="xm-grid-2">
       <div class="xm-card" id="devDepositCard" hidden>
-        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Development deposit</h2>
-        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Instant wallet credit for local/staging testing only.</p>
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem" data-i18n="wallet.devDeposit">Development deposit</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem" data-i18n="wallet.devDepositHint">Instant wallet credit for local/staging testing only.</p>
         <form id="devDepositForm">
-          <div class="xm-field"><label>Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
-          <div class="xm-field"><label>Currency</label><select name="currency" id="devCurrency"><option value="AED">AED</option></select></div>
-          <button class="xm-btn xm-btn-outline" type="submit" id="devDepositBtn">Add test funds</button>
+          <div class="xm-field"><label data-i18n="wallet.amount">Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
+          <div class="xm-field"><label data-i18n="wallet.currency">Currency</label><select name="currency" id="devCurrency"><option value="AED">AED</option></select></div>
+          <button class="xm-btn xm-btn-outline" type="submit" id="devDepositBtn" data-i18n="wallet.addTestFunds">Add test funds</button>
         </form>
       </div>
       <div class="xm-card">
-        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Top up wallet</h2>
-        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Funds are added via the modular payment provider (stub in development).</p>
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem" data-i18n="wallet.topUp">Top up wallet</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem" data-i18n="wallet.topUpHint">Funds are added via the modular payment provider (stub in development).</p>
         <form id="topUpForm">
-          <div class="xm-field"><label>Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
-          <div class="xm-field"><label>Currency</label>
+          <div class="xm-field"><label data-i18n="wallet.amount">Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
+          <div class="xm-field"><label data-i18n="wallet.currency">Currency</label>
             <select name="currency" id="currency"><option value="AED">AED</option></select>
           </div>
-          <div class="xm-field"><label>Payment method</label>
+          <div class="xm-field"><label data-i18n="wallet.paymentMethod">Payment method</label>
             <select name="payment_method"><option value="card">Card</option><option value="gateway">Payment gateway</option></select>
           </div>
-          <button class="xm-btn xm-btn-primary" type="submit" id="topBtn">Top up now</button>
+          <button class="xm-btn xm-btn-primary" type="submit" id="topBtn" data-i18n="wallet.topUpNow">Top up now</button>
         </form>
       </div>
       <div class="xm-card">

@@ -8,6 +8,7 @@ These scripts are for the **XMONEY database only**.
 | `01_create_database_and_user.sql.template` | Template for dedicated DB + user |
 | `02_schema_no_create_db.sql` | All XMONEY tables (no CREATE DATABASE) |
 | `03_seed.sql` | Roles, currencies, rates, admin row |
+| `../migrations/003_wallet_payments_analytics.sql` | `payments.wallet_id`, `payments.purpose` (apply after core schema) |
 
 ## Critical
 

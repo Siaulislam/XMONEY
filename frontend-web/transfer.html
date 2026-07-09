@@ -25,29 +25,29 @@
   <div data-xm-shell>
     <div id="alert" hidden></div>
     <div class="xm-steps" id="steps">
-      <div class="xm-step active" data-step="1">1. Beneficiary</div>
-      <div class="xm-step" data-step="2">2. Amount</div>
-      <div class="xm-step" data-step="3">3. Review</div>
-      <div class="xm-step" data-step="4">4. Pay</div>
+      <div class="xm-step active" data-step="1" data-i18n="transfer.step.beneficiary">1. Beneficiary</div>
+      <div class="xm-step" data-step="2" data-i18n="transfer.step.amount">2. Amount</div>
+      <div class="xm-step" data-step="3" data-i18n="transfer.step.review">3. Review</div>
+      <div class="xm-step" data-step="4" data-i18n="transfer.step.pay">4. Pay</div>
     </div>
 
     <div class="xm-card" style="max-width:640px" id="panel">
       <!-- Step 1 -->
       <section data-panel="1">
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Select beneficiary</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="transfer.selectBeneficiary">Select beneficiary</h2>
         <div class="xm-field">
-          <label>Beneficiary</label>
-          <select id="benSelect" required><option value="">Loading…</option></select>
+          <label data-i18n="transfer.beneficiary">Beneficiary</label>
+          <select id="benSelect" required><option value="" data-i18n="loading">Loading…</option></select>
         </div>
-        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Need a new receiver? <a href="beneficiaries.html">Add beneficiary</a></p>
-        <button type="button" class="xm-btn xm-btn-primary" id="toStep2">Continue</button>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem"><span data-i18n="transfer.addBeneficiaryLink">Need a new receiver?</span> <a href="beneficiaries.html" data-i18n="transfer.addBeneficiary">Add beneficiary</a></p>
+        <button type="button" class="xm-btn xm-btn-primary" id="toStep2" data-i18n="transfer.continue">Continue</button>
       </section>
 
       <!-- Step 2 -->
       <section data-panel="2" hidden>
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Amount & currency</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="transfer.amountCurrency">Amount & currency</h2>
         <div class="xm-field">
-          <label>You send</label>
+          <label data-i18n="transfer.youSend">You send</label>
           <select id="srcCur">
             <option value="AED">AED</option>
             <option value="USD">USD</option>
@@ -61,27 +61,27 @@
         </div>
         <div id="quoteBox" class="xm-alert xm-alert-info" hidden></div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button type="button" class="xm-btn xm-btn-outline" id="back1">Back</button>
-          <button type="button" class="xm-btn xm-btn-outline" id="quoteBtn">Get live quote</button>
-          <button type="button" class="xm-btn xm-btn-primary" id="toStep3">Review transfer</button>
+          <button type="button" class="xm-btn xm-btn-outline" id="back1" data-i18n="transfer.back">Back</button>
+          <button type="button" class="xm-btn xm-btn-outline" id="quoteBtn" data-i18n="transfer.getQuote">Get live quote</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="toStep3" data-i18n="transfer.reviewTransfer">Review transfer</button>
         </div>
       </section>
 
       <!-- Step 3 -->
       <section data-panel="3" hidden>
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Review</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="transfer.review">Review</h2>
         <div id="reviewBox" style="font-size:0.95rem;line-height:1.7"></div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem">
-          <button type="button" class="xm-btn xm-btn-outline" id="back2">Back</button>
-          <button type="button" class="xm-btn xm-btn-primary" id="toStep4">Confirm & pay</button>
+          <button type="button" class="xm-btn xm-btn-outline" id="back2" data-i18n="transfer.back">Back</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="toStep4" data-i18n="transfer.confirmPay">Confirm & pay</button>
         </div>
       </section>
 
       <!-- Step 4 -->
       <section data-panel="4" hidden>
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Payment</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="transfer.payment">Payment</h2>
         <div class="xm-field">
-          <label>Payment method</label>
+          <label data-i18n="wallet.paymentMethod">Payment method</label>
           <select id="payMethod">
             <option value="wallet">Wallet balance</option>
             <option value="card">Card</option>
@@ -90,8 +90,8 @@
         </div>
         <div id="payStatus" class="xm-alert xm-alert-info" hidden></div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button type="button" class="xm-btn xm-btn-outline" id="back3">Back</button>
-          <button type="button" class="xm-btn xm-btn-primary" id="payBtn">Pay now</button>
+          <button type="button" class="xm-btn xm-btn-outline" id="back3" data-i18n="transfer.back">Back</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="payBtn" data-i18n="transfer.payNow">Pay now</button>
         </div>
       </section>
     </div>

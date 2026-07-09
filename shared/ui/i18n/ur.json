@@ -31,5 +31,14 @@
   "hero.subtitle": "ایک محفوظ اور شفاف منی ٹرانسفر پلیٹ فارم جو رفتار، تعمیل اور منصفانہ شرح مبادلہ کے لیے بنایا گیا ہے۔",
   "hero.cta.register": "مفت اکاؤنٹ بنائیں",
   "hero.cta.login": "سائن ان",
-  "admin.tag": "ایڈمن"
+  "admin.tag": "ایڈمن",
+  "wallet.available": "دستیاب بیلنس",
+  "wallet.devDeposit": "ڈیولپمنٹ ڈپازٹ",
+  "wallet.topUp": "والیٹ ٹاپ اپ",
+  "wallet.history": "تاریخ",
+  "transfer.selectBeneficiary": "وصول کنندہ منتخب کریں",
+  "transfer.continue": "جاری رکھیں",
+  "transfer.review": "جائزہ",
+  "transfer.back": "واپس",
+  "transfer.submit": "ابھی رقم بھیجیں"
 }
