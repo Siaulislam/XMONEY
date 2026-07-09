@@ -14,9 +14,15 @@
 $ErrorActionPreference = 'Stop'
 $Root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $Out = Join-Path $PSScriptRoot 'dist\xmoney-cpanel-package'
+$EnsureBranding = Join-Path $Root 'scripts\ensure-deploy-branding.ps1'
 
 Write-Host "XMONEY root: $Root"
 Write-Host "Output:      $Out"
+
+if (Test-Path $EnsureBranding) {
+  Write-Host "Ensuring branding assets..."
+  & $EnsureBranding
+}
 
 if (Test-Path $Out) {
   Remove-Item $Out -Recurse -Force
@@ -81,7 +87,14 @@ Copy-Item (Join-Path $PSScriptRoot 'package-template\storage.htaccess') (Join-Pa
 '' | Set-Content (Join-Path $Out 'storage\backups\.gitkeep')
 
 # Public runtime config (no secrets)
-Copy-Item (Join-Path $Root 'config\runtime-config.example.js') (Join-Path $Out 'config\runtime-config.example.js') -Force
+$runtimeExample = Join-Path $Root 'config\runtime-config.example.js'
+$runtimeLive = Join-Path $Root 'frontend-web\config\runtime-config.js'
+Copy-Item $runtimeExample (Join-Path $Out 'config\runtime-config.example.js') -Force
+if (Test-Path $runtimeLive) {
+  Copy-Item $runtimeLive (Join-Path $Out 'config\runtime-config.js') -Force
+} else {
+  Copy-Item $runtimeExample (Join-Path $Out 'config\runtime-config.js') -Force
+}
 Copy-Item (Join-Path $PSScriptRoot 'package-template\config.htaccess') (Join-Path $Out 'config\.htaccess') -Force
 
 # Database import pack (XMONEY DB only)
@@ -109,24 +122,54 @@ Get-ChildItem (Join-Path $Out 'admin') -Filter '*.html' -File | ForEach-Object {
   Add-RuntimeConfigScript $_.FullName '../config/runtime-config.js'
 }
 
+# Verify required live files are present in the package
+$required = @(
+  'index.html',
+  '.htaccess',
+  'favicon.ico',
+  'config\runtime-config.js',
+  'src\assets\css\xmoney.css',
+  'src\assets\branding\xmoney-logo-nav.png',
+  'admin\index.html',
+  'admin\config\runtime-config.js',
+  'api\public\index.php',
+  'api\.env.example',
+  'storage\uploads\kyc',
+  'database\02_schema_no_create_db.sql'
+)
+foreach ($rel in $required) {
+  $path = Join-Path $Out $rel
+  if (-not (Test-Path $path)) {
+    throw "Package incomplete: missing $rel"
+  }
+}
+
 # README inside package
 @"
-XMONEY cPanel Package
-=====================
-Upload the CONTENTS of this folder to: public_html/
+XMONEY cPanel Package — FULL SERVER UPLOAD
+==========================================
+Upload the CONTENTS of this folder to:
+  /home/smartdms/public_html/
 
-Upload into the approved hosting root only.
+Do NOT upload the repository source tree (frontend-web, admin-panel, backend-api folders).
 
-Next steps:
-1. Create MySQL database + user for XMONEY only (see database/)
-2. Import database/*.sql into the XMONEY database only
-3. Copy api/.env.example -> api/.env and fill XMONEY credentials
-4. Copy config/runtime-config.example.js -> config/runtime-config.js and set apiBaseUrl
-5. On server: cd api && composer install --no-dev && php scripts/seed-admin.php
-6. Visit / and /admin/ and /api/v1/health
+This package already includes:
+- index.html and all customer pages
+- admin/ panel
+- api/ backend source
+- config/runtime-config.js
+- src/assets CSS, JS, branding images
+- storage/, database SQL pack, .htaccess
 
-Isolation policy: documentation/ISOLATION.md
-"@ | Set-Content (Join-Path $Out 'DEPLOY_README.txt') -Encoding UTF8
+After upload:
+1. Copy api/.env.example -> api/.env and fill DB + JWT values
+2. In cPanel Terminal: cd ~/public_html/api && composer install --no-dev
+3. Optional: php scripts/seed-admin.php "YourStrongPassword"
+4. Test:
+   - https://smartdms.me/
+   - https://smartdms.me/admin/
+   - https://smartdms.me/api/v1/health
+"@ | Set-Content (Join-Path $Out 'UPLOAD_TO_PUBLIC_HTML.txt') -Encoding UTF8
 
 # Zip
 $zip = Join-Path $PSScriptRoot 'dist\xmoney-cpanel-package.zip'
