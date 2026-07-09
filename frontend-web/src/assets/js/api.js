@@ -21,6 +21,14 @@ const XMONEY = (() => {
 
   let refreshPromise = null;
 
+  function t(key, fallback) {
+    return (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t(key, fallback) : fallback;
+  }
+
+  function getLocale() {
+    return localStorage.getItem('xmoney_lang') || 'en';
+  }
+
   function getToken() {
     return localStorage.getItem(KEYS.access);
   }
@@ -104,7 +112,7 @@ const XMONEY = (() => {
   async function api(path, options = {}) {
     const isForm = options.body instanceof FormData;
     const headers = Object.assign(
-      { Accept: 'application/json', 'X-Device-Id': getDeviceId() },
+      { Accept: 'application/json', 'X-Device-Id': getDeviceId(), 'X-Locale': getLocale() },
       isForm ? {} : { 'Content-Type': 'application/json' },
       options.headers || {}
     );
@@ -130,7 +138,7 @@ const XMONEY = (() => {
     try {
       payload = await res.json();
     } catch {
-      payload = { success: false, message: 'Invalid server response' };
+      payload = { success: false, message: t('common.invalidServer', 'Invalid server response') };
     }
 
     const skipRefresh = path.includes('/auth/login')
@@ -219,7 +227,8 @@ const XMONEY = (() => {
       blocked: 'danger', expired: 'danger', none: 'muted', read: 'muted',
     };
     const cls = map[status] || 'muted';
-    return `<span class="xm-badge xm-badge-${cls}">${String(status).replace(/_/g, ' ')}</span>`;
+    const label = t(`status.${status}`, String(status).replace(/_/g, ' '));
+    return `<span class="xm-badge xm-badge-${cls}">${label}</span>`;
   }
 
   function formatMoney(amount, currency) {
@@ -233,10 +242,10 @@ const XMONEY = (() => {
     if (loading) {
       btn.dataset.label = btn.textContent;
       btn.disabled = true;
-      btn.innerHTML = `<span class="xm-spinner"></span> ${label || 'Please wait…'}`;
+      btn.innerHTML = `<span class="xm-spinner"></span> ${label || t('common.pleaseWait', 'Please wait…')}`;
     } else {
       btn.disabled = false;
-      btn.textContent = btn.dataset.label || label || 'Submit';
+      btn.textContent = btn.dataset.label || label || t('common.submit', 'Submit');
     }
   }
 

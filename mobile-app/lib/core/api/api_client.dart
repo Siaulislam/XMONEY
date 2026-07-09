@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import '../l10n/xm_strings.dart';
 import 'session_manager.dart';
 
 class ApiClient {
@@ -28,6 +29,7 @@ class ApiClient {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'X-Device-Id': _deviceId,
+      'X-Locale': XmStrings.instance.lang,
       'X-Platform': Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other'),
     };
     return headers;
@@ -95,6 +97,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
         'X-Device-Id': _deviceId,
+        'X-Locale': XmStrings.instance.lang,
       },
       body: jsonEncode({'refresh_token': refresh}),
     );

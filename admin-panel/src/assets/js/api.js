@@ -16,6 +16,14 @@ const XMONEY = (() => {
 
   let refreshPromise = null;
 
+  function t(key, fallback) {
+    return (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t(key, fallback) : fallback;
+  }
+
+  function getLocale() {
+    return localStorage.getItem('xmoney_lang') || 'en';
+  }
+
   function getToken() { return localStorage.getItem(KEYS.access); }
   function getRefreshToken() { return localStorage.getItem(KEYS.refresh); }
 
@@ -91,7 +99,7 @@ const XMONEY = (() => {
 
   async function api(path, options = {}) {
     const headers = Object.assign(
-      { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Device-Id': getDeviceId() },
+      { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Device-Id': getDeviceId(), 'X-Locale': getLocale() },
       options.headers || {}
     );
     const token = getToken();
@@ -107,7 +115,7 @@ const XMONEY = (() => {
 
     let payload;
     try { payload = await res.json(); }
-    catch { payload = { success: false, message: 'Invalid server response' }; }
+    catch { payload = { success: false, message: t('common.invalidServer', 'Invalid server response') }; }
 
     const skip = path.includes('/auth/login') || path.includes('/auth/refresh') || path.includes('/auth/logout');
     if (res.status === 401 && !skip && !options._retried) {
@@ -142,7 +150,8 @@ const XMONEY = (() => {
       created: 'muted', failed: 'danger', rejected: 'danger', cancelled: 'muted', refunded: 'info',
       blocked: 'danger', expired: 'danger', none: 'muted',
     };
-    return `<span class="xm-badge xm-badge-${map[status] || 'muted'}">${String(status).replace(/_/g, ' ')}</span>`;
+    const label = t(`status.${status}`, String(status).replace(/_/g, ' '));
+    return `<span class="xm-badge xm-badge-${map[status] || 'muted'}">${label}</span>`;
   }
 
   function formatMoney(amount, currency) {

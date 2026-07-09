@@ -28,25 +28,26 @@
       <div class="xm-skeleton" style="height:8rem"></div>
     </div>
     <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap" id="actions">
-      <a href="transactions.html" class="xm-btn xm-btn-outline">All transactions</a>
-      <a href="transfer.html" class="xm-btn xm-btn-primary">New transfer</a>
-      <button type="button" class="xm-btn xm-btn-outline" onclick="window.print()">Print</button>
+      <a href="transactions.html" class="xm-btn xm-btn-outline" data-i18n="receipt.allTransactions">All transactions</a>
+      <a href="transfer.html" class="xm-btn xm-btn-primary" data-i18n="receipt.newTransfer">New transfer</a>
+      <button type="button" class="xm-btn xm-btn-outline" onclick="window.print()" data-i18n="common.print">Print</button>
     </div>
   </div>
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
     (async () => {
-      const profile = await XMShell.mount({ title: 'Receipt', heading: 'Transfer receipt' });
+      const profile = await XMShell.mount({ title: 'Receipt', headingKey: 'receipt.title', heading: 'Transfer receipt' });
       if (!profile) return;
+      const tt = (key, fallback) => (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t(key, fallback) : fallback;
       const uuid = new URLSearchParams(location.search).get('uuid');
       if (!uuid) {
-        document.getElementById('receipt').innerHTML = '<div class="xm-empty">Missing transfer reference.</div>';
+        document.getElementById('receipt').innerHTML = `<div class="xm-empty">${tt('receipt.missingReference', 'Missing transfer reference.')}</div>`;
         return;
       }
       const res = await XMONEY.api('/v1/transfers/' + uuid);
       if (!res.success) {
-        XMONEY.showAlert(document.getElementById('alert'), res.message || 'Transfer not found');
+        XMONEY.showAlert(document.getElementById('alert'), res.message || tt('error.transaction_not_found', 'Transfer not found'));
         return;
       }
       const t = res.data;
@@ -67,20 +68,20 @@
           <div>${XMONEY.statusBadge(t.status)}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem 1.25rem;font-size:0.95rem">
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Receiver</div><strong>${t.receiver_name}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Bank / account</div><strong>${t.bank_name || '—'} · ${t.account_number || t.iban || '—'}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">You sent</div><strong>${XMONEY.formatMoney(t.send_amount, t.source_currency)}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">They receive</div><strong>${XMONEY.formatMoney(t.receive_amount, t.target_currency)}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Rate</div><strong>${t.customer_rate}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Fee</div><strong>${XMONEY.formatMoney(t.fee_amount, t.fee_currency)}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Total debit</div><strong>${XMONEY.formatMoney(t.total_debit, t.source_currency)}</strong></div>
-          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Created</div><strong>${new Date(t.created_at).toLocaleString()}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.receiver', 'Receiver')}</div><strong>${t.receiver_name}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.bankAccount', 'Bank / account')}</div><strong>${t.bank_name || '—'} · ${t.account_number || t.iban || '—'}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.youSent', 'You sent')}</div><strong>${XMONEY.formatMoney(t.send_amount, t.source_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.theyReceive', 'They receive')}</div><strong>${XMONEY.formatMoney(t.receive_amount, t.target_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.rate', 'Rate')}</div><strong>${t.customer_rate}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('txn.fee', 'Fee')}</div><strong>${XMONEY.formatMoney(t.fee_amount, t.fee_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.totalDebit', 'Total debit')}</div><strong>${XMONEY.formatMoney(t.total_debit, t.source_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">${tt('receipt.created', 'Created')}</div><strong>${new Date(t.created_at).toLocaleString()}</strong></div>
         </div>
-        <h3 style="margin:1.5rem 0 0.75rem;font-size:1rem">Status history</h3>
+        <h3 style="margin:1.5rem 0 0.75rem;font-size:1rem">${tt('receipt.statusHistory', 'Status history')}</h3>
         <div class="xm-table-wrap">
           <table class="xm-table">
-            <thead><tr><th>Transition</th><th>Actor</th><th>Note</th><th>When</th></tr></thead>
-            <tbody>${history || '<tr><td colspan="4">No history</td></tr>'}</tbody>
+            <thead><tr><th>${tt('receipt.transition', 'Transition')}</th><th>${tt('common.actor', 'Actor')}</th><th>${tt('common.note', 'Note')}</th><th>${tt('common.when', 'When')}</th></tr></thead>
+            <tbody>${history || `<tr><td colspan="4">${tt('receipt.noHistory', 'No history')}</td></tr>`}</tbody>
           </table>
         </div>`;
 
@@ -88,12 +89,12 @@
         const cancelBtn = document.createElement('button');
         cancelBtn.type = 'button';
         cancelBtn.className = 'xm-btn xm-btn-danger';
-        cancelBtn.textContent = 'Cancel transfer';
+        cancelBtn.textContent = tt('receipt.cancelTransfer', 'Cancel transfer');
         cancelBtn.onclick = async () => {
-          if (!confirm('Cancel this transfer?')) return;
+          if (!confirm(tt('receipt.cancelConfirm', 'Cancel this transfer?'))) return;
           const r = await XMONEY.api('/v1/transfers/' + uuid + '/cancel', { method: 'POST', body: {} });
           if (r.success) { XMONEY.toast('Transfer cancelled', 'success'); location.reload(); }
-          else XMONEY.toast(r.message || 'Cancel failed', 'error');
+          else XMONEY.toast(r.message || tt('receipt.cancelFailed', 'Cancel failed'), 'error');
         };
         document.getElementById('actions').prepend(cancelBtn);
       }
