@@ -41,7 +41,7 @@ const XMShell = (() => {
       root.classList.add('xm-dash');
       root.innerHTML = `
         <aside class="xm-sidebar">
-          <div class="xm-sidebar-brand"><span class="xm-logo-mark">X</span> XMONEY</div>
+          <div class="xm-sidebar-brand"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" class="xm-logo-img xm-logo-img--sidebar" width="132" height="36" /></div>
           <nav class="xm-sidebar-nav">${renderNav()}</nav>
         </aside>
         <div class="xm-dash-content">

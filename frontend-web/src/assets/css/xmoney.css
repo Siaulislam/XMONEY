@@ -5,7 +5,9 @@
   --xm-blue: #1A4B8C;
   --xm-teal: #0D9488;
   --xm-teal-light: #14B8A6;
-  --xm-gold: #C9A227;
+  --xm-gold: #FFC107;
+  --xm-brand-black: #000000;
+  --xm-brand-white: #FFFFFF;
   --xm-surface: #F5F7FA;
   --xm-card: #FFFFFF;
   --xm-border: #E2E8F0;
@@ -71,11 +73,44 @@ img { max-width: 100%; display: block; }
   gap: 0.5rem;
 }
 
+.xm-logo-img {
+  display: block;
+  width: auto;
+  height: 36px;
+  object-fit: contain;
+}
+
+.xm-logo-img--sidebar {
+  height: 32px;
+  margin-bottom: 0.25rem;
+}
+
+.xm-logo-hero-img {
+  width: min(280px, 70vw);
+  height: auto;
+  margin-bottom: 1.5rem;
+  opacity: 0.98;
+}
+
+.xm-logo-card-img {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.xm-logo-admin-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--xm-gold);
+  margin-left: 0.35rem;
+}
+
 .xm-logo-mark {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: linear-gradient(145deg, var(--xm-teal-light), var(--xm-teal));
+  background: linear-gradient(145deg, var(--xm-gold), #e6ac00);
   display: grid;
   place-items: center;
   font-size: 0.85rem;
