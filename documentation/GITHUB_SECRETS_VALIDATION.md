@@ -27,7 +27,7 @@
 | `FTP_PORT` | `21` |
 | `FTP_USERNAME` | FTP user for XMONEY (or account with access only as needed) |
 | `FTP_PASSWORD` | FTP password |
-| `FTP_REMOTE_PATH` | `/home/smartdms/public_html/` |
+| `FTP_REMOTE_PATH` | `public_html/` |
 | `XMONEY_DB_HOST` | `localhost` |
 | `XMONEY_DB_NAME` | `smartdms_XMONEY` |
 | `XMONEY_DB_USER` | `smartdms_xmoney` |
