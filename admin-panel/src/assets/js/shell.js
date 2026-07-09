@@ -19,7 +19,9 @@ const XMONEY_ADMIN_SHELL = (() => {
   function mount(activeHref) {
     const active = activeHref || location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.xm-sidebar').forEach((aside) => {
-      aside.innerHTML = LINKS.map(([href, label]) =>
+      const brand = aside.querySelector('.xm-sidebar-brand');
+      const brandHtml = brand ? brand.outerHTML : `<div class="xm-sidebar-brand"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" class="xm-logo-img xm-logo-img--sidebar" width="132" height="36" /><span class="xm-logo-admin-tag">Admin</span></div>`;
+      aside.innerHTML = brandHtml + LINKS.map(([href, label]) =>
         `<a href="${href}" class="${href === active ? 'active' : ''}">${label}</a>`
       ).join('');
     });

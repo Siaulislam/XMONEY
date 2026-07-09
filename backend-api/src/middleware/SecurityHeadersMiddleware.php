@@ -16,5 +16,6 @@ final class SecurityHeadersMiddleware
         if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
         }
+        header("Content-Security-Policy: default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     }
 }
