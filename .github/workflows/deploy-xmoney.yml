@@ -23,7 +23,7 @@ on:
 
 concurrency:
   group: xmoney-deploy-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
