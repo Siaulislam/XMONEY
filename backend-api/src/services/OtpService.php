@@ -14,7 +14,7 @@ final class OtpService
     {
     }
 
-    public function issue(?int $userId, string $channel, string $destination, string $purpose): array
+    public function issue(?int $userId, string $channel, string $destination, string $purpose, ?string $locale = null): array
     {
         $otp = Security::generateOtp(6);
         $minutes = max(1, (int) (App::env('OTP_EXPIRY_MINUTES', '10') ?? '10'));
@@ -46,7 +46,7 @@ final class OtpService
             'expires_at' => $expires,
         ]);
 
-        $this->notifications->sendOtp($channel, $destination, $otp, $purpose);
+        $this->notifications->sendOtp($channel, $destination, $otp, $purpose, $locale);
 
         $payload = [
             'destination' => $this->maskDestination($channel, $destination),

@@ -8,6 +8,7 @@ use XMoney\Config\App;
 use XMoney\Config\Database;
 use XMoney\Services\PaymentService;
 use XMoney\Services\WalletService;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Response;
 use XMoney\Utils\Validator;
 
@@ -127,8 +128,9 @@ final class WalletController
 
     public function deposit(array $request): void
     {
+        $locale = I18n::locale($request);
         if (!App::isDebug()) {
-            Response::error('Manual deposit is disabled. Use wallet top-up.', 403);
+            Response::error(Response::text('response.manual_deposit_disabled', [], $request, $locale), 403);
         }
 
         $userId = (int) $request['user']['id'];
@@ -136,9 +138,9 @@ final class WalletController
         $errors = Validator::validate($body, [
             'amount' => 'required|numeric|min:1',
             'currency' => 'required|min:3|max:3',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $wallet = $this->wallets->getOrCreate($userId, strtoupper($body['currency']));
@@ -155,6 +157,9 @@ final class WalletController
             Response::error($e->getMessage(), 400);
         }
 
-        Response::success($this->wallets->getOrCreate($userId, strtoupper($body['currency'])), 'Deposit recorded');
+        Response::success(
+            $this->wallets->getOrCreate($userId, strtoupper($body['currency'])),
+            Response::text('response.deposit_recorded', [], $request, $locale)
+        );
     }
 }

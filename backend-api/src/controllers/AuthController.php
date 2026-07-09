@@ -10,6 +10,7 @@ use XMoney\Services\AuthService;
 use XMoney\Services\DeviceService;
 use XMoney\Services\OtpService;
 use XMoney\Services\WalletService;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Response;
 use XMoney\Utils\Security;
 use XMoney\Utils\Validator;
@@ -28,6 +29,7 @@ final class AuthController
     public function register(array $request): void
     {
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'full_name' => 'required|min:2|max:200',
             'email' => 'required|email|max:255',
@@ -35,9 +37,9 @@ final class AuthController
             'mobile_number' => 'required|min:6|max:30',
             'password' => 'required|password',
             'country_code' => 'required|min:2|max:2',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $pdo = Database::connection();
@@ -52,12 +54,12 @@ final class AuthController
             'mn' => $body['mobile_number'],
         ]);
         if ($exists->fetch()) {
-            Response::error('Email or mobile already registered', 409);
+            Response::error(Response::text('response.email_or_mobile_exists', [], $request, $locale), 409);
         }
 
         $roleId = (int) $pdo->query("SELECT id FROM roles WHERE code = 'customer' LIMIT 1")->fetchColumn();
         if (!$roleId) {
-            Response::error('System roles not seeded', 500);
+            Response::error(Response::text('response.system_roles_missing', [], $request, $locale), 500);
         }
 
         $uuid = Security::uuid();
@@ -95,29 +97,30 @@ final class AuthController
             throw $e;
         }
 
-        $otpPayload = $this->otp->issue($userId, 'email', $email, 'registration');
+        $otpPayload = $this->otp->issue($userId, 'email', $email, 'registration', $locale);
 
         Response::success([
             'user_uuid' => $uuid,
             'otp' => $otpPayload,
-        ], 'Registration successful. Please verify OTP.', 201);
+        ], Response::text('response.registration_success', [], $request, $locale), 201);
     }
 
     public function verifyOtp(array $request): void
     {
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'email' => 'required|email',
             'otp' => 'required|min:6|max:6',
             'purpose' => 'required|in:registration,login,password_reset,transfer,device,kyc',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $email = strtolower(trim($body['email']));
         if (!$this->otp->verify($email, $body['purpose'], $body['otp'])) {
-            Response::error('Invalid or expired OTP', 400);
+            Response::error(Response::text('response.otp_invalid', [], $request, $locale), 400);
         }
 
         $pdo = Database::connection();
@@ -129,18 +132,19 @@ final class AuthController
             $this->audit->log('user', null, 'user.email_verified', 'user', null, null, ['email' => $email]);
         }
 
-        Response::success(null, 'OTP verified');
+        Response::success(null, Response::text('response.otp_verified', [], $request, $locale));
     }
 
     public function resendOtp(array $request): void
     {
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'email' => 'required|email',
             'purpose' => 'required|in:registration,password_reset,login',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $email = strtolower(trim($body['email']));
@@ -153,24 +157,25 @@ final class AuthController
         // Anti-enumeration: always succeed outwardly
         if ($user) {
             if ($purpose === 'registration' && $user['status'] !== 'pending') {
-                Response::success(null, 'If the account requires verification, an OTP has been sent');
+                Response::success(null, Response::text('response.otp_sent_if_required', [], $request, $locale));
             }
-            $otpPayload = $this->otp->issue((int) $user['id'], 'email', $email, $purpose);
-            Response::success(['otp' => $otpPayload], 'If the account exists, an OTP has been sent');
+            $otpPayload = $this->otp->issue((int) $user['id'], 'email', $email, $purpose, $locale);
+            Response::success(['otp' => $otpPayload], Response::text('response.otp_sent_if_exists', [], $request, $locale));
         }
 
-        Response::success(null, 'If the account exists, an OTP has been sent');
+        Response::success(null, Response::text('response.otp_sent_if_exists', [], $request, $locale));
     }
 
     public function login(array $request): void
     {
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'email' => 'required|email',
             'password' => 'required',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $pdo = Database::connection();
@@ -183,27 +188,29 @@ final class AuthController
         $user = $stmt->fetch();
 
         if (!$user) {
-            Response::error('Invalid credentials', 401);
+            Response::error(Response::text('response.invalid_credentials', [], $request, $locale), 401);
         }
 
         // Lock check before password verify (same generic message when locked + wrong pwd)
         if ($user['locked_until'] && strtotime($user['locked_until']) > time()) {
-            Response::error('Account temporarily locked. Try again later.', 423);
+            Response::error(Response::text('response.account_locked', [], $request, $locale), 423);
         }
 
         if (!Security::verifyPassword($body['password'], $user['password_hash'])) {
             $this->auth->recordFailedLogin((int) $user['id'], (int) $user['failed_login_count']);
-            Response::error('Invalid credentials', 401);
+            Response::error(Response::text('response.invalid_credentials', [], $request, $locale), 401);
         }
 
         if ($user['status'] === 'pending') {
-            Response::error('Please verify your email with the OTP before signing in.', 403, [
+            Response::error(Response::text('response.email_unverified', [], $request, $locale), 403, [
                 'code' => 'email_unverified',
             ]);
         }
 
         if (in_array($user['status'], ['blocked', 'suspended', 'closed'], true)) {
-            Response::error('Account is ' . $user['status'], 403);
+            Response::error(Response::text('response.account_status', [
+                'status' => I18n::t('domain.status.' . $user['status'], [], $locale),
+            ], $request, $locale), 403);
         }
 
         $pdo->prepare(
@@ -242,15 +249,16 @@ final class AuthController
                 'status' => $user['status'],
                 'kyc_status' => $user['kyc_status'],
             ],
-        ], 'Login successful');
+        ], Response::text('response.login_success', [], $request, $locale));
     }
 
     public function refresh(array $request): void
     {
         $body = $request['body'];
-        $errors = Validator::validate($body, ['refresh_token' => 'required|min:20']);
+        $locale = I18n::locale($request);
+        $errors = Validator::validate($body, ['refresh_token' => 'required|min:20'], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         try {
@@ -277,7 +285,7 @@ final class AuthController
             $payload['admin'] = $tokens['actor'];
         }
 
-        Response::success($payload, 'Token refreshed');
+        Response::success($payload, Response::text('response.token_refreshed', [], $request, $locale));
     }
 
     /**
@@ -305,15 +313,16 @@ final class AuthController
             $this->audit->log('user', $userId, 'user.logout', 'user', $userId);
         }
 
-        Response::success(null, 'Logged out');
+        Response::success(null, Response::text('response.logged_out', [], $request));
     }
 
     public function forgotPassword(array $request): void
     {
         $body = $request['body'];
-        $errors = Validator::validate($body, ['email' => 'required|email']);
+        $locale = I18n::locale($request);
+        $errors = Validator::validate($body, ['email' => 'required|email'], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $email = strtolower(trim($body['email']));
@@ -324,7 +333,7 @@ final class AuthController
 
         $otpPayload = null;
         if ($user) {
-            $otpPayload = $this->otp->issue((int) $user['id'], 'email', $email, 'password_reset');
+            $otpPayload = $this->otp->issue((int) $user['id'], 'email', $email, 'password_reset', $locale);
         }
 
         // Anti-enumeration message; debug OTP only when APP_DEBUG=true and user exists
@@ -333,24 +342,25 @@ final class AuthController
             $data = ['otp' => $otpPayload];
         }
 
-        Response::success($data, 'If the account exists, an OTP has been sent');
+        Response::success($data, Response::text('response.otp_sent_if_exists', [], $request, $locale));
     }
 
     public function resetPassword(array $request): void
     {
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'email' => 'required|email',
             'otp' => 'required|min:6|max:6',
             'password' => 'required|password',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $email = strtolower(trim($body['email']));
         if (!$this->otp->verify($email, 'password_reset', $body['otp'])) {
-            Response::error('Invalid or expired OTP', 400);
+            Response::error(Response::text('response.otp_invalid', [], $request, $locale), 400);
         }
 
         $pdo = Database::connection();
@@ -358,7 +368,7 @@ final class AuthController
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         if (!$user) {
-            Response::error('Invalid or expired OTP', 400);
+            Response::error(Response::text('response.otp_invalid', [], $request, $locale), 400);
         }
 
         $pdo->prepare('UPDATE users SET password_hash = :pwd WHERE id = :id')
@@ -370,7 +380,7 @@ final class AuthController
         $this->auth->revokeAllUserRefreshTokens((int) $user['id']);
         $this->audit->log('user', (int) $user['id'], 'password.reset', 'user', (int) $user['id']);
 
-        Response::success(null, 'Password updated successfully');
+        Response::success(null, Response::text('response.password_updated', [], $request, $locale));
     }
 
     private function resolveDeviceUuid(array $request, array $body): string

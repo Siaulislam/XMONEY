@@ -9,6 +9,7 @@ use XMoney\Services\ExchangeService;
 use XMoney\Services\PaymentService;
 use XMoney\Services\TransactionService;
 use XMoney\Services\WalletService;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Response;
 use XMoney\Utils\Validator;
 
@@ -24,13 +25,14 @@ final class TransferController
     public function quote(array $request): void
     {
         $body = $request['body'] ?: $request['query'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'source_currency' => 'required|min:3|max:3',
             'target_currency' => 'required|min:3|max:3',
             'send_amount' => 'required|numeric|min:1',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $quote = $this->exchange->quote(
@@ -40,7 +42,7 @@ final class TransferController
             isset($body['destination_country']) ? strtoupper($body['destination_country']) : null
         );
         if (!$quote) {
-            Response::error('Exchange rate unavailable', 404);
+            Response::error(I18n::t('error.exchange_unavailable', [], $locale), 404);
         }
         Response::success($quote);
     }
@@ -70,13 +72,14 @@ final class TransferController
     {
         $userId = (int) $request['user']['id'];
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'beneficiary_uuid' => 'required',
             'send_amount' => 'required|numeric|min:1',
             'source_currency' => 'required|min:3|max:3',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
 
         $pdo = Database::connection();
@@ -86,7 +89,7 @@ final class TransferController
         $ben->execute(['uuid' => $body['beneficiary_uuid'], 'uid' => $userId]);
         $beneficiary = $ben->fetch();
         if (!$beneficiary) {
-            Response::error('Beneficiary not found', 404);
+            Response::error(I18n::t('error.beneficiary_not_found', [], $locale), 404);
         }
 
         try {
@@ -101,7 +104,7 @@ final class TransferController
             Response::error($e->getMessage(), 400);
         }
 
-        Response::success($txn, 'Transfer created', 201);
+        Response::success($txn, Response::text('response.transfer_created', [], $request, $locale), 201);
     }
 
     public function confirm(array $request): void
@@ -110,16 +113,20 @@ final class TransferController
         $uuid = $request['params']['uuid'] ?? '';
         $body = $request['body'];
         $method = $body['payment_method'] ?? 'wallet';
+        $locale = I18n::locale($request);
 
         $pdo = Database::connection();
         $stmt = $pdo->prepare('SELECT * FROM transactions WHERE uuid = :uuid AND sender_user_id = :uid');
         $stmt->execute(['uuid' => $uuid, 'uid' => $userId]);
         $txn = $stmt->fetch();
         if (!$txn) {
-            Response::error('Transaction not found', 404);
+            Response::error(I18n::t('error.transaction_not_found', [], $locale), 404);
         }
         if ($txn['status'] !== 'created') {
-            Response::error('Transaction cannot be confirmed in current status', 400);
+            Response::error(I18n::t('error.invalid_status_transition', [
+                'from' => I18n::t('domain.status.' . $txn['status'], [], $locale),
+                'to' => I18n::t('domain.status.pending_payment', [], $locale),
+            ], $locale), 400);
         }
 
         try {
@@ -148,7 +155,7 @@ final class TransferController
                 Response::success([
                     'transaction' => $this->transactions->findById((int) $txn['id'], $userId),
                     'payment' => $payment,
-                ], 'Payment initiated');
+                ], Response::text('response.ok', [], $request, $locale));
             }
         } catch (\RuntimeException $e) {
             Response::error($e->getMessage(), 400);
@@ -156,7 +163,7 @@ final class TransferController
 
         Response::success(
             $this->transactions->findById((int) $txn['id'], $userId),
-            'Transfer confirmed'
+            Response::text('response.transfer_confirmed', [], $request, $locale)
         );
     }
 
@@ -183,12 +190,13 @@ final class TransferController
     {
         $userId = (int) $request['user']['id'];
         $uuid = $request['params']['uuid'] ?? '';
+        $locale = I18n::locale($request);
         $pdo = Database::connection();
         $stmt = $pdo->prepare('SELECT id FROM transactions WHERE uuid = :uuid AND sender_user_id = :uid');
         $stmt->execute(['uuid' => $uuid, 'uid' => $userId]);
         $row = $stmt->fetch();
         if (!$row) {
-            Response::error('Transaction not found', 404);
+            Response::error(I18n::t('error.transaction_not_found', [], $locale), 404);
         }
 
         $txn = $this->transactions->findById((int) $row['id'], $userId);
@@ -205,18 +213,19 @@ final class TransferController
     {
         $userId = (int) $request['user']['id'];
         $uuid = $request['params']['uuid'] ?? '';
+        $locale = I18n::locale($request);
         $pdo = Database::connection();
         $stmt = $pdo->prepare('SELECT id, status FROM transactions WHERE uuid = :uuid AND sender_user_id = :uid');
         $stmt->execute(['uuid' => $uuid, 'uid' => $userId]);
         $txn = $stmt->fetch();
         if (!$txn) {
-            Response::error('Transaction not found', 404);
+            Response::error(I18n::t('error.transaction_not_found', [], $locale), 404);
         }
         try {
             $result = $this->transactions->updateStatus((int) $txn['id'], 'cancelled', 'user', $userId, 'Cancelled by user');
         } catch (\RuntimeException $e) {
             Response::error($e->getMessage(), 400);
         }
-        Response::success($result, 'Transfer cancelled');
+        Response::success($result, Response::text('response.transfer_cancelled', [], $request, $locale));
     }
 }

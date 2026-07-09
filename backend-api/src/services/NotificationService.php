@@ -6,6 +6,7 @@ namespace XMoney\Services;
 
 use XMoney\Config\Database;
 use XMoney\Providers\Notification\NotificationProviderRegistry;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Security;
 
 final class NotificationService
@@ -45,10 +46,17 @@ final class NotificationService
         ]);
     }
 
-    public function sendOtp(string $channel, string $destination, string $otp, string $purpose): void
+    public function sendOtp(string $channel, string $destination, string $otp, string $purpose, ?string $locale = null): void
     {
-        $title = 'XMONEY Verification Code';
-        $body = "Your XMONEY OTP for {$purpose} is {$otp}. It expires in 10 minutes.";
+        $locale ??= 'en';
+        $minutes = max(1, (int) (\XMoney\Config\App::env('OTP_EXPIRY_MINUTES', '10') ?? '10'));
+        $purposeLabel = I18n::t('notification.purpose.' . $purpose, [], $locale);
+        $title = I18n::t('notification.otp_title', [], $locale);
+        $body = I18n::t('notification.otp_body', [
+            'purpose' => $purposeLabel,
+            'otp' => $otp,
+            'minutes' => $minutes,
+        ], $locale);
         $deliveryChannel = $channel === 'sms' ? 'sms' : 'email';
 
         $provider = NotificationProviderRegistry::forChannel($deliveryChannel);
@@ -68,7 +76,7 @@ final class NotificationService
             'channel' => $deliveryChannel,
             'template' => 'otp_' . $purpose,
             'title' => $title,
-            'body' => \XMoney\Config\App::isDebug() ? $body : 'Your XMONEY verification code has been sent.',
+            'body' => \XMoney\Config\App::isDebug() ? $body : I18n::t('notification.otp_confirmation', [], $locale),
             'payload' => json_encode(['destination' => $destination, 'purpose' => $purpose]),
         ]);
     }

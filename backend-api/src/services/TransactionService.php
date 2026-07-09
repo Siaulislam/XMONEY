@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace XMoney\Services;
 
 use XMoney\Config\Database;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Security;
 
 final class TransactionService
@@ -30,17 +31,17 @@ final class TransactionService
         $ben->execute(['id' => $beneficiaryId, 'uid' => $userId]);
         $beneficiary = $ben->fetch();
         if (!$beneficiary) {
-            throw new \RuntimeException('Beneficiary not found');
+            throw new \RuntimeException(I18n::t('error.beneficiary_not_found'));
         }
 
         $user = $pdo->prepare('SELECT kyc_status, status FROM users WHERE id = :id');
         $user->execute(['id' => $userId]);
         $u = $user->fetch();
         if (!$u || $u['status'] !== 'active') {
-            throw new \RuntimeException('Account is not active');
+            throw new \RuntimeException(I18n::t('error.account_not_active'));
         }
         if ($this->settings->getBool('kyc.required_for_transfer', true) && $u['kyc_status'] !== 'approved') {
-            throw new \RuntimeException('KYC approval required before transfer');
+            throw new \RuntimeException(I18n::t('error.kyc_required'));
         }
 
         $quote = $this->exchange->quote(
@@ -50,7 +51,7 @@ final class TransactionService
             $beneficiary['country_code']
         );
         if (!$quote) {
-            throw new \RuntimeException('Exchange rate unavailable for this corridor');
+            throw new \RuntimeException(I18n::t('error.exchange_unavailable'));
         }
 
         $uuid = Security::uuid();
@@ -115,12 +116,15 @@ final class TransactionService
         $stmt->execute(['id' => $txnId]);
         $txn = $stmt->fetch();
         if (!$txn) {
-            throw new \RuntimeException('Transaction not found');
+            throw new \RuntimeException(I18n::t('error.transaction_not_found'));
         }
 
         $from = $txn['status'];
         if (!$this->canTransition($from, $toStatus)) {
-            throw new \RuntimeException("Invalid status transition: {$from} → {$toStatus}");
+            throw new \RuntimeException(I18n::t('error.invalid_status_transition', [
+                'from' => I18n::t('domain.status.' . $from),
+                'to' => I18n::t('domain.status.' . $toStatus),
+            ]));
         }
 
         $extra = '';
@@ -142,8 +146,13 @@ final class TransactionService
             $this->notifications->notifyUser(
                 (int) $txn['sender_user_id'],
                 'transfer_' . $toStatus,
-                'Transfer ' . ucfirst(str_replace('_', ' ', $toStatus)),
-                "Your transfer {$txn['reference_code']} is now {$toStatus}."
+                I18n::t('notification.transfer_status.title', [
+                    'status' => I18n::t('domain.status.' . $toStatus),
+                ]),
+                I18n::t('notification.transfer_status.body', [
+                    'reference' => $txn['reference_code'],
+                    'status' => I18n::t('domain.status.' . $toStatus),
+                ])
             );
         }
 
@@ -166,7 +175,7 @@ final class TransactionService
         $stmt->execute($params);
         $row = $stmt->fetch();
         if (!$row) {
-            throw new \RuntimeException('Transaction not found');
+            throw new \RuntimeException(I18n::t('error.transaction_not_found'));
         }
         return $row;
     }
@@ -296,10 +305,16 @@ final class TransactionService
         }
 
         if ($amountInDefault < $min) {
-            throw new \RuntimeException(sprintf('Minimum transfer amount is %s %s', number_format($min, 2), $defaultCurrency));
+            throw new \RuntimeException(I18n::t('error.transfer_min', [
+                'amount' => number_format($min, 2),
+                'currency' => $defaultCurrency,
+            ]));
         }
         if ($amountInDefault > $max) {
-            throw new \RuntimeException(sprintf('Maximum transfer amount is %s %s', number_format($max, 2), $defaultCurrency));
+            throw new \RuntimeException(I18n::t('error.transfer_max', [
+                'amount' => number_format($max, 2),
+                'currency' => $defaultCurrency,
+            ]));
         }
 
         $pdo = Database::connection();
@@ -312,7 +327,10 @@ final class TransactionService
         $stmt->execute(['uid' => $userId]);
         $sentToday = (float) $stmt->fetchColumn();
         if (($sentToday + $amountInDefault) > $dailyMax) {
-            throw new \RuntimeException(sprintf('Daily transfer limit of %s %s exceeded', number_format($dailyMax, 2), $defaultCurrency));
+            throw new \RuntimeException(I18n::t('error.transfer_daily_limit', [
+                'amount' => number_format($dailyMax, 2),
+                'currency' => $defaultCurrency,
+            ]));
         }
     }
 }

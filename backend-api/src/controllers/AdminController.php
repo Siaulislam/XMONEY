@@ -10,6 +10,7 @@ use XMoney\Services\AuthService;
 use XMoney\Services\ExchangeService;
 use XMoney\Services\NotificationService;
 use XMoney\Services\TransactionService;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Response;
 use XMoney\Utils\Security;
 use XMoney\Utils\Validator;
@@ -236,14 +237,17 @@ final class AdminController
     {
         $uuid = $request['params']['uuid'] ?? '';
         $body = $request['body'];
+        $locale = I18n::locale($request);
         $errors = Validator::validate($body, [
             'decision' => 'required|in:approved,rejected',
-        ]);
+        ], $locale);
         if ($errors) {
-            Response::error('Validation failed', 422, $errors);
+            Response::error(Response::text('response.validation_failed', [], $request, $locale), 422, $errors);
         }
         if ($body['decision'] === 'rejected' && empty($body['rejection_reason'])) {
-            Response::error('rejection_reason is required', 422);
+            Response::error(I18n::t('validation.required', [
+                'field' => I18n::t('field.rejection_reason', [], $locale),
+            ], $locale), 422);
         }
 
         $pdo = Database::connection();
@@ -251,7 +255,7 @@ final class AdminController
         $stmt->execute(['uuid' => $uuid]);
         $doc = $stmt->fetch();
         if (!$doc) {
-            Response::error('Document not found', 404);
+            Response::error(Response::text('response.document_not_found', [], $request, $locale), 404);
         }
 
         $pdo->prepare(
@@ -270,8 +274,8 @@ final class AdminController
             (new NotificationService())->notifyUser(
                 (int) $doc['user_id'],
                 'kyc_approved',
-                'KYC Approved',
-                'Your KYC has been approved. You can now send money with XMONEY.'
+                I18n::t('notification.kyc_approved.title', [], $locale),
+                I18n::t('notification.kyc_approved.body', [], $locale)
             );
         } else {
             $pdo->prepare("UPDATE users SET kyc_status = 'rejected' WHERE id = :id")
@@ -279,13 +283,15 @@ final class AdminController
             (new NotificationService())->notifyUser(
                 (int) $doc['user_id'],
                 'kyc_rejected',
-                'KYC Rejected',
-                'Your KYC was rejected: ' . ($body['rejection_reason'] ?? '')
+                I18n::t('notification.kyc_rejected.title', [], $locale),
+                I18n::t('notification.kyc_rejected.body', ['reason' => (string) ($body['rejection_reason'] ?? '')], $locale)
             );
         }
 
         (new AuditService())->log('admin', (int) $request['admin']['id'], 'kyc.' . $body['decision'], 'kyc_document', (int) $doc['id']);
-        Response::success(null, 'KYC ' . $body['decision']);
+        Response::success(null, Response::text('response.kyc_decision', [
+            'decision' => I18n::t('domain.kyc.' . $body['decision'], [], $locale),
+        ], $request, $locale));
     }
 
     public function kycFile(array $request): void

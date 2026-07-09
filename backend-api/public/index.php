@@ -11,6 +11,7 @@ use XMoney\Config\Database;
 use XMoney\Middleware\CorsMiddleware;
 use XMoney\Middleware\RequestIdMiddleware;
 use XMoney\Middleware\SecurityHeadersMiddleware;
+use XMoney\Utils\I18n;
 use XMoney\Utils\Response;
 use XMoney\Utils\Router;
 
@@ -37,7 +38,7 @@ try {
 } catch (Throwable $e) {
     $debug = App::env('APP_DEBUG', 'false') === 'true';
     Response::error(
-        'Internal server error',
+        I18n::t('response.internal_error', [], I18n::locale()),
         500,
         $debug ? ['exception' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()] : [],
         $requestId

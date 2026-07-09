@@ -6,6 +6,11 @@ namespace XMoney\Utils;
 
 final class Response
 {
+    public static function text(string $key, array $params = [], ?array $request = null, ?string $locale = null): string
+    {
+        return I18n::t($key, $params, $locale ?? I18n::locale($request));
+    }
+
     public static function json(array $payload, int $status = 200, ?string $requestId = null): void
     {
         http_response_code($status);
@@ -16,7 +21,13 @@ final class Response
         exit;
     }
 
-    public static function success(mixed $data = null, string $message = 'OK', int $status = 200, ?string $requestId = null): void
+    public static function success(
+        mixed $data = null,
+        string $message = 'OK',
+        int $status = 200,
+        ?string $requestId = null,
+        ?array $request = null
+    ): void
     {
         self::json([
             'success' => true,
@@ -26,7 +37,13 @@ final class Response
         ], $status, $requestId);
     }
 
-    public static function error(string $message, int $status = 400, array $errors = [], ?string $requestId = null): void
+    public static function error(
+        string $message,
+        int $status = 400,
+        array $errors = [],
+        ?string $requestId = null,
+        ?array $request = null
+    ): void
     {
         self::json([
             'success' => false,
