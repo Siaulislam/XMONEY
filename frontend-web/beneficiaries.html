@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beneficiaries — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" class="ben-grid">
+      <div class="xm-card">
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Add beneficiary</h2>
+        <form id="benForm">
+          <div class="xm-field"><label>Receiver name</label><input name="receiver_name" required /></div>
+          <div class="xm-field"><label>Country</label>
+            <select name="country_code"><option value="IN">India</option><option value="PK">Pakistan</option><option value="AE">UAE</option><option value="GB">UK</option></select>
+          </div>
+          <div class="xm-field"><label>Currency</label>
+            <select name="currency_code"><option>INR</option><option>PKR</option><option>AED</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+          </div>
+          <div class="xm-field"><label>Bank name</label><input name="bank_name" /></div>
+          <div class="xm-field"><label>Account number</label><input name="account_number" /></div>
+          <div class="xm-field"><label>IBAN</label><input name="iban" /></div>
+          <div class="xm-field"><label>Mobile</label><input name="mobile_number" /></div>
+          <button class="xm-btn xm-btn-primary" type="submit" id="saveBtn">Save</button>
+        </form>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Saved receivers</h2>
+        <div id="list">Loading…</div>
+      </div>
+    </div>
+  </div>
+  <style>@media(max-width:800px){.ben-grid{grid-template-columns:1fr!important}}</style>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    async function load() {
+      const res = await XMONEY.api('/v1/beneficiaries');
+      const el = document.getElementById('list');
+      if (!res.success || !res.data.length) { el.innerHTML = '<div class="xm-empty">No beneficiaries yet.</div>'; return; }
+      el.innerHTML = res.data.map(b => `
+        <div style="padding:0.85rem 0;border-bottom:1px solid var(--xm-border)">
+          <strong>${b.receiver_name}</strong> ${XMONEY.statusBadge(b.verification_status)}<br/>
+          <span style="color:var(--xm-muted);font-size:0.85rem">${b.country_code} · ${b.currency_code} · ${b.bank_name || '—'} · ${b.account_number || b.iban || b.mobile_number || ''}</span>
+          <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+            <a class="xm-btn xm-btn-primary" style="padding:0.35rem 0.7rem;font-size:0.8rem" href="transfer.html">Send</a>
+            <button class="xm-btn xm-btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-verify="${b.uuid}">Verify</button>
+            <button class="xm-btn xm-btn-danger" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-del="${b.uuid}">Delete</button>
+          </div>
+        </div>`).join('');
+      el.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
+        if (!confirm('Delete this beneficiary?')) return;
+        const r = await XMONEY.api('/v1/beneficiaries/' + btn.dataset.del, { method: 'DELETE' });
+        if (!r.success) XMONEY.toast(r.message || 'Delete failed', 'error');
+        else { XMONEY.toast('Deleted', 'success'); load(); }
+      });
+      el.querySelectorAll('[data-verify]').forEach(btn => btn.onclick = async () => {
+        await XMONEY.api('/v1/beneficiaries/' + btn.dataset.verify + '/verify', { method: 'POST', body: {} });
+        XMONEY.toast('Verification requested', 'success');
+        load();
+      });
+    }
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Beneficiaries', heading: 'Beneficiaries' });
+      if (!profile) return;
+      document.getElementById('benForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const body = Object.fromEntries(new FormData(e.target).entries());
+        const btn = document.getElementById('saveBtn');
+        XMONEY.setLoading(btn, true, 'Saving…');
+        const res = await XMONEY.api('/v1/beneficiaries', { method: 'POST', body });
+        XMONEY.setLoading(btn, false);
+        if (!res.success) { XMONEY.showAlert(document.getElementById('alert'), res.message); return; }
+        e.target.reset();
+        XMONEY.toast('Beneficiary added', 'success');
+        load();
+      };
+      load();
+    })();
+  </script>
+</body>
+</html>

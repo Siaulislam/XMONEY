@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav">
+    <div class="xm-container xm-nav-inner">
+      <a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a>
+      <button class="xm-btn xm-btn-secondary" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html" class="active">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Operations dashboard</h1>
+      <div class="xm-stats">
+        <div class="xm-stat"><div class="label">Users</div><div class="value" id="s1">—</div></div>
+        <div class="xm-stat"><div class="label">KYC pending</div><div class="value" id="s2">—</div></div>
+        <div class="xm-stat"><div class="label">Today volume</div><div class="value" id="s3">—</div></div>
+        <div class="xm-stat"><div class="label">In process</div><div class="value" id="s4">—</div></div>
+      </div>
+      <div class="xm-stats" style="grid-template-columns:repeat(3,1fr)">
+        <div class="xm-stat"><div class="label">Active users</div><div class="value" id="s5">—</div></div>
+        <div class="xm-stat"><div class="label">Txns today</div><div class="value" id="s6">—</div></div>
+        <div class="xm-stat"><div class="label">Failed today</div><div class="value" id="s7">—</div></div>
+      </div>
+      <div class="xm-card">
+        <p style="color:var(--xm-muted)">Monitor users, compliance, transfers, FX margins, fees, and revenue. All actions are audited.</p>
+      </div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    document.getElementById('logoutBtn').onclick = () => XMONEY.logout();
+    (async () => {
+      const res = await XMONEY.api('/v1/admin/dashboard');
+      if (!res.success) return;
+      document.getElementById('s1').textContent = res.data.users_total;
+      document.getElementById('s2').textContent = res.data.kyc_pending;
+      document.getElementById('s3').textContent = Number(res.data.volume_today).toLocaleString();
+      document.getElementById('s4').textContent = res.data.transactions_processing;
+      document.getElementById('s5').textContent = res.data.users_active;
+      document.getElementById('s6').textContent = res.data.transactions_today;
+      document.getElementById('s7').textContent = res.data.failed_today;
+    })();
+  </script>
+</body>
+</html>

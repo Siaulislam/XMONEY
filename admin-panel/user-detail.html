@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User detail — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html" class="active">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="settings.html">Settings</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <p><a href="users.html">&larr; Back to users</a></p>
+      <h1 style="font-family:var(--xm-display);margin:1rem 0" id="title">User detail</h1>
+      <div id="profile" class="xm-card" style="margin-bottom:1rem"></div>
+      <div class="xm-grid-2">
+        <div class="xm-card"><h3>KYC documents</h3><div id="kyc"></div></div>
+        <div class="xm-card"><h3>Wallets</h3><div id="wallets"></div></div>
+      </div>
+      <div class="xm-card" style="margin-top:1rem"><h3>Recent transfers</h3><div id="txns"></div></div>
+      <div style="margin-top:1rem" id="actions"></div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    const params = new URLSearchParams(location.search);
+    const uuid = params.get('uuid');
+    if (!uuid) location.href = 'users.html';
+
+    async function load() {
+      const res = await XMONEY.api('/v1/admin/users/' + uuid);
+      if (!res.success) { document.getElementById('profile').textContent = res.message || 'Not found'; return; }
+      const u = res.data.user;
+      document.getElementById('title').textContent = u.full_name || u.email;
+      document.getElementById('profile').innerHTML = `
+        <p><strong>Email:</strong> ${u.email}</p>
+        <p><strong>Mobile:</strong> ${u.mobile_country} ${u.mobile_number}</p>
+        <p><strong>Status:</strong> ${XMONEY.statusBadge(u.status)} &nbsp; <strong>KYC:</strong> ${XMONEY.statusBadge(u.kyc_status)}</p>
+        <p><strong>Country:</strong> ${u.country_code || '—'} &nbsp; <strong>Joined:</strong> ${XMONEY.formatDate(u.created_at)}</p>
+        <p><strong>Last login:</strong> ${u.last_login_at ? XMONEY.formatDate(u.last_login_at) : '—'}</p>`;
+
+      document.getElementById('kyc').innerHTML = (res.data.kyc_documents || []).map(d =>
+        `<p>${d.document_type} — ${XMONEY.statusBadge(d.status)} <small>${XMONEY.formatDate(d.created_at)}</small></p>`
+      ).join('') || '<p>No KYC uploads</p>';
+
+      document.getElementById('wallets').innerHTML = (res.data.wallets || []).map(w =>
+        `<p>${w.currency_code}: ${Number(w.balance).toFixed(2)} (locked ${Number(w.locked_balance).toFixed(2)})</p>`
+      ).join('') || '<p>No wallets</p>';
+
+      document.getElementById('txns').innerHTML = `<table class="xm-table"><thead><tr><th>Ref</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>` +
+        (res.data.recent_transactions || []).map(t => `<tr>
+          <td>${t.reference_code}</td>
+          <td>${t.send_amount} ${t.source_currency} → ${t.target_currency}</td>
+          <td>${XMONEY.statusBadge(t.status)}</td>
+          <td>${XMONEY.formatDate(t.created_at)}</td>
+        </tr>`).join('') + '</tbody></table>';
+
+      document.getElementById('actions').innerHTML = u.status === 'blocked'
+        ? `<button class="xm-btn xm-btn-primary" id="unblock">Unblock user</button>`
+        : `<button class="xm-btn xm-btn-danger" id="block">Block user</button>`;
+
+      const blockBtn = document.getElementById('block');
+      const unblockBtn = document.getElementById('unblock');
+      if (blockBtn) blockBtn.onclick = async () => {
+        await XMONEY.api('/v1/admin/users/' + uuid + '/block', { method: 'POST', body: {} });
+        load();
+      };
+      if (unblockBtn) unblockBtn.onclick = async () => {
+        await XMONEY.api('/v1/admin/users/' + uuid + '/unblock', { method: 'POST', body: {} });
+        load();
+      };
+    }
+    load();
+  </script>
+</body>
+</html>

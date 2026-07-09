@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transactions — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div class="xm-card">
+      <div class="xm-table-wrap">
+        <table class="xm-table">
+          <thead><tr><th>Reference</th><th>Receiver</th><th>Send</th><th>Receive</th><th>Fee</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="body"><tr><td colspan="7">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Transactions', heading: 'Transactions' });
+      if (!profile) return;
+      const res = await XMONEY.api('/v1/transfers?limit=50');
+      const body = document.getElementById('body');
+      if (!res.success || !res.data.length) {
+        body.innerHTML = '<tr><td colspan="7" class="xm-empty">No transactions yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = res.data.map(t => `
+        <tr>
+          <td><a href="receipt.html?uuid=${t.uuid}">${t.reference_code}</a></td>
+          <td>${t.receiver_name}<br/><small style="color:var(--xm-muted)">${t.country_code || ''}</small></td>
+          <td>${XMONEY.formatMoney(t.send_amount, t.source_currency)}</td>
+          <td>${XMONEY.formatMoney(t.receive_amount, t.target_currency)}</td>
+          <td>${XMONEY.formatMoney(t.fee_amount, t.source_currency)}</td>
+          <td>${XMONEY.statusBadge(t.status)}</td>
+          <td>${new Date(t.created_at).toLocaleString()}</td>
+        </tr>`).join('');
+    })();
+  </script>
+</body>
+</html>

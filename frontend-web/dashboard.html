@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div class="xm-stats">
+      <div class="xm-stat"><div class="label">Wallet</div><div class="value" id="walletBal"><span class="xm-skeleton" style="width:70%;display:inline-block;height:1.4rem"></span></div></div>
+      <div class="xm-stat"><div class="label">KYC</div><div class="value" id="kycStatus" style="font-size:1.1rem">—</div></div>
+      <div class="xm-stat"><div class="label">Transfers</div><div class="value" id="txnCount">—</div></div>
+      <div class="xm-stat"><div class="label">Status</div><div class="value" id="acctStatus" style="font-size:1.1rem">—</div></div>
+    </div>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem">
+      <a href="transfer.html" class="xm-btn xm-btn-primary">Send money</a>
+      <a href="wallet.html" class="xm-btn xm-btn-outline">Top up wallet</a>
+      <a href="kyc.html" class="xm-btn xm-btn-outline">Complete KYC</a>
+    </div>
+    <div class="xm-card">
+      <h2 style="font-family:var(--xm-display);font-size:1.15rem;margin-bottom:1rem">Recent transfers</h2>
+      <div class="xm-table-wrap">
+        <table class="xm-table">
+          <thead><tr><th>Reference</th><th>Receiver</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="txnBody"><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Overview', heading: 'Welcome back' });
+      if (!profile) return;
+
+      document.getElementById('kycStatus').innerHTML = XMONEY.statusBadge(profile.kyc_status);
+      document.getElementById('acctStatus').innerHTML = XMONEY.statusBadge(profile.status);
+
+      const [wallet, txns] = await Promise.all([
+        XMONEY.api('/v1/wallet'),
+        XMONEY.api('/v1/transfers?limit=8'),
+      ]);
+
+      if (wallet.success) {
+        document.getElementById('walletBal').textContent = XMONEY.formatMoney(wallet.data.available_balance, wallet.data.currency);
+      }
+      if (txns.success) {
+        document.getElementById('txnCount').textContent = txns.data.length;
+        const body = document.getElementById('txnBody');
+        if (!txns.data.length) {
+          body.innerHTML = '<tr><td colspan="5" class="xm-empty">No transfers yet. <a href="transfer.html">Send money</a></td></tr>';
+        } else {
+          body.innerHTML = txns.data.map(t => `
+            <tr>
+              <td><a href="receipt.html?uuid=${t.uuid || ''}">${t.reference_code}</a></td>
+              <td>${t.receiver_name}</td>
+              <td>${XMONEY.formatMoney(t.send_amount, t.source_currency)}</td>
+              <td>${XMONEY.statusBadge(t.status)}</td>
+              <td>${new Date(t.created_at).toLocaleString()}</td>
+            </tr>`).join('');
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

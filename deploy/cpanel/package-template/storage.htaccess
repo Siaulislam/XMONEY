@@ -1,0 +1,7 @@
+# Deny web access to XMONEY storage (uploads/logs/backups)
+# Place at: public_html/xmoney/storage/.htaccess
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+Deny from all

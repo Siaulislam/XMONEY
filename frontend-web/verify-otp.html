@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify OTP — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav">
+    <div class="xm-container xm-nav-inner">
+      <a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY</a>
+    </div>
+  </nav>
+  <div class="xm-auth-wrap">
+    <div class="xm-card xm-auth-card">
+      <h1>Verify your email</h1>
+      <p class="sub">Enter the 6-digit OTP sent to your email</p>
+      <div id="alert" hidden></div>
+      <form id="otpForm">
+        <div class="xm-field"><label>Email</label><input id="email" name="email" type="email" required /></div>
+        <div class="xm-field"><label>OTP</label><input name="otp" id="otp" inputmode="numeric" maxlength="6" required autocomplete="one-time-code" /></div>
+        <input type="hidden" name="purpose" id="purpose" value="registration" />
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn">Verify</button>
+      </form>
+      <p style="margin-top:1rem;text-align:center;font-size:0.9rem;color:var(--xm-muted)">
+        Didn’t get the code?
+        <button type="button" id="resendBtn" class="xm-btn xm-btn-outline" style="padding:0.35rem 0.7rem;margin-left:0.35rem;font-size:0.85rem">Resend OTP</button>
+      </p>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const purpose = params.get('purpose') || sessionStorage.getItem('xm_otp_purpose') || 'registration';
+    document.getElementById('purpose').value = purpose;
+    document.getElementById('email').value = sessionStorage.getItem('xm_verify_email') || params.get('email') || '';
+    const debug = sessionStorage.getItem('xm_debug_otp');
+    if (debug) XMONEY.showAlert(document.getElementById('alert'), 'Dev OTP: ' + debug, 'info');
+
+    let cooldown = 0;
+    const resendBtn = document.getElementById('resendBtn');
+    function tickCooldown() {
+      if (cooldown <= 0) { resendBtn.disabled = false; resendBtn.textContent = 'Resend OTP'; return; }
+      resendBtn.disabled = true;
+      resendBtn.textContent = `Resend in ${cooldown}s`;
+      cooldown -= 1;
+      setTimeout(tickCooldown, 1000);
+    }
+
+    resendBtn.onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      if (!email) { XMONEY.showAlert(document.getElementById('alert'), 'Enter your email first'); return; }
+      XMONEY.setLoading(resendBtn, true, 'Sending…');
+      const res = await XMONEY.api('/v1/auth/resend-otp', {
+        method: 'POST',
+        body: { email, purpose },
+      });
+      XMONEY.setLoading(resendBtn, false);
+      if (res.data?.otp?.debug_otp) {
+        sessionStorage.setItem('xm_debug_otp', res.data.otp.debug_otp);
+        XMONEY.showAlert(document.getElementById('alert'), 'Dev OTP: ' + res.data.otp.debug_otp, 'info');
+      } else {
+        XMONEY.showAlert(document.getElementById('alert'), res.message || 'OTP sent', 'success');
+      }
+      cooldown = 60;
+      tickCooldown();
+    };
+
+    document.getElementById('otpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const btn = document.getElementById('submitBtn');
+      XMONEY.setLoading(btn, true, 'Verifying…');
+      const res = await XMONEY.api('/v1/auth/verify-otp', {
+        method: 'POST',
+        body: { email: fd.get('email'), otp: fd.get('otp'), purpose: fd.get('purpose') },
+      });
+      XMONEY.setLoading(btn, false);
+      if (!res.success) {
+        XMONEY.showAlert(document.getElementById('alert'), res.message || 'Verification failed');
+        return;
+      }
+      sessionStorage.removeItem('xm_debug_otp');
+      sessionStorage.removeItem('xm_otp_purpose');
+      XMONEY.toast('Email verified', 'success');
+      if (purpose === 'password_reset') location.href = 'forgot-password.html?step=reset';
+      else location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

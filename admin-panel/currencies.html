@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Currencies — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html" class="active">Currencies</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Currency management</h1>
+      <div class="xm-card" id="list">Loading…</div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    async function load() {
+      const res = await XMONEY.api('/v1/admin/currencies');
+      const el = document.getElementById('list');
+      if (!res.success) { el.textContent = res.message; return; }
+      el.innerHTML = `<table class="xm-table"><thead><tr><th>Code</th><th>Name</th><th>Active</th><th>Source</th><th>Destination</th><th>Actions</th></tr></thead><tbody>
+        ${(res.data||[]).map(c => `<tr>
+          <td><strong>${c.code}</strong> ${c.symbol}</td>
+          <td>${c.name}</td>
+          <td>${XMONEY.statusBadge(c.is_active == 1 ? 'active' : 'cancelled')}</td>
+          <td>${c.is_source == 1 ? 'Yes' : 'No'}</td>
+          <td>${c.is_destination == 1 ? 'Yes' : 'No'}</td>
+          <td>
+            <button class="xm-btn xm-btn-outline" style="padding:0.3rem 0.6rem;font-size:0.8rem" data-toggle="${c.code}" data-active="${c.is_active}">
+              ${c.is_active == 1 ? 'Disable' : 'Enable'}
+            </button>
+          </td>
+        </tr>`).join('')}
+      </tbody></table>`;
+      el.querySelectorAll('[data-toggle]').forEach(btn => {
+        btn.onclick = async () => {
+          const next = btn.dataset.active == '1' ? 0 : 1;
+          await XMONEY.api('/v1/admin/currencies/' + btn.dataset.toggle, {
+            method: 'PATCH',
+            body: { is_active: next },
+          });
+          load();
+        };
+      });
+    }
+    load();
+  </script>
+</body>
+</html>

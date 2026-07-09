@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notifications — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
+      <p style="color:var(--xm-muted);margin:0" id="unreadLabel">Loading…</p>
+      <button type="button" class="xm-btn xm-btn-outline" id="markAllBtn">Mark all read</button>
+    </div>
+    <div class="xm-card" id="list">Loading…</div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    async function load() {
+      const res = await XMONEY.api('/v1/notifications?limit=50');
+      const list = document.getElementById('list');
+      if (!res.success) { list.textContent = res.message || 'Failed to load'; return; }
+      document.getElementById('unreadLabel').textContent = `${res.data.unread_count} unread`;
+      if (!res.data.items.length) {
+        list.innerHTML = '<div class="xm-empty">No notifications yet.</div>';
+        return;
+      }
+      list.innerHTML = res.data.items.map(n => `
+        <div style="padding:1rem 0;border-bottom:1px solid var(--xm-border);display:flex;justify-content:space-between;gap:1rem;align-items:flex-start">
+          <div>
+            <strong>${n.title}</strong> ${XMONEY.statusBadge(n.status)}
+            <div style="color:var(--xm-muted);font-size:0.9rem;margin-top:0.25rem">${n.body}</div>
+            <div style="font-size:0.75rem;color:var(--xm-muted);margin-top:0.35rem">${new Date(n.created_at).toLocaleString()} · ${n.channel}</div>
+          </div>
+          ${!n.read_at ? `<button class="xm-btn xm-btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-uuid="${n.uuid}">Mark read</button>` : ''}
+        </div>`).join('');
+      list.querySelectorAll('[data-uuid]').forEach(btn => {
+        btn.onclick = async () => {
+          await XMONEY.api('/v1/notifications/' + btn.dataset.uuid + '/read', { method: 'POST', body: {} });
+          load();
+        };
+      });
+    }
+
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Notifications', heading: 'Notifications' });
+      if (!profile) return;
+      document.getElementById('markAllBtn').onclick = async () => {
+        await XMONEY.api('/v1/notifications/read-all', { method: 'POST', body: {} });
+        XMONEY.toast('All marked as read', 'success');
+        load();
+      };
+      load();
+    })();
+  </script>
+</body>
+</html>

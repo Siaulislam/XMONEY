@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rates â€” XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html" class="active">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Exchange rate control</h1>
+      <div id="alert" hidden></div>
+      <div class="xm-card" style="max-width:480px;margin-bottom:1.25rem">
+        <p style="color:var(--xm-muted);font-size:0.9rem;margin-bottom:1rem">Customer rate = market rate âˆ’ margin (e.g. 22.50 âˆ’ 0.15 = 22.35)</p>
+        <form id="rateForm">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="xm-field"><label>Source</label><input name="source_currency" value="AED" required /></div>
+            <div class="xm-field"><label>Target</label><input name="target_currency" value="INR" required /></div>
+          </div>
+          <div class="xm-field"><label>Market rate</label><input name="market_rate" type="number" step="0.00000001" required /></div>
+          <div class="xm-field"><label>XMONEY margin</label><input name="margin" type="number" step="0.000001" value="0.15" required /></div>
+          <button class="xm-btn xm-btn-primary" type="submit">Publish rate</button>
+        </form>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Active rates</h2>
+        <div id="rates">Loadingâ€¦</div>
+      </div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    async function load() {
+      const res = await XMONEY.api('/v1/rates');
+      const el = document.getElementById('rates');
+      if (!res.success) { el.textContent = 'Failed to load'; return; }
+      el.innerHTML = `<table class="xm-table"><thead><tr><th>Pair</th><th>Market</th><th>Margin</th><th>Customer</th></tr></thead><tbody>
+        ${(res.data||[]).map(r => `<tr><td>${r.source_currency}/${r.target_currency}</td><td>${r.market_rate}</td><td>${r.margin}</td><td><strong>${r.customer_rate}</strong></td></tr>`).join('')}
+      </tbody></table>`;
+    }
+    document.getElementById('rateForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      body.market_rate = Number(body.market_rate);
+      body.margin = Number(body.margin);
+      const res = await XMONEY.api('/v1/admin/rates', { method: 'POST', body });
+      XMONEY.showAlert(document.getElementById('alert'),
+        res.success ? `Published customer rate ${res.data.customer_rate}` : res.message,
+        res.success ? 'success' : 'error');
+      if (res.success) load();
+    };
+    load();
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Send money — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div class="xm-steps" id="steps">
+      <div class="xm-step active" data-step="1">1. Beneficiary</div>
+      <div class="xm-step" data-step="2">2. Amount</div>
+      <div class="xm-step" data-step="3">3. Review</div>
+      <div class="xm-step" data-step="4">4. Pay</div>
+    </div>
+
+    <div class="xm-card" style="max-width:640px" id="panel">
+      <!-- Step 1 -->
+      <section data-panel="1">
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Select beneficiary</h2>
+        <div class="xm-field">
+          <label>Beneficiary</label>
+          <select id="benSelect" required><option value="">Loading…</option></select>
+        </div>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Need a new receiver? <a href="beneficiaries.html">Add beneficiary</a></p>
+        <button type="button" class="xm-btn xm-btn-primary" id="toStep2">Continue</button>
+      </section>
+
+      <!-- Step 2 -->
+      <section data-panel="2" hidden>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Amount & currency</h2>
+        <div class="xm-field">
+          <label>You send</label>
+          <select id="srcCur">
+            <option value="AED">AED</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+        <div class="xm-field">
+          <label>Amount</label>
+          <input id="amount" type="number" min="1" step="0.01" required placeholder="0.00" />
+        </div>
+        <div id="quoteBox" class="xm-alert xm-alert-info" hidden></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <button type="button" class="xm-btn xm-btn-outline" id="back1">Back</button>
+          <button type="button" class="xm-btn xm-btn-outline" id="quoteBtn">Get live quote</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="toStep3">Review transfer</button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section data-panel="3" hidden>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Review</h2>
+        <div id="reviewBox" style="font-size:0.95rem;line-height:1.7"></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem">
+          <button type="button" class="xm-btn xm-btn-outline" id="back2">Back</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="toStep4">Confirm & pay</button>
+        </div>
+      </section>
+
+      <!-- Step 4 -->
+      <section data-panel="4" hidden>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem">Payment</h2>
+        <div class="xm-field">
+          <label>Payment method</label>
+          <select id="payMethod">
+            <option value="wallet">Wallet balance</option>
+            <option value="card">Card</option>
+            <option value="gateway">Payment gateway</option>
+          </select>
+        </div>
+        <div id="payStatus" class="xm-alert xm-alert-info" hidden></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <button type="button" class="xm-btn xm-btn-outline" id="back3">Back</button>
+          <button type="button" class="xm-btn xm-btn-primary" id="payBtn">Pay now</button>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    const state = { beneficiary: null, quote: null, txn: null };
+
+    function setStep(n) {
+      document.querySelectorAll('[data-panel]').forEach(p => { p.hidden = p.getAttribute('data-panel') !== String(n); });
+      document.querySelectorAll('.xm-step').forEach(s => {
+        const sn = Number(s.dataset.step);
+        s.classList.toggle('active', sn === n);
+        s.classList.toggle('done', sn < n);
+      });
+    }
+
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Send money', heading: 'Send money' });
+      if (!profile) return;
+
+      if (profile.kyc_status !== 'approved') {
+        XMONEY.showAlert(document.getElementById('alert'), 'KYC must be approved before you can send money. Complete verification first.', 'info');
+      }
+
+      const bens = await XMONEY.api('/v1/beneficiaries');
+      const sel = document.getElementById('benSelect');
+      if (!bens.success || !bens.data.length) {
+        sel.innerHTML = '<option value="">No beneficiaries — add one first</option>';
+      } else {
+        sel.innerHTML = bens.data.map(b =>
+          `<option value="${b.uuid}" data-cur="${b.currency_code}" data-country="${b.country_code}" data-name="${b.receiver_name}">${b.receiver_name} (${b.country_code} · ${b.currency_code})</option>`
+        ).join('');
+      }
+
+      document.getElementById('toStep2').onclick = () => {
+        const opt = sel.selectedOptions[0];
+        if (!opt || !opt.value) { XMONEY.toast('Select a beneficiary', 'error'); return; }
+        state.beneficiary = {
+          uuid: opt.value,
+          currency: opt.dataset.cur,
+          country: opt.dataset.country,
+          name: opt.dataset.name,
+        };
+        setStep(2);
+      };
+
+      document.getElementById('back1').onclick = () => setStep(1);
+      document.getElementById('back2').onclick = () => setStep(2);
+      document.getElementById('back3').onclick = () => setStep(3);
+
+      async function loadQuote() {
+        const amount = Number(document.getElementById('amount').value);
+        if (!amount || amount <= 0) { XMONEY.toast('Enter a valid amount', 'error'); return null; }
+        const res = await XMONEY.api('/v1/transfers/quote', {
+          method: 'POST',
+          body: {
+            source_currency: document.getElementById('srcCur').value,
+            target_currency: state.beneficiary.currency,
+            send_amount: amount,
+            destination_country: state.beneficiary.country,
+          },
+        });
+        if (!res.success) {
+          XMONEY.showAlert(document.getElementById('alert'), res.message || 'Quote failed');
+          return null;
+        }
+        state.quote = res.data;
+        const box = document.getElementById('quoteBox');
+        box.hidden = false;
+        box.innerHTML = `
+          Market rate <strong>${res.data.market_rate}</strong> − margin <strong>${res.data.margin}</strong>
+          = customer rate <strong>${res.data.customer_rate}</strong><br/>
+          Receiver gets <strong>${XMONEY.formatMoney(res.data.receive_amount, res.data.target_currency)}</strong><br/>
+          Fee <strong>${XMONEY.formatMoney(res.data.fee_amount, res.data.fee_currency)}</strong> ·
+          Total debit <strong>${XMONEY.formatMoney(res.data.total_debit, res.data.source_currency)}</strong>`;
+        return res.data;
+      }
+
+      document.getElementById('quoteBtn').onclick = () => loadQuote();
+
+      document.getElementById('toStep3').onclick = async () => {
+        const q = state.quote || await loadQuote();
+        if (!q) return;
+        document.getElementById('reviewBox').innerHTML = `
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>Receiver</span><strong>${state.beneficiary.name}</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>Corridor</span><strong>${q.source_currency} → ${q.target_currency} (${state.beneficiary.country})</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>You send</span><strong>${XMONEY.formatMoney(q.send_amount, q.source_currency)}</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>Customer rate</span><strong>${q.customer_rate}</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>They receive</span><strong>${XMONEY.formatMoney(q.receive_amount, q.target_currency)}</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>Fee</span><strong>${XMONEY.formatMoney(q.fee_amount, q.fee_currency)}</strong></div>
+          <div class="xm-rate-row" style="border-color:var(--xm-border);color:inherit"><span>Total to pay</span><strong>${XMONEY.formatMoney(q.total_debit, q.source_currency)}</strong></div>`;
+        setStep(3);
+      };
+
+      document.getElementById('toStep4').onclick = () => setStep(4);
+
+      document.getElementById('payBtn').onclick = async () => {
+        const btn = document.getElementById('payBtn');
+        const method = document.getElementById('payMethod').value;
+        XMONEY.setLoading(btn, true, 'Processing…');
+
+        const create = await XMONEY.api('/v1/transfers', {
+          method: 'POST',
+          body: {
+            beneficiary_uuid: state.beneficiary.uuid,
+            send_amount: state.quote.send_amount,
+            source_currency: state.quote.source_currency,
+            payment_method: method,
+          },
+        });
+        if (!create.success) {
+          XMONEY.setLoading(btn, false);
+          XMONEY.showAlert(document.getElementById('alert'), create.message || 'Could not create transfer');
+          return;
+        }
+        state.txn = create.data;
+
+        const confirm = await XMONEY.api(`/v1/transfers/${create.data.uuid}/confirm`, {
+          method: 'POST',
+          body: { payment_method: method },
+        });
+        XMONEY.setLoading(btn, false);
+        if (!confirm.success) {
+          XMONEY.showAlert(document.getElementById('alert'), confirm.message || 'Payment failed');
+          return;
+        }
+
+        const status = confirm.data?.transaction?.status || confirm.data?.status || 'processing';
+        const uuid = create.data.uuid;
+        XMONEY.toast('Transfer submitted', 'success');
+        location.href = 'receipt.html?uuid=' + encodeURIComponent(uuid);
+      };
+    })();
+  </script>
+</body>
+</html>

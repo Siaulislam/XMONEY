@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Users — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html" class="active">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="settings.html">Settings</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">User management</h1>
+      <div class="xm-field" style="max-width:320px"><input id="q" placeholder="Search name, email, mobile…" /></div>
+      <div class="xm-card">
+        <div class="xm-table-wrap">
+          <table class="xm-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>KYC</th><th>Status</th><th></th></tr></thead>
+            <tbody id="body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    async function load(q='') {
+      const res = await XMONEY.api('/v1/admin/users' + (q ? '?q=' + encodeURIComponent(q) : ''));
+      document.getElementById('body').innerHTML = (res.data || []).map(u => `
+        <tr>
+          <td><a href="user-detail.html?uuid=${u.uuid}">${u.full_name}</a></td>
+          <td>${u.email}</td>
+          <td>${u.mobile_country} ${u.mobile_number}</td>
+          <td>${XMONEY.statusBadge(u.kyc_status)}</td>
+          <td>${XMONEY.statusBadge(u.status)}</td>
+          <td>
+            <a class="xm-btn xm-btn-ghost" style="padding:0.3rem 0.6rem;font-size:0.8rem" href="user-detail.html?uuid=${u.uuid}">View</a>
+            ${u.status !== 'blocked' ? `<button class="xm-btn xm-btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem" data-block="${u.uuid}">Block</button>` : `<button class="xm-btn xm-btn-primary" style="padding:0.3rem 0.6rem;font-size:0.8rem" data-unblock="${u.uuid}">Unblock</button>`}
+          </td>
+        </tr>`).join('') || '<tr><td colspan="6">No users</td></tr>';
+      document.querySelectorAll('[data-block]').forEach(btn => btn.onclick = async () => {
+        await XMONEY.api('/v1/admin/users/' + btn.dataset.block + '/block', { method: 'POST', body: {} });
+        load(document.getElementById('q').value);
+      });
+      document.querySelectorAll('[data-unblock]').forEach(btn => btn.onclick = async () => {
+        await XMONEY.api('/v1/admin/users/' + btn.dataset.unblock + '/unblock', { method: 'POST', body: {} });
+        load(document.getElementById('q').value);
+      });
+    }
+    document.getElementById('q').oninput = (e) => load(e.target.value);
+    load();
+  </script>
+</body>
+</html>

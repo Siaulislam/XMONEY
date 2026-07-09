@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" class="prof-grid">
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:1rem">Profile</h2>
+        <form id="profForm">
+          <div class="xm-field"><label>Full name</label><input name="full_name" id="full_name" required /></div>
+          <div class="xm-field"><label>Country</label><input name="country_code" id="country_code" maxlength="2" required /></div>
+          <div class="xm-field"><label>City</label><input name="city" id="city" /></div>
+          <div class="xm-field"><label>Address</label><input name="address_line1" id="address_line1" /></div>
+          <button class="xm-btn xm-btn-primary" type="submit" id="profBtn">Save profile</button>
+        </form>
+      </div>
+      <div>
+        <div class="xm-card" style="margin-bottom:1.25rem">
+          <h2 style="font-size:1.05rem;margin-bottom:1rem">Change password</h2>
+          <form id="pwdForm">
+            <div class="xm-field"><label>Current password</label><input name="current_password" type="password" required /></div>
+            <div class="xm-field"><label>New password</label><input name="new_password" type="password" required /></div>
+            <button class="xm-btn xm-btn-outline" type="submit" id="pwdBtn">Update password</button>
+          </form>
+        </div>
+        <div class="xm-card">
+          <h2 style="font-size:1.05rem;margin-bottom:1rem">Devices</h2>
+          <div id="devices">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>@media(max-width:800px){.prof-grid{grid-template-columns:1fr!important}}</style>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    async function loadDevices() {
+      const devices = await XMONEY.api('/v1/me/devices');
+      const el = document.getElementById('devices');
+      if (!devices.success || !devices.data.length) { el.textContent = 'No devices registered yet.'; return; }
+      el.innerHTML = devices.data.map(d => `
+        <div style="padding:0.5rem 0;border-bottom:1px solid var(--xm-border);font-size:0.9rem">
+          ${d.device_name || d.device_uuid} · ${d.platform}
+          ${d.revoked_at ? XMONEY.statusBadge('cancelled') : ''}
+          ${!d.revoked_at ? `<button data-id="${d.id}" class="xm-btn xm-btn-danger" style="padding:0.2rem 0.5rem;font-size:0.75rem;margin-left:0.5rem">Revoke</button>` : ''}
+        </div>`).join('');
+      el.querySelectorAll('[data-id]').forEach(btn => btn.onclick = async () => {
+        await XMONEY.api('/v1/me/devices/' + btn.dataset.id, { method: 'DELETE' });
+        XMONEY.toast('Device revoked', 'success');
+        loadDevices();
+      });
+    }
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Profile', heading: 'Profile & security' });
+      if (!profile) return;
+      ['full_name','country_code','city','address_line1'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = profile[k] || '';
+      });
+      document.getElementById('profForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const body = Object.fromEntries(new FormData(e.target).entries());
+        const btn = document.getElementById('profBtn');
+        XMONEY.setLoading(btn, true, 'Saving…');
+        const res = await XMONEY.api('/v1/me', { method: 'PUT', body });
+        XMONEY.setLoading(btn, false);
+        XMONEY.showAlert(document.getElementById('alert'), res.success ? 'Profile saved' : res.message, res.success ? 'success' : 'error');
+      };
+      document.getElementById('pwdForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const body = Object.fromEntries(new FormData(e.target).entries());
+        const btn = document.getElementById('pwdBtn');
+        XMONEY.setLoading(btn, true, 'Updating…');
+        const res = await XMONEY.api('/v1/me/change-password', { method: 'POST', body });
+        XMONEY.setLoading(btn, false);
+        if (!res.success) {
+          XMONEY.showAlert(document.getElementById('alert'), res.message || 'Failed');
+          return;
+        }
+        XMONEY.toast('Password changed — sign in again', 'success');
+        setTimeout(() => XMONEY.logout(), 800);
+      };
+      loadDevices();
+    })();
+  </script>
+</body>
+</html>

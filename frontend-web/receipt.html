@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Receipt — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div class="xm-card" style="max-width:640px" id="receipt">
+      <div class="xm-skeleton" style="height:8rem"></div>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+      <a href="transactions.html" class="xm-btn xm-btn-outline">All transactions</a>
+      <a href="transfer.html" class="xm-btn xm-btn-primary">New transfer</a>
+      <button type="button" class="xm-btn xm-btn-outline" onclick="window.print()">Print</button>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Receipt', heading: 'Transfer receipt' });
+      if (!profile) return;
+      const uuid = new URLSearchParams(location.search).get('uuid');
+      if (!uuid) {
+        document.getElementById('receipt').innerHTML = '<div class="xm-empty">Missing transfer reference.</div>';
+        return;
+      }
+      const res = await XMONEY.api('/v1/transfers/' + uuid);
+      if (!res.success) {
+        XMONEY.showAlert(document.getElementById('alert'), res.message || 'Transfer not found');
+        return;
+      }
+      const t = res.data;
+      const history = (t.history || []).map(h => `
+        <tr>
+          <td>${h.from_status || '—'} → ${h.to_status}</td>
+          <td>${h.actor_type}</td>
+          <td>${h.note || ''}</td>
+          <td>${new Date(h.created_at).toLocaleString()}</td>
+        </tr>`).join('');
+
+      document.getElementById('receipt').innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem">
+          <div>
+            <div class="xm-logo" style="color:var(--xm-navy);font-size:1.1rem;margin-bottom:0.5rem"><span class="xm-logo-mark">X</span> XMONEY</div>
+            <div style="font-family:var(--xm-display);font-size:1.35rem;font-weight:700">${t.reference_code}</div>
+          </div>
+          <div>${XMONEY.statusBadge(t.status)}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem 1.25rem;font-size:0.95rem">
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Receiver</div><strong>${t.receiver_name}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Bank / account</div><strong>${t.bank_name || '—'} · ${t.account_number || t.iban || '—'}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">You sent</div><strong>${XMONEY.formatMoney(t.send_amount, t.source_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">They receive</div><strong>${XMONEY.formatMoney(t.receive_amount, t.target_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Rate</div><strong>${t.customer_rate}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Fee</div><strong>${XMONEY.formatMoney(t.fee_amount, t.fee_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Total debit</div><strong>${XMONEY.formatMoney(t.total_debit, t.source_currency)}</strong></div>
+          <div><div style="color:var(--xm-muted);font-size:0.75rem;text-transform:uppercase;font-weight:700">Created</div><strong>${new Date(t.created_at).toLocaleString()}</strong></div>
+        </div>
+        <h3 style="margin:1.5rem 0 0.75rem;font-size:1rem">Status history</h3>
+        <div class="xm-table-wrap">
+          <table class="xm-table">
+            <thead><tr><th>Transition</th><th>Actor</th><th>Note</th><th>When</th></tr></thead>
+            <tbody>${history || '<tr><td colspan="4">No history</td></tr>'}</tbody>
+          </table>
+        </div>`;
+    })();
+  </script>
+</body>
+</html>

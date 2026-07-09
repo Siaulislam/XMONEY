@@ -1,0 +1,20 @@
+{
+  "app_name": "XMONEY",
+  "environments": {
+    "local": {
+      "api_base_url": "http://10.0.2.2:8080/api",
+      "ios_api_base_url": "http://127.0.0.1:8080/api"
+    },
+    "staging": {
+      "api_base_url": "https://staging-api.xmoney.example/api"
+    },
+    "production": {
+      "api_base_url": "https://api.xmoney.example/api"
+    }
+  },
+  "features": {
+    "biometric_login": true,
+    "push_notifications": true,
+    "kyc_camera_capture": true
+  }
+}

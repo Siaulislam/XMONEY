@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav">
+    <div class="xm-container xm-nav-inner">
+      <a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY</a>
+    </div>
+  </nav>
+  <div class="xm-auth-wrap">
+    <div class="xm-card xm-auth-card">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to your XMONEY account</p>
+      <div id="alert" hidden></div>
+      <form id="loginForm">
+        <div class="xm-field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required autocomplete="username" />
+        </div>
+        <div class="xm-field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password" />
+        </div>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn">Sign in</button>
+      </form>
+      <p style="margin-top:1.25rem;font-size:0.9rem;color:var(--xm-muted);text-align:center">
+        <a href="forgot-password.html">Forgot password?</a> · <a href="register.html">Create account</a>
+      </p>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (XMONEY.getToken() || XMONEY.getRefreshToken()) {
+      location.href = 'dashboard.html';
+    }
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alert = document.getElementById('alert');
+      const btn = document.getElementById('submitBtn');
+      const fd = new FormData(e.target);
+      XMONEY.setLoading(btn, true, 'Signing in…');
+      const res = await XMONEY.api('/v1/auth/login', {
+        method: 'POST',
+        body: {
+          email: fd.get('email'),
+          password: fd.get('password'),
+          device_uuid: XMONEY.getDeviceId(),
+          platform: 'web',
+          device_name: navigator.userAgent.slice(0, 80),
+        },
+      });
+      XMONEY.setLoading(btn, false);
+      if (!res.success) {
+        if (res.errors?.code === 'email_unverified' || (res.message || '').toLowerCase().includes('verify')) {
+          sessionStorage.setItem('xm_verify_email', fd.get('email'));
+          XMONEY.showAlert(alert, res.message + ' Redirecting to verification…', 'info');
+          setTimeout(() => location.href = 'verify-otp.html', 900);
+          return;
+        }
+        XMONEY.showAlert(alert, res.message || 'Login failed');
+        return;
+      }
+      XMONEY.setSession(res.data);
+      XMONEY.toast('Signed in successfully', 'success');
+      location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

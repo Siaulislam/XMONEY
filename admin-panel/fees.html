@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fees — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html" class="active">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Fee management</h1>
+      <div id="alert" hidden></div>
+      <div class="xm-card" style="max-width:520px;margin-bottom:1.25rem">
+        <form id="feeForm">
+          <div class="xm-field"><label>Name</label><input name="name" required /></div>
+          <div class="xm-field"><label>Type</label>
+            <select name="fee_type"><option value="flat">Flat</option><option value="percent">Percent</option></select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="xm-field"><label>Source currency</label><input name="source_currency" placeholder="AED" /></div>
+            <div class="xm-field"><label>Target currency</label><input name="target_currency" placeholder="INR" /></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="xm-field"><label>Flat amount</label><input name="flat_amount" type="number" step="0.01" /></div>
+            <div class="xm-field"><label>Percent</label><input name="percent_value" type="number" step="0.01" /></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="xm-field"><label>Min amount</label><input name="min_amount" type="number" step="0.01" value="0" /></div>
+            <div class="xm-field"><label>Max amount</label><input name="max_amount" type="number" step="0.01" /></div>
+          </div>
+          <div class="xm-field"><label>Priority (lower = first)</label><input name="priority" type="number" value="10" /></div>
+          <button class="xm-btn xm-btn-primary" type="submit">Create fee</button>
+        </form>
+      </div>
+      <div class="xm-card" id="list">Loading…</div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    async function load() {
+      const res = await XMONEY.api('/v1/admin/fees');
+      const el = document.getElementById('list');
+      if (!res.success) { el.textContent = res.message; return; }
+      el.innerHTML = `<table class="xm-table"><thead><tr><th>Name</th><th>Type</th><th>Corridor</th><th>Value</th><th>Range</th><th>Active</th></tr></thead><tbody>
+        ${(res.data||[]).map(f => `<tr>
+          <td>${f.name}</td><td>${f.fee_type}</td>
+          <td>${f.source_currency || '*'} → ${f.target_currency || '*'}</td>
+          <td>${f.fee_type === 'flat' ? f.flat_amount : f.percent_value + '%'}</td>
+          <td>${f.min_amount} – ${f.max_amount || '∞'}</td>
+          <td>${XMONEY.statusBadge(f.is_active == 1 ? 'active' : 'cancelled')}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+    }
+    document.getElementById('feeForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      ['flat_amount','percent_value','min_amount','max_amount','priority'].forEach(k => {
+        if (body[k] === '') delete body[k]; else if (body[k] != null) body[k] = Number(body[k]);
+      });
+      const res = await XMONEY.api('/v1/admin/fees', { method: 'POST', body });
+      XMONEY.showAlert(document.getElementById('alert'), res.success ? 'Fee saved' : res.message, res.success ? 'success' : 'error');
+      if (res.success) { e.target.reset(); load(); }
+    };
+    load();
+  </script>
+</body>
+</html>

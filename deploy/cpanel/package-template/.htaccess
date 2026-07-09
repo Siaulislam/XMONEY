@@ -1,0 +1,27 @@
+﻿# ============================================================
+# XMONEY root .htaccess
+# Deployed to: /home/smartdms/public_html/xmoney/
+# Public URL:  https://qamar.tasjeel.ae/xmoney/
+# Does NOT affect SmartDMS files in /public_html/ root.
+# ============================================================
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /xmoney/
+
+  # Force HTTPS (uncomment when SSL is active)
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Route /xmoney/api/* to API front controller
+  RewriteRule ^api/(.*)$ api/public/index.php [QSA,L]
+</IfModule>
+
+# Protect .env anywhere under this app folder
+<FilesMatch "^\.env">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div data-xm-shell>
+    <div id="alert" hidden></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" class="settings-grid">
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Security</h2>
+        <p style="color:var(--xm-muted);font-size:0.9rem;margin-bottom:1rem">Manage password and signed-in devices.</p>
+        <a href="profile.html" class="xm-btn xm-btn-primary">Open profile & security</a>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Preferences</h2>
+        <form id="prefForm">
+          <div class="xm-field">
+            <label>Preferred language</label>
+            <select name="preferred_language" id="preferred_language">
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+              <option value="hi">Hindi</option>
+              <option value="ur">Urdu</option>
+            </select>
+          </div>
+          <div class="xm-field">
+            <label>Preferred currency</label>
+            <select name="preferred_currency" id="preferred_currency">
+              <option>AED</option><option>USD</option><option>EUR</option><option>GBP</option><option>INR</option><option>PKR</option>
+            </select>
+          </div>
+          <button class="xm-btn xm-btn-outline" type="submit" id="saveBtn">Save preferences</button>
+        </form>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Session</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:0.75rem">Device ID: <code id="deviceId">—</code></p>
+        <button type="button" class="xm-btn xm-btn-danger" id="logoutAllHint">Sign out this device</button>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">API endpoint</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);word-break:break-all" id="apiBase">—</p>
+      </div>
+    </div>
+  </div>
+  <style>@media(max-width:800px){.settings-grid{grid-template-columns:1fr!important}}</style>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    (async () => {
+      const profile = await XMShell.mount({ title: 'Settings', heading: 'Settings' });
+      if (!profile) return;
+      document.getElementById('deviceId').textContent = XMONEY.getDeviceId();
+      document.getElementById('apiBase').textContent = XMONEY.API_BASE;
+      document.getElementById('preferred_language').value = profile.preferred_language || 'en';
+      document.getElementById('preferred_currency').value = profile.preferred_currency || 'AED';
+      document.getElementById('logoutAllHint').onclick = () => XMONEY.logout();
+
+      document.getElementById('prefForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const btn = document.getElementById('saveBtn');
+        XMONEY.setLoading(btn, true, 'Saving…');
+        const res = await XMONEY.api('/v1/me', {
+          method: 'PUT',
+          body: {
+            full_name: profile.full_name,
+            country_code: profile.country_code,
+            city: profile.city,
+            address_line1: profile.address_line1,
+            preferred_language: fd.get('preferred_language'),
+            preferred_currency: fd.get('preferred_currency'),
+          },
+        });
+        XMONEY.setLoading(btn, false);
+        if (!res.success) {
+          XMONEY.showAlert(document.getElementById('alert'), res.message || 'Save failed');
+          return;
+        }
+        XMONEY.toast('Preferences saved', 'success');
+      };
+    })();
+  </script>
+</body>
+</html>

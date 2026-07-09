@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create account — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav">
+    <div class="xm-container xm-nav-inner">
+      <a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY</a>
+    </div>
+  </nav>
+  <div class="xm-auth-wrap">
+    <div class="xm-card xm-auth-card" style="width:min(480px,100%)">
+      <h1>Create your account</h1>
+      <p class="sub">Join XMONEY to send money securely</p>
+      <div id="alert" hidden></div>
+      <form id="regForm">
+        <div class="xm-field"><label>Full name</label><input name="full_name" required autocomplete="name" /></div>
+        <div class="xm-field"><label>Email</label><input name="email" type="email" required autocomplete="email" /></div>
+        <div style="display:grid;grid-template-columns:100px 1fr;gap:0.75rem">
+          <div class="xm-field"><label>Code</label><input name="mobile_country" value="+971" required /></div>
+          <div class="xm-field"><label>Mobile</label><input name="mobile_number" required autocomplete="tel" /></div>
+        </div>
+        <div class="xm-field">
+          <label>Country</label>
+          <select name="country_code" required>
+            <option value="AE">United Arab Emirates</option>
+            <option value="IN">India</option>
+            <option value="PK">Pakistan</option>
+            <option value="GB">United Kingdom</option>
+            <option value="US">United States</option>
+          </select>
+        </div>
+        <div class="xm-field"><label>Address</label><input name="address" autocomplete="street-address" /></div>
+        <div class="xm-field"><label>Password</label><input name="password" type="password" required minlength="8" autocomplete="new-password" /></div>
+        <p style="font-size:0.8rem;color:var(--xm-muted);margin:-0.4rem 0 1rem">Min 8 characters with upper, lower, and a number.</p>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn">Register</button>
+      </form>
+      <p style="margin-top:1.25rem;font-size:0.9rem;color:var(--xm-muted);text-align:center">
+        Already have an account? <a href="login.html">Sign in</a>
+      </p>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alert = document.getElementById('alert');
+      const btn = document.getElementById('submitBtn');
+      const fd = new FormData(e.target);
+      const body = Object.fromEntries(fd.entries());
+      XMONEY.setLoading(btn, true, 'Creating account…');
+      const res = await XMONEY.api('/v1/auth/register', { method: 'POST', body });
+      XMONEY.setLoading(btn, false);
+      if (!res.success) {
+        const detail = res.errors ? Object.values(res.errors).flat().join(' ') : '';
+        XMONEY.showAlert(alert, (res.message || 'Registration failed') + (detail ? ' — ' + detail : ''));
+        return;
+      }
+      sessionStorage.setItem('xm_verify_email', body.email);
+      sessionStorage.setItem('xm_otp_purpose', 'registration');
+      if (res.data?.otp?.debug_otp) sessionStorage.setItem('xm_debug_otp', res.data.otp.debug_otp);
+      XMONEY.toast('Account created — verify your email', 'success');
+      window.location.href = 'verify-otp.html';
+    });
+  </script>
+</body>
+</html>

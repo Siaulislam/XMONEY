@@ -1,0 +1,43 @@
+# Environment
+.env
+.env.local
+.env.production
+backend-api/.env
+deploy/cpanel/CREDENTIALS.local.txt
+**/CREDENTIALS.local.txt
+
+# Dependencies
+backend-api/vendor/
+node_modules/
+
+# Deploy build output
+deploy/cpanel/dist/
+
+# Uploads & runtime
+uploads/kyc/**
+uploads/profiles/**
+uploads/temp/**
+!uploads/**/.gitkeep
+logs/**
+!logs/.gitkeep
+backups/**
+!backups/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log
+
+# Mobile generated (when Flutter/RN initialized)
+mobile-app/**/build/
+mobile-app/**/.gradle/
+mobile-app/**/Pods/
+mobile-app/**/.dart_tool/
+
+# Secrets
+*.pem
+*.key
+credentials.json

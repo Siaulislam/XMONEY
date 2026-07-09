@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audit Logs — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html" class="active">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Audit logs</h1>
+      <div class="xm-field" style="max-width:280px"><input id="q" placeholder="Filter by action…" /></div>
+      <div class="xm-card">
+        <div class="xm-table-wrap">
+          <table class="xm-table">
+            <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Entity</th><th>IP</th></tr></thead>
+            <tbody id="body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    async function load(action='') {
+      const res = await XMONEY.api('/v1/admin/audit-logs?limit=100' + (action ? '&action=' + encodeURIComponent(action) : ''));
+      document.getElementById('body').innerHTML = (res.data || []).map(r => `
+        <tr>
+          <td>${new Date(r.created_at).toLocaleString()}</td>
+          <td>${r.actor_type} #${r.actor_id || '—'}</td>
+          <td><code>${r.action}</code></td>
+          <td>${r.entity_type} ${r.entity_id || ''}</td>
+          <td>${r.ip_address || ''}</td>
+        </tr>`).join('') || '<tr><td colspan="5">No audit entries</td></tr>';
+    }
+    let t;
+    document.getElementById('q').oninput = (e) => {
+      clearTimeout(t);
+      t = setTimeout(() => load(e.target.value), 250);
+    };
+    load();
+  </script>
+</body>
+</html>

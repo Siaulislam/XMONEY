@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Platform settings — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar">
+      <a href="index.html">Dashboard</a>
+      <a href="users.html">Users</a>
+      <a href="kyc.html">KYC review</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="rates.html">Rates</a>
+      <a href="fees.html">Fees</a>
+      <a href="currencies.html">Currencies</a>
+      <a href="settings.html" class="active">Settings</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit logs</a>
+    </aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Platform settings</h1>
+      <p class="xm-muted">Transfer limits, security, and notification toggles.</p>
+      <form id="form" class="xm-card" style="margin-top:1rem"></form>
+      <button type="button" class="xm-btn xm-btn-primary" id="save" style="margin-top:1rem">Save settings</button>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    let rows = [];
+
+    function field(row) {
+      const id = 's_' + row.setting_key.replace(/\./g, '_');
+      const val = row.setting_value;
+      if (row.value_type === 'boolean') {
+        return `<label class="xm-check"><input type="checkbox" id="${id}" data-key="${row.setting_key}" ${val ? 'checked' : ''} /> ${row.description || row.setting_key}</label>`;
+      }
+      return `<div class="xm-field"><label for="${id}">${row.description || row.setting_key}</label>
+        <input id="${id}" data-key="${row.setting_key}" value="${val ?? ''}" /></div>`;
+    }
+
+    async function load() {
+      const res = await XMONEY.api('/v1/admin/settings');
+      rows = res.data || [];
+      const groups = {};
+      rows.forEach(r => { (groups[r.group_name] = groups[r.group_name] || []).push(r); });
+      document.getElementById('form').innerHTML = Object.entries(groups).map(([g, items]) =>
+        `<h3 style="margin:1rem 0 0.5rem;text-transform:capitalize">${g}</h3>${items.map(field).join('')}`
+      ).join('');
+    }
+
+    document.getElementById('save').onclick = async () => {
+      const payload = {};
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.dataset.key;
+        const row = rows.find(r => r.setting_key === key);
+        if (row?.value_type === 'boolean') payload[key] = el.checked;
+        else payload[key] = el.value;
+      });
+      const res = await XMONEY.api('/v1/admin/settings', { method: 'PUT', body: payload });
+      XMONEY.toast(res.success ? 'Settings saved' : (res.message || 'Save failed'), res.success ? 'success' : 'error');
+      if (res.success) load();
+    };
+    load();
+  </script>
+</body>
+</html>

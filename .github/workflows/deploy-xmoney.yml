@@ -1,0 +1,320 @@
+# ============================================================
+# XMONEY — Production deploy to cPanel (isolated)
+# ============================================================
+# Approved deploy target (this hosting):
+#   /home/smartdms/public_html/xmoney/
+# Public URL:
+#   https://qamar.tasjeel.ae/xmoney/
+# NEVER deploy to /public_html/ root (SmartDMS / main site).
+#
+# Required GitHub Secrets (exact names):
+#   FTP_HOST, FTP_PORT, FTP_USERNAME, FTP_PASSWORD, FTP_REMOTE_PATH
+#   XMONEY_DB_HOST, XMONEY_DB_NAME, XMONEY_DB_USER, XMONEY_DB_PASS
+#   XMONEY_JWT_SECRET, XMONEY_APP_URL
+# ============================================================
+
+name: Deploy XMONEY
+
+on:
+  workflow_dispatch:
+  # Auto-deploy disabled during development phase.
+  # Re-enable when ready for production:
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: xmoney-deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-deploy:
+    name: Validate secrets + deploy XMONEY only
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout XMONEY only
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets exist
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+          XMONEY_DB_HOST: ${{ secrets.XMONEY_DB_HOST }}
+          XMONEY_DB_NAME: ${{ secrets.XMONEY_DB_NAME }}
+          XMONEY_DB_USER: ${{ secrets.XMONEY_DB_USER }}
+          XMONEY_DB_PASS: ${{ secrets.XMONEY_DB_PASS }}
+          XMONEY_JWT_SECRET: ${{ secrets.XMONEY_JWT_SECRET }}
+          XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in FTP_HOST FTP_PORT FTP_USERNAME FTP_PASSWORD FTP_REMOTE_PATH \
+                      XMONEY_DB_HOST XMONEY_DB_NAME XMONEY_DB_USER XMONEY_DB_PASS \
+                      XMONEY_JWT_SECRET XMONEY_APP_URL; do
+            val="${!name}"
+            if [ -z "${val}" ]; then
+              echo "MISSING SECRET: $name"
+              missing=1
+            else
+              echo "OK SECRET PRESENT: $name"
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::One or more required GitHub Secrets are missing. Stop deployment."
+            exit 1
+          fi
+
+      - name: HARD FAIL unless FTP path is XMONEY-only
+        env:
+          FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+          PATH_RAW="${FTP_REMOTE_PATH}"
+          # Normalize: trim whitespace, force leading slash, strip trailing slash for compare
+          PATH_NORM="$(echo -n "$PATH_RAW" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          case "$PATH_NORM" in
+            /*) ;;
+            *) PATH_NORM="/${PATH_NORM}" ;;
+          esac
+          PATH_TRIM="${PATH_NORM%/}"
+
+          echo "Configured FTP_REMOTE_PATH (raw): ${PATH_RAW}"
+          echo "Normalized path: ${PATH_TRIM}/"
+
+          # Absolute deny list — would overwrite SmartDMS / whole site
+          case "$PATH_TRIM" in
+            /public_html|/|/home/smartdms/public_html|/home/smartdms/smartdms.me)
+              echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' targets the whole site or domain root. Must be the xmoney subfolder only."
+              exit 1
+              ;;
+          esac
+
+          # Approved XMONEY folder ONLY (never parent public_html)
+          case "$PATH_TRIM" in
+            /home/smartdms/public_html/xmoney|/public_html/xmoney)
+              echo "PATH VALIDATION PASSED: deploy target is XMONEY-only (${PATH_TRIM}/)."
+              ;;
+            *)
+              echo "::error::REFUSED: FTP_REMOTE_PATH must be exactly:"
+              echo "  /home/smartdms/public_html/xmoney/"
+              echo "  (or /public_html/xmoney/)"
+              echo "Got: '${PATH_RAW}'"
+              echo "This protects your existing SmartDMS project from being overwritten."
+              exit 1
+              ;;
+          esac
+
+          BASE="$(basename "$PATH_TRIM")"
+          if [ "$BASE" != "xmoney" ]; then
+            echo "::error::REFUSED: path basename must be lowercase xmoney (got '${BASE}')"
+            exit 1
+          fi
+
+      - name: Validate XMONEY database + APP_URL (isolation)
+        env:
+          XMONEY_DB_NAME: ${{ secrets.XMONEY_DB_NAME }}
+          XMONEY_DB_USER: ${{ secrets.XMONEY_DB_USER }}
+          XMONEY_JWT_SECRET: ${{ secrets.XMONEY_JWT_SECRET }}
+          XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
+        run: |
+          set -euo pipefail
+          echo "DB name (masked length): ${#XMONEY_DB_NAME}"
+          echo "DB user (masked length): ${#XMONEY_DB_USER}"
+
+          # Must not be the SmartDMS database
+          if [[ "${XMONEY_DB_NAME}" == "smartdms_smartdms_db" ]]; then
+            echo "::error::REFUSED: XMONEY_DB_NAME points at SmartDMS database. Use smartdms_XMONEY only."
+            exit 1
+          fi
+          if [[ "${XMONEY_DB_NAME,,}" != *xmoney* ]]; then
+            echo "::error::XMONEY_DB_NAME must contain 'xmoney' (expected smartdms_XMONEY)."
+            exit 1
+          fi
+          if [[ "${XMONEY_DB_USER,,}" != *xmoney* ]]; then
+            echo "::error::XMONEY_DB_USER must contain 'xmoney' (expected smartdms_xmoney)."
+            exit 1
+          fi
+
+          if [ "${#XMONEY_JWT_SECRET}" -lt 32 ]; then
+            echo "::error::XMONEY_JWT_SECRET must be at least 32 characters."
+            exit 1
+          fi
+
+          # Expected production API URL for this hosting
+          APP_TRIM="${XMONEY_APP_URL%/}"
+          if [[ "$APP_TRIM" != "https://qamar.tasjeel.ae/xmoney/api" ]]; then
+            echo "::warning::XMONEY_APP_URL is '${XMONEY_APP_URL}' — expected https://qamar.tasjeel.ae/xmoney/api"
+          fi
+          if [[ "${XMONEY_APP_URL}" != http* ]]; then
+            echo "::error::XMONEY_APP_URL must start with http:// or https://"
+            exit 1
+          fi
+          if [[ "${XMONEY_APP_URL,,}" != *"/xmoney/api"* ]]; then
+            echo "::error::XMONEY_APP_URL must include /xmoney/api"
+            exit 1
+          fi
+
+          echo "Database/JWT/APP_URL validation passed."
+
+      - name: Setup PHP 8.2 + Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, openssl, json, fileinfo
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node (static package assist)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build isolated cPanel package
+        shell: pwsh
+        run: |
+          Set-Location deploy/cpanel
+          ./Build-CpanelPackage.ps1
+
+      - name: Install API dependencies into package (no-dev)
+        working-directory: deploy/cpanel/dist/xmoney-cpanel-package/api
+        run: |
+          set -euo pipefail
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Generate production api/.env from GitHub Secrets only
+        env:
+          XMONEY_DB_HOST: ${{ secrets.XMONEY_DB_HOST }}
+          XMONEY_DB_NAME: ${{ secrets.XMONEY_DB_NAME }}
+          XMONEY_DB_USER: ${{ secrets.XMONEY_DB_USER }}
+          XMONEY_DB_PASS: ${{ secrets.XMONEY_DB_PASS }}
+          XMONEY_JWT_SECRET: ${{ secrets.XMONEY_JWT_SECRET }}
+          XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
+        run: |
+          set -euo pipefail
+          PKG="deploy/cpanel/dist/xmoney-cpanel-package"
+          # If APP_URL is https://domain/xmoney/api → CORS https://domain
+          CORS_ORIGIN="$(echo -n "$XMONEY_APP_URL" | sed -E 's#(https?://[^/]+).*#\1#')"
+
+          cat > "$PKG/api/.env" <<EOF
+          APP_NAME=XMONEY
+          APP_ENV=production
+          APP_DEBUG=false
+          APP_URL=${XMONEY_APP_URL}
+          APP_TIMEZONE=Asia/Dubai
+          DB_HOST=${XMONEY_DB_HOST}
+          DB_PORT=3306
+          DB_NAME=${XMONEY_DB_NAME}
+          DB_USER=${XMONEY_DB_USER}
+          DB_PASS=${XMONEY_DB_PASS}
+          DB_CHARSET=utf8mb4
+          JWT_SECRET=${XMONEY_JWT_SECRET}
+          JWT_ACCESS_TTL_MINUTES=15
+          JWT_REFRESH_TTL_DAYS=30
+          JWT_ISSUER=xmoney-api
+          JWT_AUDIENCE=xmoney-clients
+          BCRYPT_COST=12
+          CORS_ALLOWED_ORIGINS=${CORS_ORIGIN}
+          RATE_LIMIT_PER_MINUTE=60
+          SECURITY_MAX_LOGIN_ATTEMPTS=5
+          SECURITY_LOCKOUT_MINUTES=30
+          OTP_EXPIRY_MINUTES=10
+          UPLOAD_MAX_MB=10
+          UPLOAD_PATH=../storage/uploads
+          EXCHANGE_PROVIDER=manual
+          EXCHANGE_API_URL=
+          EXCHANGE_API_KEY=
+          PAYMENT_DEFAULT_PROVIDER=stub
+          MAIL_DRIVER=log
+          MAIL_FROM_ADDRESS=noreply@localhost
+          MAIL_FROM_NAME=XMONEY
+          SMS_DRIVER=log
+          PUSH_DRIVER=log
+          LOG_PATH=../storage/logs
+          LOG_LEVEL=info
+          EOF
+          sed -i 's/^[[:space:]]*//' "$PKG/api/.env"
+
+          # Derive web/admin base path from APP_URL path (e.g. /Xmoney/ or /)
+          APP_PATH="$(echo -n "$XMONEY_APP_URL" | sed -E 's#https?://[^/]+##; s#/api/?$##')"
+          if [ -z "$APP_PATH" ] || [ "$APP_PATH" = "/" ]; then
+            WEB_BASE="/"
+            ADMIN_BASE="/admin/"
+          else
+            WEB_BASE="${APP_PATH%/}/"
+            ADMIN_BASE="${APP_PATH%/}/admin/"
+          fi
+
+          printf '%s\n' \
+            "window.XMONEY_RUNTIME = {" \
+            "  appName: 'XMONEY'," \
+            "  apiBaseUrl: '${XMONEY_APP_URL}'," \
+            "  webBasePath: '${WEB_BASE}'," \
+            "  adminBasePath: '${ADMIN_BASE}'" \
+            "};" > "$PKG/config/runtime-config.js"
+
+          echo "Generated api/.env and config/runtime-config.js (credentials not printed)."
+          test -f "$PKG/api/.env"
+          grep -q '^DB_NAME=' "$PKG/api/.env"
+          grep -q '^JWT_SECRET=' "$PKG/api/.env"
+      - name: Safety check — package must not contain foreign project paths
+        run: |
+          set -euo pipefail
+          PKG="deploy/cpanel/dist/xmoney-cpanel-package"
+          if grep -RIn --exclude-dir=vendor -E 'ZIAAI|SmartDMS|smartdms' "$PKG" 2>/dev/null | head -20; then
+            echo "::warning::Package contains SmartDMS/ZIAAI string references in docs/comments — verify no SmartDMS source files were packaged."
+          fi
+          # Must contain XMONEY API entrypoint
+          test -f "$PKG/api/public/index.php"
+          test -f "$PKG/index.html"
+          test -d "$PKG/admin"
+          echo "Package structure OK for XMONEY-only deploy."
+
+      - name: Deploy via FTP to XMONEY folder ONLY
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy/cpanel/dist/xmoney-cpanel-package/
+          # Must end with trailing slash for FTP-Deploy-Action
+          server-dir: ${{ secrets.FTP_REMOTE_PATH }}
+          dangerous-clean-slate: false
+          timeout: 600000
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env.example
+            **/DEPLOY_README.txt
+
+      - name: Post-deploy health check (XMONEY API only)
+        env:
+          XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
+        run: |
+          set -euo pipefail
+          # APP_URL should be like https://domain/xmoney/api
+          HEALTH_URL="${XMONEY_APP_URL%/}/v1/health"
+          echo "Checking: $HEALTH_URL"
+          # Allow time for FTP settle
+          sleep 5
+          code=$(curl -sS -o /tmp/xmoney-health.json -w "%{http_code}" "$HEALTH_URL" || true)
+          echo "HTTP $code"
+          cat /tmp/xmoney-health.json || true
+          if [ "$code" != "200" ]; then
+            echo "::warning::Health endpoint did not return 200. Files may be uploaded but DB/schema may still need import, or APP_URL may be wrong."
+            echo "This does NOT mean SmartDMS was modified. Verify manually: $HEALTH_URL"
+            exit 0
+          fi
+          if grep -q '"success":true' /tmp/xmoney-health.json || grep -q '"status":"healthy"' /tmp/xmoney-health.json; then
+            echo "XMONEY health check passed."
+          else
+            echo "::warning::Health response unexpected. Confirm XMONEY DB is imported and .env DB_* secrets are correct."
+          fi

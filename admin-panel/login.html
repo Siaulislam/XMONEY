@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login — XMONEY</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <div class="xm-auth-wrap" style="background:linear-gradient(160deg,#071526,#0B1F3A)">
+    <div class="xm-card xm-auth-card">
+      <div class="xm-logo" style="color:var(--xm-navy);margin-bottom:1rem"><span class="xm-logo-mark">X</span> XMONEY Admin</div>
+      <h1>Staff sign in</h1>
+      <p class="sub">Authorized personnel only</p>
+      <div id="alert" hidden></div>
+      <form id="loginForm">
+        <div class="xm-field"><label>Email</label><input name="email" type="email" required value="admin@xmoney.local" /></div>
+        <div class="xm-field"><label>Password</label><input name="password" type="password" required /></div>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit">Sign in</button>
+      </form>
+    </div>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    if (XMONEY.getToken()) location.href = 'index.html';
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const res = await XMONEY.api('/v1/admin/auth/login', {
+        method: 'POST',
+        body: { email: fd.get('email'), password: fd.get('password') },
+      });
+      if (!res.success) {
+        XMONEY.showAlert(document.getElementById('alert'), res.message || 'Login failed');
+        return;
+      }
+      XMONEY.setSession(res.data);
+      location.href = 'index.html';
+    };
+  </script>
+</body>
+</html>

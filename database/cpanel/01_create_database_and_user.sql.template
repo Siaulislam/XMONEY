@@ -1,0 +1,34 @@
+-- ============================================================
+-- XMONEY — Create dedicated database + user (TEMPLATE)
+-- ============================================================
+-- DO NOT run this blindly on shared hosting.
+-- On cPanel, prefer: MySQL® Databases UI to create DB + user.
+--
+-- If you have SUPER / CREATE USER privileges (VPS / remote root),
+-- replace placeholders then run carefully.
+--
+-- Placeholders:
+--   {{CPANEL_PREFIX}}   e.g. myaccount
+--   {{DB_PASSWORD}}     strong unique password for XMONEY only
+--
+-- Resulting names (typical cPanel):
+--   Database: {{CPANEL_PREFIX}}_xmoney_db
+--   User:     {{CPANEL_PREFIX}}_xmoney_user
+--
+-- ISOLATION: Grants are ONLY on the XMONEY database.
+-- ============================================================
+
+-- CREATE DATABASE {{CPANEL_PREFIX}}_xmoney_db
+--   CHARACTER SET utf8mb4
+--   COLLATE utf8mb4_unicode_ci;
+
+-- CREATE USER '{{CPANEL_PREFIX}}_xmoney_user'@'localhost'
+--   IDENTIFIED BY '{{DB_PASSWORD}}';
+
+-- GRANT ALL PRIVILEGES ON {{CPANEL_PREFIX}}_xmoney_db.*
+--   TO '{{CPANEL_PREFIX}}_xmoney_user'@'localhost';
+
+-- FLUSH PRIVILEGES;
+
+-- Verify (should list only XMONEY DB privileges for this user):
+-- SHOW GRANTS FOR '{{CPANEL_PREFIX}}_xmoney_user'@'localhost';
