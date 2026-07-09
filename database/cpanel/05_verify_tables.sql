@@ -6,7 +6,7 @@
 SELECT DATABASE() AS current_database;
 
 -- Must show: smartdms_XMONEY
--- If it shows smartdms_smartdms_db — STOP. Wrong database.
+-- If it does not show smartdms_XMONEY — STOP. Wrong database.
 
 SELECT COUNT(*) AS table_count
 FROM information_schema.tables

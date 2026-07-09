@@ -33,6 +33,27 @@ New-Item -ItemType Directory -Force -Path (Join-Path $Out 'storage\logs') | Out-
 New-Item -ItemType Directory -Force -Path (Join-Path $Out 'storage\backups') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $Out 'database') | Out-Null
 
+function Copy-DirectoryFiltered {
+  param(
+    [Parameter(Mandatory = $true)][string]$Source,
+    [Parameter(Mandatory = $true)][string]$Destination,
+    [string[]]$ExcludeNames = @()
+  )
+
+  New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+
+  Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
+    if ($ExcludeNames -contains $_.Name) { return }
+
+    $target = Join-Path $Destination $_.Name
+    if ($_.PSIsContainer) {
+      Copy-DirectoryFiltered -Source $_.FullName -Destination $target -ExcludeNames $ExcludeNames
+    } else {
+      Copy-Item $_.FullName $target -Force
+    }
+  }
+}
+
 # Root htaccess
 Copy-Item (Join-Path $PSScriptRoot 'package-template\.htaccess') (Join-Path $Out '.htaccess') -Force
 
@@ -43,10 +64,9 @@ Copy-Item (Join-Path $webSrc '*') $Out -Recurse -Force -Exclude @('.git')
 # Admin panel → /admin
 Copy-Item (Join-Path $Root 'admin-panel\*') (Join-Path $Out 'admin') -Recurse -Force
 
-# Backend API → /api (full source; vendor installed on server or locally before zip)
+# Backend API → /api (full source; vendor installed later in workflow/server)
 $apiSrc = Join-Path $Root 'backend-api'
-robocopy $apiSrc (Join-Path $Out 'api') /E /XD vendor .git /NFL /NDL /NJH /NJS /nc /ns /np | Out-Null
-if ($LASTEXITCODE -ge 8) { throw "robocopy api failed: $LASTEXITCODE" }
+Copy-DirectoryFiltered -Source $apiSrc -Destination (Join-Path $Out 'api') -ExcludeNames @('vendor', '.git')
 
 # Prefer production env example inside package
 Copy-Item (Join-Path $Root 'config\env.production.example') (Join-Path $Out 'api\.env.example') -Force

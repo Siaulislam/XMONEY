@@ -10,8 +10,8 @@ XMONEY is designed to run **beside** an existing site without touching it:
 | Resource | XMONEY | Existing site |
 |----------|--------|---------------|
 | Folder | `public_html/xmoney/` only | Untouched |
-| Database | New `{user}_xmoney_db` | Untouched |
-| DB user | New `{user}_xmoney_user` | Untouched |
+| Database | `smartdms_XMONEY` | Untouched |
+| DB user | `smartdms_xmoney` | Untouched |
 | Config | `xmoney/api/.env` | Untouched |
 
 Read: [documentation/ISOLATION.md](documentation/ISOLATION.md) · [documentation/CPANEL_DEPLOYMENT.md](documentation/CPANEL_DEPLOYMENT.md)

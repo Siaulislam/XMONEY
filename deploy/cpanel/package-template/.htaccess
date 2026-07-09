@@ -2,7 +2,7 @@
 # XMONEY root .htaccess
 # Deployed to: /home/smartdms/public_html/xmoney/
 # Public URL:  https://qamar.tasjeel.ae/xmoney/
-# Does NOT affect SmartDMS files in /public_html/ root.
+# Does not affect sibling folders in /public_html/.
 # ============================================================
 
 Options -Indexes

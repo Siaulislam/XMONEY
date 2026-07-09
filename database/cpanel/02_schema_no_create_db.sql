@@ -2,7 +2,7 @@
 -- XMONEY cPanel Schema Import
 -- IMPORTANT:
 -- 1. Select ONLY the XMONEY database in phpMyAdmin first
---    (e.g. {cpanel_user}_xmoney_db)
+--    (smartdms_XMONEY on this hosting)
 -- 2. Do NOT run this against any existing application database
 -- 3. This file does NOT create/drop databases
 -- ============================================================

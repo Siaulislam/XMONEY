@@ -48,7 +48,7 @@ php scripts/seed-admin.php "YourSecurePassword"
 ## Apply on cPanel (XMONEY database only)
 
 Use `database/cpanel/` — these files do **not** create or select a database by name.
-You must select `{cpanel_user}_xmoney_db` in phpMyAdmin first.
+You must select `smartdms_XMONEY` in phpMyAdmin first.
 
 Never import into your existing application database.
 

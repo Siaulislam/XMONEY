@@ -29,7 +29,7 @@ Until the API is uploaded to `/home/smartdms/public_html/xmoney/`, browser and m
 ## Isolation guarantees
 
 - FTP target: `/home/smartdms/public_html/xmoney/` only
-- Database: `smartdms_XMONEY` only — never `smartdms_smartdms_db`
-- Workflow fails if path or DB name looks like SmartDMS root
+- Database: `smartdms_XMONEY` only
+- Workflow fails if the path is outside `/home/smartdms/public_html/xmoney/` or if the DB name is not exactly `smartdms_XMONEY`
 
 See `documentation/E2E_TESTING.md` for the full test checklist after deploy.

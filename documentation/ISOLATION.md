@@ -6,15 +6,14 @@ XMONEY is a **completely independent application** on the same cPanel account as
 
 1. **Folder isolation**  
    Deploy only under `public_html/xmoney/` (or a dedicated subdomain document root that points only to XMONEY).  
-   Never write into, overwrite, rename, or delete sibling folders (e.g. `public_html/existing_project/`).
+   Never write into, overwrite, rename, or delete sibling folders under `public_html/`.
 
 2. **Database isolation**  
-   Use a dedicated MySQL database (example logical name: `xmoney_db`).  
-   On cPanel the real name is usually prefixed: `{cpanel_user}_xmoney_db`.  
-   Never connect to, migrate, or alter the existing application’s database.
+   Use the dedicated XMONEY MySQL database: `smartdms_XMONEY`.  
+   Never connect to, migrate, or alter any non-XMONEY database.
 
 3. **User isolation**  
-   Use a dedicated MySQL user (example: `{cpanel_user}_xmoney_user`) with grants **only** on the XMONEY database.
+   Use the dedicated XMONEY MySQL user: `smartdms_xmoney` with grants **only** on `smartdms_XMONEY`.
 
 4. **Config isolation**  
    All secrets live in `backend-api/.env` (production: `public_html/xmoney/api/.env`).  
@@ -30,8 +29,11 @@ XMONEY is a **completely independent application** on the same cPanel account as
 
 ```
 public_html/
-├── existing_project/          ← DO NOT TOUCH
-├── (other existing files)     ← DO NOT TOUCH
+├── .github/                   ← leave untouched
+├── admin-panel/               ← leave untouched
+├── backend-api/               ← leave untouched
+├── frontend-web/              ← leave untouched
+├── (other existing folders)   ← leave untouched
 └── xmoney/                    ← XMONEY ONLY
     ├── .htaccess
     ├── index.html             (customer web)

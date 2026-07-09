@@ -5,7 +5,7 @@
 #   /home/smartdms/public_html/xmoney/
 # Public URL:
 #   https://qamar.tasjeel.ae/xmoney/
-# NEVER deploy to /public_html/ root (SmartDMS / main site).
+# NEVER deploy to /public_html/ root (main site root).
 #
 # Required GitHub Secrets (exact names):
 #   FTP_HOST, FTP_PORT, FTP_USERNAME, FTP_PASSWORD, FTP_REMOTE_PATH
@@ -88,7 +88,7 @@ jobs:
           echo "Configured FTP_REMOTE_PATH (raw): ${PATH_RAW}"
           echo "Normalized path: ${PATH_TRIM}/"
 
-          # Absolute deny list — would overwrite SmartDMS / whole site
+          # Absolute deny list — would overwrite the whole site
           case "$PATH_TRIM" in
             /public_html|/|/home/smartdms/public_html|/home/smartdms/smartdms.me)
               echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' targets the whole site or domain root. Must be the xmoney subfolder only."
@@ -106,7 +106,7 @@ jobs:
               echo "  /home/smartdms/public_html/xmoney/"
               echo "  (or /public_html/xmoney/)"
               echo "Got: '${PATH_RAW}'"
-              echo "This protects your existing SmartDMS project from being overwritten."
+              echo "This protects the main site root from being overwritten."
               exit 1
               ;;
           esac
@@ -128,17 +128,13 @@ jobs:
           echo "DB name (masked length): ${#XMONEY_DB_NAME}"
           echo "DB user (masked length): ${#XMONEY_DB_USER}"
 
-          # Must not be the SmartDMS database
-          if [[ "${XMONEY_DB_NAME}" == "smartdms_smartdms_db" ]]; then
-            echo "::error::REFUSED: XMONEY_DB_NAME points at SmartDMS database. Use smartdms_XMONEY only."
+          # Must match the approved XMONEY database exactly
+          if [[ "${XMONEY_DB_NAME}" != "smartdms_XMONEY" ]]; then
+            echo "::error::REFUSED: XMONEY_DB_NAME must be exactly smartdms_XMONEY."
             exit 1
           fi
-          if [[ "${XMONEY_DB_NAME,,}" != *xmoney* ]]; then
-            echo "::error::XMONEY_DB_NAME must contain 'xmoney' (expected smartdms_XMONEY)."
-            exit 1
-          fi
-          if [[ "${XMONEY_DB_USER,,}" != *xmoney* ]]; then
-            echo "::error::XMONEY_DB_USER must contain 'xmoney' (expected smartdms_xmoney)."
+          if [[ "${XMONEY_DB_USER}" != "smartdms_xmoney" ]]; then
+            echo "::error::XMONEY_DB_USER must be exactly smartdms_xmoney."
             exit 1
           fi
 
@@ -267,8 +263,8 @@ jobs:
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
-          if grep -RIn --exclude-dir=vendor -E 'ZIAAI|SmartDMS|smartdms' "$PKG" 2>/dev/null | head -20; then
-            echo "::warning::Package contains SmartDMS/ZIAAI string references in docs/comments — verify no SmartDMS source files were packaged."
+          if grep -RIn --exclude-dir=vendor -E 'smartdms_smartdms_db|smartdms\.me|ZIAAI' "$PKG" 2>/dev/null | head -20; then
+            echo "::warning::Package contains old-project references — verify no foreign source files were packaged."
           fi
           # Must contain XMONEY API entrypoint
           test -f "$PKG/api/public/index.php"
@@ -310,7 +306,7 @@ jobs:
           cat /tmp/xmoney-health.json || true
           if [ "$code" != "200" ]; then
             echo "::warning::Health endpoint did not return 200. Files may be uploaded but DB/schema may still need import, or APP_URL may be wrong."
-            echo "This does NOT mean SmartDMS was modified. Verify manually: $HEALTH_URL"
+            echo "This does NOT mean any sibling site path was modified. Verify manually: $HEALTH_URL"
             exit 0
           fi
           if grep -q '"success":true' /tmp/xmoney-health.json || grep -q '"status":"healthy"' /tmp/xmoney-health.json; then

@@ -1,7 +1,7 @@
 ﻿-- ============================================================
 -- XMONEY cPanel Seed Import
 -- Run ONLY after 02_schema_no_create_db.sql
--- Target database: {cpanel_user}_xmoney_db (selected in phpMyAdmin)
+-- Target database: smartdms_XMONEY (selected in phpMyAdmin)
 -- ============================================================
 -- ============================================================
 -- XMONEY Seed Data â€” Local Development

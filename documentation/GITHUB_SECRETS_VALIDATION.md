@@ -13,7 +13,7 @@
 
 ### Blocked paths (workflow refuses)
 
-- `/home/smartdms/public_html` (SmartDMS / main site root)
+- `/home/smartdms/public_html` (main site root)
 - `/public_html`
 - `/home/smartdms/smartdms.me`
 - Any path whose last folder is not lowercase `xmoney`
@@ -42,5 +42,5 @@
 
 - Deploys **only** into `public_html/xmoney/`
 - Never syncs or cleans `public_html/` root
-- Uses database `smartdms_XMONEY` only (refuses `smartdms_smartdms_db`)
+- Uses database `smartdms_XMONEY` only
 - `dangerous-clean-slate: false`

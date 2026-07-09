@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Import XMONEY schema/seed into smartdms_XMONEY only (never SmartDMS DB).
+  Import XMONEY schema/seed into smartdms_XMONEY only.
 
 .DESCRIPTION
   Requires mysql client and credentials via environment variables or parameters.
@@ -33,10 +33,6 @@ if (-not $DbHost -or -not $DbName -or -not $DbUser -or -not $DbPass) {
 
 if ($DbName -ne 'smartdms_XMONEY') {
   throw "REFUSED: Database must be exactly 'smartdms_XMONEY'. Got '$DbName'."
-}
-
-if ($DbName -eq 'smartdms_smartdms_db') {
-  throw "REFUSED: Will never import into SmartDMS database."
 }
 
 $mysql = Get-Command mysql -ErrorAction SilentlyContinue

@@ -8,14 +8,14 @@ Full isolation rules: [ISOLATION.md](ISOLATION.md)
 
 ## What you will create on cPanel (XMONEY only)
 
-| Resource | Example logical name | Typical cPanel name |
-|----------|----------------------|---------------------|
-| Folder | `public_html/xmoney/` | same |
-| Database | `xmoney_db` | `{user}_xmoney_db` |
-| DB user | `xmoney_user` | `{user}_xmoney_user` |
-| Privileges | ALL on XMONEY DB only | via MySQL Databases UI |
+| Resource | Required value |
+|----------|----------------|
+| Folder | `public_html/xmoney/` |
+| Database | `smartdms_XMONEY` |
+| DB user | `smartdms_xmoney` |
+| Privileges | ALL on XMONEY DB only |
 
-Replace `{user}` with your cPanel username. **Never reuse** the existing app’s DB or user.
+Use the XMONEY database/user above exactly. **Never reuse** any other database or DB user on the hosting account.
 
 ---
 
@@ -35,8 +35,8 @@ Until then, nothing is uploaded or connected to your server.
 ## Phase B — Create database (cPanel UI — safest)
 
 1. cPanel → **MySQL® Databases**
-2. Create database: `xmoney_db` → becomes `{user}_xmoney_db`
-3. Create user: `xmoney_user` + strong password → `{user}_xmoney_user`
+2. Confirm database exists: `smartdms_XMONEY`
+3. Confirm DB user exists: `smartdms_xmoney` + strong password
 4. **Add User To Database** → select XMONEY DB + XMONEY user → **ALL PRIVILEGES**
 5. Do **not** add this user to any other database
 
@@ -54,13 +54,13 @@ Import into the **new** database only:
 3. `database/migrations/000_schema_migrations.sql`
 4. `database/migrations/001_core_schema.sql`
 
-Via phpMyAdmin: select `{user}_xmoney_db` → Import → choose files in order.
+Via phpMyAdmin: select `smartdms_XMONEY` → Import → choose files in order.
 
 Or CLI (example):
 
 ```bash
-mysql -h localhost -u {user}_xmoney_user -p {user}_xmoney_db < 02_schema_no_create_db.sql
-mysql -h localhost -u {user}_xmoney_user -p {user}_xmoney_db < 03_seed.sql
+mysql -h localhost -u smartdms_xmoney -p smartdms_XMONEY < 02_schema_no_create_db.sql
+mysql -h localhost -u smartdms_xmoney -p smartdms_XMONEY < 03_seed.sql
 ```
 
 ---
@@ -93,8 +93,8 @@ APP_DEBUG=false
 APP_URL=https://your-domain.com/xmoney/api
 
 DB_HOST=localhost
-DB_NAME={user}_xmoney_db
-DB_USER={user}_xmoney_user
+DB_NAME=smartdms_XMONEY
+DB_USER=smartdms_xmoney
 DB_PASS=********
 
 JWT_SECRET=<generate-64-char-random>
@@ -118,7 +118,7 @@ php scripts/seed-admin.php "YourStrongAdminPassword"
 - Existing site URL still loads unchanged
 - `https://your-domain.com/xmoney/` loads XMONEY
 - `https://your-domain.com/xmoney/api/v1/health` returns healthy
-- phpMyAdmin shows XMONEY tables **only** under `{user}_xmoney_db`
+- phpMyAdmin shows XMONEY tables **only** under `smartdms_XMONEY`
 - Existing database table list unchanged
 
 ---
@@ -126,5 +126,5 @@ php scripts/seed-admin.php "YourStrongAdminPassword"
 ## Future updates
 
 - Deploy only into `public_html/xmoney/`
-- Run new migrations only against `{user}_xmoney_db`
+- Run new migrations only against `smartdms_XMONEY`
 - Never run XMONEY SQL against the existing app database

@@ -12,23 +12,23 @@
 --   {{DB_PASSWORD}}     strong unique password for XMONEY only
 --
 -- Resulting names (typical cPanel):
---   Database: {{CPANEL_PREFIX}}_xmoney_db
---   User:     {{CPANEL_PREFIX}}_xmoney_user
+--   Database: smartdms_XMONEY
+--   User:     smartdms_xmoney
 --
 -- ISOLATION: Grants are ONLY on the XMONEY database.
 -- ============================================================
 
--- CREATE DATABASE {{CPANEL_PREFIX}}_xmoney_db
+-- CREATE DATABASE smartdms_XMONEY
 --   CHARACTER SET utf8mb4
 --   COLLATE utf8mb4_unicode_ci;
 
--- CREATE USER '{{CPANEL_PREFIX}}_xmoney_user'@'localhost'
+-- CREATE USER 'smartdms_xmoney'@'localhost'
 --   IDENTIFIED BY '{{DB_PASSWORD}}';
 
--- GRANT ALL PRIVILEGES ON {{CPANEL_PREFIX}}_xmoney_db.*
---   TO '{{CPANEL_PREFIX}}_xmoney_user'@'localhost';
+-- GRANT ALL PRIVILEGES ON smartdms_XMONEY.*
+--   TO 'smartdms_xmoney'@'localhost';
 
 -- FLUSH PRIVILEGES;
 
 -- Verify (should list only XMONEY DB privileges for this user):
--- SHOW GRANTS FOR '{{CPANEL_PREFIX}}_xmoney_user'@'localhost';
+-- SHOW GRANTS FOR 'smartdms_xmoney'@'localhost';

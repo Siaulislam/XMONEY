@@ -1,7 +1,6 @@
 # Import XMONEY schema into smartdms_XMONEY ONLY
 #
 # SAFETY:
-# - Never select smartdms_smartdms_db
 # - Use only 02_schema_no_create_db.sql then 03_seed.sql
 # - These files do NOT create/drop databases and do NOT contain USE statements
 
@@ -26,7 +25,7 @@
 
 ## Do NOT
 
-- Import into `smartdms_smartdms_db`
+- Import into any database other than `smartdms_XMONEY`
 - Click "Create database" during import
 - Import `database/schema.sql` (that file contains CREATE DATABASE for local use)
 

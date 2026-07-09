@@ -12,7 +12,7 @@ These scripts are for the **XMONEY database only**.
 
 ## Critical
 
-1. In phpMyAdmin, **select** `{cpanel_user}_xmoney_db` before importing.
+1. In phpMyAdmin, **select** `smartdms_XMONEY` before importing.
 2. Never import into your existing application database.
 3. Prefer creating the database/user in the cPanel **MySQL® Databases** UI.
 

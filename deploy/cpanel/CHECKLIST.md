@@ -9,8 +9,8 @@ Use this when credentials are provided. Tick only XMONEY actions.
 - [ ] Confirmed NEW database user (grants only on XMONEY DB)
 
 ## Database (XMONEY only)
-- [ ] Create `{user}_xmoney_db`
-- [ ] Create `{user}_xmoney_user`
+- [ ] Confirm `smartdms_XMONEY` exists
+- [ ] Confirm `smartdms_xmoney` exists and has ALL privileges on `smartdms_XMONEY`
 - [ ] Grant ALL on XMONEY DB only
 - [ ] Import `02_schema_no_create_db.sql` into XMONEY DB
 - [ ] Import `03_seed.sql` into XMONEY DB
