@@ -4,7 +4,7 @@
 
 | Setting | Exact value |
 |---------|-------------|
-| **FTP_REMOTE_PATH** | `/home/smartdms/public_html/` |
+| **FTP_REMOTE_PATH** | `public_html/` *(cPanel FTP — do NOT use `/home/...` full path)* |
 | **Public site** | `https://smartdms.me/` |
 | **XMONEY_APP_URL** | `https://smartdms.me/api` |
 | **XMONEY_DB_HOST** | `localhost` |
