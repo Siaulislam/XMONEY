@@ -8,6 +8,7 @@ use XMoney\Controllers\BeneficiaryController;
 use XMoney\Controllers\HealthController;
 use XMoney\Controllers\KycController;
 use XMoney\Controllers\NotificationController;
+use XMoney\Controllers\SettingsController;
 use XMoney\Controllers\TransferController;
 use XMoney\Controllers\UserController;
 use XMoney\Controllers\WalletController;
@@ -26,6 +27,7 @@ $wallet = new WalletController();
 $admin = new AdminController();
 $health = new HealthController();
 $notifications = new NotificationController();
+$settings = new SettingsController();
 
 $customerAuth = [AuthMiddleware::customer()];
 $adminOps = [AuthMiddleware::admin(['super_admin', 'admin', 'support_staff', 'compliance_officer'])];
@@ -41,6 +43,7 @@ $rlRefresh = [RateLimitMiddleware::forAuth('refresh')];
 
 // Health
 $router->get('/v1/health', [$health, 'check']);
+$router->get('/v1/settings/public', [$settings, 'publicSettings']);
 
 // Auth (logout/refresh intentionally public — authenticated via refresh_token body)
 $router->post('/v1/auth/register', [$auth, 'register'], $rlRegister);

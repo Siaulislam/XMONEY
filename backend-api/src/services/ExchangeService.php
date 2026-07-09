@@ -4,15 +4,29 @@ declare(strict_types=1);
 
 namespace XMoney\Services;
 
+use XMoney\Config\App;
 use XMoney\Config\Database;
 use XMoney\Providers\Exchange\ExchangeRateProviderInterface;
+use XMoney\Providers\Exchange\ExternalApiExchangeProvider;
 use XMoney\Providers\Exchange\ManualExchangeProvider;
 
 final class ExchangeService
 {
     public function __construct(
-        private readonly ExchangeRateProviderInterface $provider = new ManualExchangeProvider()
+        private readonly ?ExchangeRateProviderInterface $provider = null
     ) {
+    }
+
+    private function provider(): ExchangeRateProviderInterface
+    {
+        if ($this->provider) {
+            return $this->provider;
+        }
+        $mode = strtolower((string) (App::env('EXCHANGE_PROVIDER', 'manual') ?? 'manual'));
+        if ($mode === 'external' || App::env('EXCHANGE_API_URL')) {
+            return new ExternalApiExchangeProvider();
+        }
+        return new ManualExchangeProvider();
     }
 
     public function getCustomerRate(string $source, string $target): ?array
@@ -42,7 +56,7 @@ final class ExchangeService
             ];
         }
 
-        $external = $this->provider->fetchRate($source, $target);
+        $external = $this->provider()->fetchRate($source, $target);
         if (!$external) {
             return null;
         }

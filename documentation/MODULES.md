@@ -15,7 +15,9 @@
 | FX engine | Done | Market − margin = customer rate |
 | Wallet ledger | Done | Optimistic locking + history |
 | Mobile structure | Scaffolded | Shared API contract |
-| Live FX API | Next | External provider |
+| Live FX API | Done | External provider via `EXCHANGE_API_URL` (Frankfurter-compatible) |
+| API smoke tests | Done | `backend-api/scripts/smoke-test.php` |
+| Public transfer limits API | Done | `GET /v1/settings/public` |
 | Live payment gateway | Next | Real provider |
 | SMTP / SMS / Push | Next | Replace log drivers |
 | Flutter/RN apps | Next | Generate from scaffold |
