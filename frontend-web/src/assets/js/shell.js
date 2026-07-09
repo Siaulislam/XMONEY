@@ -53,12 +53,21 @@ const XMShell = (() => {
         </aside>
         <div class="xm-dash-content">
           <header class="xm-topbar">
-            <div>
-              <h1 class="xm-page-title" ${options.headingKey ? `data-i18n="${options.headingKey}"` : ''}>${heading}</h1>
-              <p class="xm-page-sub" id="xmWelcomeSub">${t('loading', 'Loading…')}</p>
+            <div class="xm-topbar-title">
+              <button type="button" class="xm-sidebar-toggle" id="xmSidebarToggle" aria-label="Open menu">☰</button>
+              <div>
+                <h1 class="xm-page-title" ${options.headingKey ? `data-i18n="${options.headingKey}"` : ''}>${heading}</h1>
+              </div>
             </div>
-            <div class="xm-topbar-actions">
+            <div class="xm-topbar-user">
               <a href="notifications.html" class="xm-icon-btn" data-i18n-title="nav.notifications" title="Notifications" id="xmNotifBtn" aria-label="Notifications">◉ <span id="xmNotifCount" class="xm-pill" hidden>0</span></a>
+              <div class="xm-user-chip" id="xmUserChip">
+                <span class="xm-user-avatar" id="xmUserAvatar" aria-hidden="true">?</span>
+                <div class="xm-user-meta">
+                  <strong id="xmUserName">—</strong>
+                  <span id="xmUserEmail">—</span>
+                </div>
+              </div>
               <button type="button" class="xm-btn xm-btn-secondary" id="xmLogoutBtn" data-i18n="nav.logout">Logout</button>
             </div>
           </header>
@@ -79,8 +88,27 @@ const XMShell = (() => {
     const profile = await XMONEY.ensureSession();
     if (!profile) return null;
 
-    const sub = document.getElementById('xmWelcomeSub') || document.getElementById('welcomeSub');
-    if (sub) sub.textContent = `${profile.full_name} · ${profile.email}`;
+    const initials = String(profile.full_name || profile.email || '?')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join('')
+      .toUpperCase() || '?';
+
+    const avatar = document.getElementById('xmUserAvatar');
+    const nameEl = document.getElementById('xmUserName');
+    const emailEl = document.getElementById('xmUserEmail');
+    if (avatar) avatar.textContent = initials;
+    if (nameEl) nameEl.textContent = profile.full_name || profile.email;
+    if (emailEl) emailEl.textContent = profile.email || '';
+
+    const userChip = document.getElementById('xmUserChip');
+    if (userChip) {
+      userChip.style.cursor = 'pointer';
+      userChip.title = profile.email || '';
+      userChip.onclick = () => { window.location.href = 'profile.html'; };
+    }
 
     try {
       const n = await XMONEY.api('/v1/notifications?limit=1');

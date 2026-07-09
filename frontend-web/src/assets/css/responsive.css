@@ -212,6 +212,29 @@ table.xm-table { min-width: 520px; }
   .xm-sidebar-toggle { display: none; }
 }
 
+@media (max-width: 768px) {
+  .xm-coversheet { margin: -1rem -1rem 1.25rem; }
+  .xm-coversheet-hero { padding: 1.25rem 1rem 4rem; }
+  .xm-rates-board { padding: 0 1rem 1.25rem; }
+  .xm-converter-row { grid-template-columns: 1fr; }
+  .xm-swap-btn { justify-self: center; margin: 0; transform: rotate(90deg); }
+  .xm-rates-cols { display: none; }
+  .xm-rate-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "cur send"
+      "amt amt"
+      "chg chart";
+  }
+  .xm-rate-currency { grid-area: cur; }
+  .xm-rate-send { grid-area: send; }
+  .xm-rate-amount { grid-area: amt; }
+  .xm-rate-change { grid-area: chg; }
+  .xm-rate-chart { grid-area: chart; }
+  .xm-user-chip { max-width: 180px; }
+  .xm-user-meta span { display: none; }
+}
+
 @media (max-width: 390px) {
   .xm-logo-img { height: 30px; }
   .xm-wallet-hero .balance { font-size: 1.5rem; }

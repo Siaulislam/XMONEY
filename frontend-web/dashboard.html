@@ -24,14 +24,7 @@
 <body>
   <div data-xm-shell>
     <div id="alert" hidden></div>
-    <div class="xm-wallet-hero" id="hero">
-      <div class="label" data-i18n="wallet.available">Available balance</div>
-      <div class="balance" id="heroBal">—</div>
-      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-        <a href="transfer.html" class="xm-btn xm-btn-primary" data-i18n="nav.send">Send money</a>
-        <a href="wallet.html" class="xm-btn xm-btn-secondary" data-i18n="dash.topUpWallet">Top up wallet</a>
-      </div>
-    </div>
+    <div id="xmCoversheetMount"></div>
     <div class="xm-stats" id="stats"></div>
     <div class="xm-grid-2">
       <div class="xm-card">
@@ -60,11 +53,14 @@
   </div>
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/charts.js"></script>
+  <script src="src/assets/js/xm-exchange-board.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
     (async () => {
       const profile = await XMShell.mount({ title: 'Overview', headingKey: 'dash.welcome', heading: 'Welcome back' });
       if (!profile) return;
+
+      const board = XMExchangeBoard.mount(document.getElementById('xmCoversheetMount'));
 
       const [analytics, txns] = await Promise.all([
         XMONEY.api('/v1/analytics/summary'),
@@ -74,8 +70,8 @@
       if (analytics.success) {
         const a = analytics.data;
         const w = (a.wallets || []).find(x => x.currency_code === 'AED') || a.wallets?.[0];
-        if (w) {
-          document.getElementById('heroBal').textContent = XMONEY.formatMoney(w.available_balance, w.currency_code);
+        if (w && board) {
+          board.setBalance(w.available_balance, w.currency_code);
         }
         const t = a.transfers || {};
         XMCharts.statGrid(document.getElementById('stats'), [
