@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/widgets/xm_ui.dart';
 
 class TransferScreen extends StatefulWidget {
   const TransferScreen({super.key, required this.router});
@@ -53,8 +54,9 @@ class _TransferScreenState extends State<TransferScreen> {
     final uuid = (create['data'] as Map)['uuid'];
     await widget.router.api.post('/v1/transfers/$uuid/confirm', {'payment_method': 'wallet'});
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Transfer submitted')));
-    Navigator.pop(context);
+    showXmSnack(context, 'Transfer submitted');
+    _amount.clear();
+    setState(() => _quote = null);
   }
 
   @override

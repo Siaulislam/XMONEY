@@ -5,7 +5,9 @@ class XmoneyTheme {
   static const navyDeep = Color(0xFF071526);
   static const blue = Color(0xFF1A4B8C);
   static const teal = Color(0xFF0D9488);
-  static const gold = Color(0xFFC9A227);
+  static const gold = Color(0xFFFFC107);
+  static const brandBlack = Color(0xFF000000);
+  static const brandWhite = Color(0xFFFFFFFF);
   static const surface = Color(0xFFF5F7FA);
 
   static ThemeData get light {

@@ -4,8 +4,11 @@ import '../../routes/app_router.dart';
 import '../../core/theme/xmoney_theme.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.router});
+  const HomeScreen({super.key, required this.router, this.onSend, this.onTopUp});
+
   final AppRouter router;
+  final VoidCallback? onSend;
+  final VoidCallback? onTopUp;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -46,7 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('XMONEY'),
         actions: [
-          IconButton(icon: const Icon(Icons.person_outline), onPressed: () => Navigator.pushNamed(context, AppRouter.profile)),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => Navigator.pushNamed(context, AppRouter.notifications),
+          ),
         ],
       ),
       body: _loading
@@ -74,24 +80,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Expanded(child: ElevatedButton(onPressed: () => Navigator.pushNamed(context, AppRouter.transfer), child: const Text('Send'))),
+                            Expanded(child: ElevatedButton(onPressed: widget.onSend, child: const Text('Send'))),
                             const SizedBox(width: 8),
                             Expanded(child: OutlinedButton(
                               style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white54)),
-                              onPressed: () => Navigator.pushNamed(context, AppRouter.wallet),
+                              onPressed: widget.onTopUp,
                               child: const Text('Top up'),
                             )),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _quickNav(context, Icons.account_balance_wallet, 'Wallet', AppRouter.wallet),
-                      _quickNav(context, Icons.swap_horiz, 'Transfers', AppRouter.transactions),
-                    ],
                   ),
                   const SizedBox(height: 16),
                   const Text('Recent transfers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -109,33 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.swap_horiz), label: 'Send'),
-          NavigationDestination(icon: Icon(Icons.receipt_long), label: 'History'),
-          NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), label: 'Wallet'),
-        ],
-        onDestinationSelected: (i) {
-          final routes = [AppRouter.home, AppRouter.transfer, AppRouter.transactions, AppRouter.wallet];
-          if (i != 0) Navigator.pushNamed(context, routes[i]);
-        },
-      ),
-    );
-  }
-
-  Widget _quickNav(BuildContext context, IconData icon, String label, String route) {
-    return Expanded(
-      child: Card(
-        child: InkWell(
-          onTap: () => Navigator.pushNamed(context, route),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(children: [Icon(icon, color: XmoneyTheme.teal), const SizedBox(height: 8), Text(label)]),
-          ),
-        ),
-      ),
     );
   }
 }

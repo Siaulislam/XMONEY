@@ -64,3 +64,21 @@ flutter build ios --release
 - Tokens stored in `flutter_secure_storage` (Keychain / EncryptedSharedPreferences)
 - Stable device UUID sent as `X-Device-Id`
 - Silent refresh on 401
+
+## Official branding
+
+Regenerate from repo root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/generate-brand-assets.ps1
+powershell -ExecutionPolicy Bypass -File scripts/sync-branding-to-mobile.ps1
+powershell -ExecutionPolicy Bypass -File scripts/prepare-android-mipmaps.ps1
+```
+
+After `flutter create`, install native icons:
+
+- Copy `assets/android/mipmap-*` → `android/app/src/main/res/`
+- Copy `assets/android/adaptive/ic_launcher_foreground.png` and `ic_launcher_background.png` into `android/app/src/main/res/drawable-*` (or use `flutter_launcher_icons` with `assets/ios/icon-1024.png`)
+- Copy `assets/ios/AppIcon.appiconset` → `ios/Runner/Assets.xcassets/AppIcon.appiconset`
+
+In-app splash and login use `assets/branding/xmoney-logo-full.png` on `#000000`.

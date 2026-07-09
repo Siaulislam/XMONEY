@@ -17,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _boot() async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
     await widget.router.api.loadConfig();
     final loggedIn = await widget.router.session.isLoggedIn;
     if (!mounted) return;
@@ -26,13 +27,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      backgroundColor: Color(0xFF000000),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('XMONEY', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
-            CircularProgressIndicator(),
+            Image(
+              image: AssetImage('assets/branding/xmoney-logo-full.png'),
+              width: 280,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: 28),
+            CircularProgressIndicator(
+              color: Color(0xFFFFC107),
+              strokeWidth: 2.5,
+            ),
           ],
         ),
       ),

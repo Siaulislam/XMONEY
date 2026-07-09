@@ -23,12 +23,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _profile = res['data'] as Map<String, dynamic>?);
   }
 
-  Future<void> _logout() async {
-    await widget.router.api.logout();
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (_) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,11 +30,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ListTile(title: const Text('Name'), subtitle: Text(_profile?['full_name'] as String? ?? '—')),
           ListTile(title: const Text('Email'), subtitle: Text(_profile?['email'] as String? ?? '—')),
           ListTile(title: const Text('KYC'), subtitle: Text(_profile?['kyc_status'] as String? ?? '—')),
           ListTile(title: const Text('Status'), subtitle: Text(_profile?['status'] as String? ?? '—')),
-          const SizedBox(height: 24),
-          ElevatedButton(onPressed: _logout, child: const Text('Sign out')),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.verified_user_outlined),
+            title: const Text('KYC documents'),
+            onTap: () => Navigator.pushNamed(context, AppRouter.kyc),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('Settings'),
+            onTap: () => Navigator.pushNamed(context, AppRouter.settings),
+          ),
         ],
       ),
     );
