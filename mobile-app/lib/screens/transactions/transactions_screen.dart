@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key, required this.router});
@@ -13,6 +14,7 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen> {
   List<dynamic> _rows = [];
   bool _loading = true;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '', decimalDigits: 2);
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(title: Text(_s.t('nav.transactions', 'Transactions'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

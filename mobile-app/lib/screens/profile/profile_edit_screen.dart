@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   late final TextEditingController _address1;
   late final TextEditingController _postal;
   bool _saving = false;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -52,29 +54,29 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (res['success'] == true) {
-      showXmSnack(context, 'Profile updated');
+      showXmSnack(context, _s.t('mobile.profile.updated', 'Profile updated'));
       Navigator.pop(context, res['data']);
     } else {
-      showXmSnack(context, res['message'] as String? ?? 'Update failed', error: true);
+      showXmSnack(context, res['message'] as String? ?? _s.t('mobile.profile.updateFailed', 'Update failed'), error: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit profile')),
+      appBar: AppBar(title: Text(_s.t('mobile.profile.editTitle', 'Edit profile'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(controller: _name, decoration: const InputDecoration(labelText: 'Full name')),
-          TextField(controller: _country, decoration: const InputDecoration(labelText: 'Country (ISO 2)')),
-          TextField(controller: _city, decoration: const InputDecoration(labelText: 'City')),
-          TextField(controller: _address1, decoration: const InputDecoration(labelText: 'Address')),
-          TextField(controller: _postal, decoration: const InputDecoration(labelText: 'Postal code')),
+          TextField(controller: _name, decoration: InputDecoration(labelText: _s.t('auth.fullName', 'Full name'))),
+          TextField(controller: _country, decoration: InputDecoration(labelText: _s.t('auth.country', 'Country'))),
+          TextField(controller: _city, decoration: InputDecoration(labelText: _s.t('mobile.profile.city', 'City'))),
+          TextField(controller: _address1, decoration: InputDecoration(labelText: _s.t('mobile.profile.address', 'Address'))),
+          TextField(controller: _postal, decoration: InputDecoration(labelText: _s.t('mobile.profile.postal', 'Postal code'))),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _saving ? null : _save,
-            child: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Save'),
+            child: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(_s.t('common.save', 'Save')),
           ),
         ],
       ),

@@ -28,9 +28,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (res['success'] == true) {
       _current.clear();
       _next.clear();
-      showXmSnack(context, 'Password updated');
+      showXmSnack(context, _s.t('mobile.settings.passwordUpdated', 'Password updated'));
     } else {
-      showXmSnack(context, res['message'] as String? ?? 'Could not change password', error: true);
+      showXmSnack(context, res['message'] as String? ?? _s.t('mobile.settings.passwordUpdateFailed', 'Could not change password'), error: true);
     }
   }
 
@@ -49,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 375 ? 12 : 16),
         children: [
           if (tc != null) ...[
-            Text(_s.t('theme.system', 'Theme'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(_s.t('theme.label', 'Theme'), style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             SegmentedButton<XmThemeMode>(
               segments: [
@@ -63,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
               value: _s.lang,
-              decoration: InputDecoration(labelText: _s.t('lang.en', 'Language')),
+              decoration: InputDecoration(labelText: _s.t('lang.label', 'Language')),
               items: const [
                 DropdownMenuItem(value: 'en', child: Text('English')),
                 DropdownMenuItem(value: 'ar', child: Text('العربية')),
@@ -73,15 +73,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const Divider(height: 32),
           ],
-          const Text('Security', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(_s.t('mobile.settings.security', 'Security'), style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          TextField(controller: _current, decoration: const InputDecoration(labelText: 'Current password'), obscureText: true),
+          TextField(controller: _current, decoration: InputDecoration(labelText: _s.t('mobile.settings.currentPassword', 'Current password')), obscureText: true),
           const SizedBox(height: 8),
-          TextField(controller: _next, decoration: const InputDecoration(labelText: 'New password'), obscureText: true),
+          TextField(controller: _next, decoration: InputDecoration(labelText: _s.t('mobile.settings.newPassword', 'New password')), obscureText: true),
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: _busy ? null : _changePassword,
-            child: Text(_busy ? 'Saving…' : 'Change password'),
+            child: Text(_busy ? _s.t('mobile.settings.saving', 'Saving…') : _s.t('mobile.settings.changePassword', 'Change password')),
           ),
           const SizedBox(height: 24),
           OutlinedButton(

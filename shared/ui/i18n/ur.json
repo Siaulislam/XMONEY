@@ -103,5 +103,8 @@
   "otp.sent": "OTP بھیج دیا گیا",
   "mobile.transfer.insufficientBalance": "والیٹ بیلنس ناکافی ہے",
   "mobile.wallet.available": "دستیاب",
-  "mobile.ben.none": "ابھی کوئی وصول کنندہ نہیں"
+  "mobile.ben.none": "ابھی کوئی وصول کنندہ نہیں",
+  "mobile.profile.edit": "پروفائل میں ترمیم",
+  "mobile.txn.statusHistory": "اسٹیٹس ہسٹری",
+  "mobile.settings.security": "سیکیورٹی"
 }

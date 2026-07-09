@@ -97,5 +97,11 @@
   "receipt.cancelTransfer": "إلغاء التحويل",
   "admin.userManagement": "إدارة المستخدمين",
   "admin.operationsDashboard": "لوحة العمليات",
-  "admin.topCorridors": "أعلى المسارات"
+  "admin.topCorridors": "أعلى المسارات",
+  "otp.title": "التحقق من OTP",
+  "otp.verify": "تحقق",
+  "otp.sent": "تم إرسال OTP",
+  "mobile.transfer.insufficientBalance": "رصيد المحفظة غير كافٍ",
+  "mobile.wallet.available": "المتاح",
+  "mobile.ben.none": "لا يوجد مستفيدون بعد"
 }

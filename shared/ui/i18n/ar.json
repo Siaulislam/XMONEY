@@ -103,5 +103,8 @@
   "otp.sent": "تم إرسال OTP",
   "mobile.transfer.insufficientBalance": "رصيد المحفظة غير كافٍ",
   "mobile.wallet.available": "المتاح",
-  "mobile.ben.none": "لا يوجد مستفيدون بعد"
+  "mobile.ben.none": "لا يوجد مستفيدون بعد",
+  "mobile.profile.edit": "تعديل الملف الشخصي",
+  "mobile.txn.statusHistory": "سجل الحالة",
+  "mobile.settings.security": "الأمان"
 }

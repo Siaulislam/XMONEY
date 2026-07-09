@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.router});
@@ -11,6 +12,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _profile;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -26,17 +28,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text(_s.t('nav.profile', 'Profile'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ListTile(title: const Text('Name'), subtitle: Text(_profile?['full_name'] as String? ?? '—')),
-          ListTile(title: const Text('Email'), subtitle: Text(_profile?['email'] as String? ?? '—')),
-          ListTile(title: const Text('KYC'), subtitle: Text(_profile?['kyc_status'] as String? ?? '—')),
-          ListTile(title: const Text('Status'), subtitle: Text(_profile?['status'] as String? ?? '—')),
+          ListTile(title: Text(_s.t('mobile.profile.name', 'Name')), subtitle: Text(_profile?['full_name'] as String? ?? '—')),
+          ListTile(title: Text(_s.t('common.email', 'Email')), subtitle: Text(_profile?['email'] as String? ?? '—')),
+          ListTile(title: Text(_s.t('nav.kyc', 'KYC')), subtitle: Text(_profile?['kyc_status'] as String? ?? '—')),
+          ListTile(title: Text(_s.t('common.status', 'Status')), subtitle: Text(_profile?['status'] as String? ?? '—')),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
-            title: const Text('Edit profile'),
+            title: Text(_s.t('mobile.profile.edit', 'Edit profile')),
             onTap: () async {
               if (_profile == null) return;
               final updated = await Navigator.push<Map<String, dynamic>>(
@@ -51,12 +53,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.verified_user_outlined),
-            title: const Text('KYC documents'),
+            title: Text(_s.t('mobile.profile.kycDocs', 'KYC documents')),
             onTap: () => Navigator.pushNamed(context, AppRouter.kyc),
           ),
           ListTile(
             leading: const Icon(Icons.settings_outlined),
-            title: const Text('Settings'),
+            title: Text(_s.t('nav.settings', 'Settings')),
             onTap: () => Navigator.pushNamed(context, AppRouter.settings),
           ),
         ],
