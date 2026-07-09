@@ -40,5 +40,14 @@
   "transfer.continue": "متابعة",
   "transfer.review": "مراجعة",
   "transfer.back": "رجوع",
-  "transfer.submit": "إرسال الأموال الآن"
+  "transfer.submit": "إرسال الأموال الآن",
+  "auth.welcomeBack": "مرحباً بعودتك",
+  "auth.signInSub": "سجّل الدخول إلى حساب XMONEY",
+  "auth.forgotPassword": "نسيت كلمة المرور؟",
+  "auth.createAccount": "إنشاء حساب",
+  "ben.add": "إضافة مستفيد",
+  "ben.saved": "المستفيدون المحفوظون",
+  "notif.markAll": "تعليم الكل كمقروء",
+  "common.save": "حفظ",
+  "admin.signIn": "دخول الموظفين"
 }

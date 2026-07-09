@@ -38,6 +38,9 @@ const XMShell = (() => {
 
     const title = options.title || 'XMONEY';
     document.title = `${title} — XMONEY`;
+    const heading = options.headingKey
+      ? t(options.headingKey, options.heading || title)
+      : (options.heading || title);
 
     const root = document.querySelector('[data-xm-shell]');
     if (root && !root.querySelector('.xm-sidebar')) {
@@ -51,7 +54,7 @@ const XMShell = (() => {
         <div class="xm-dash-content">
           <header class="xm-topbar">
             <div>
-              <h1 class="xm-page-title">${options.heading || title}</h1>
+              <h1 class="xm-page-title" ${options.headingKey ? `data-i18n="${options.headingKey}"` : ''}>${heading}</h1>
               <p class="xm-page-sub" id="xmWelcomeSub">${t('loading', 'Loading…')}</p>
             </div>
             <div class="xm-topbar-actions">

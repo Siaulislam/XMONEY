@@ -26,24 +26,24 @@
     <div id="alert" hidden></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" class="ben-grid">
       <div class="xm-card">
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Add beneficiary</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="ben.add">Add beneficiary</h2>
         <form id="benForm">
-          <div class="xm-field"><label>Receiver name</label><input name="receiver_name" required /></div>
-          <div class="xm-field"><label>Country</label>
+          <div class="xm-field"><label data-i18n="ben.receiverName">Receiver name</label><input name="receiver_name" required /></div>
+          <div class="xm-field"><label data-i18n="auth.country">Country</label>
             <select name="country_code"><option value="IN">India</option><option value="PK">Pakistan</option><option value="AE">UAE</option><option value="GB">UK</option></select>
           </div>
-          <div class="xm-field"><label>Currency</label>
+          <div class="xm-field"><label data-i18n="wallet.currency">Currency</label>
             <select name="currency_code"><option>INR</option><option>PKR</option><option>AED</option><option>USD</option><option>EUR</option><option>GBP</option></select>
           </div>
-          <div class="xm-field"><label>Bank name</label><input name="bank_name" /></div>
-          <div class="xm-field"><label>Account number</label><input name="account_number" /></div>
-          <div class="xm-field"><label>IBAN</label><input name="iban" /></div>
-          <div class="xm-field"><label>Mobile</label><input name="mobile_number" /></div>
-          <button class="xm-btn xm-btn-primary" type="submit" id="saveBtn">Save</button>
+          <div class="xm-field"><label data-i18n="ben.bankName">Bank name</label><input name="bank_name" /></div>
+          <div class="xm-field"><label data-i18n="ben.accountNumber">Account number</label><input name="account_number" /></div>
+          <div class="xm-field"><label data-i18n="ben.iban">IBAN</label><input name="iban" /></div>
+          <div class="xm-field"><label data-i18n="auth.mobile">Mobile</label><input name="mobile_number" /></div>
+          <button class="xm-btn xm-btn-primary" type="submit" id="saveBtn" data-i18n="common.save">Save</button>
         </form>
       </div>
       <div class="xm-card">
-        <h2 style="font-size:1.1rem;margin-bottom:1rem">Saved receivers</h2>
+        <h2 style="font-size:1.1rem;margin-bottom:1rem" data-i18n="ben.saved">Saved receivers</h2>
         <div id="list">Loading…</div>
       </div>
     </div>

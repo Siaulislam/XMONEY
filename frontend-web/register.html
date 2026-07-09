@@ -29,18 +29,18 @@
   </nav>
   <div class="xm-auth-wrap">
     <div class="xm-card xm-auth-card" style="width:min(480px,100%)">
-      <h1>Create your account</h1>
-      <p class="sub">Join XMONEY to send money securely</p>
+      <h1 data-i18n="auth.createTitle">Create your account</h1>
+      <p class="sub" data-i18n="auth.createSub">Join XMONEY to send money securely</p>
       <div id="alert" hidden></div>
       <form id="regForm">
-        <div class="xm-field"><label>Full name</label><input name="full_name" required autocomplete="name" /></div>
-        <div class="xm-field"><label>Email</label><input name="email" type="email" required autocomplete="email" /></div>
+        <div class="xm-field"><label data-i18n="auth.fullName">Full name</label><input name="full_name" required autocomplete="name" /></div>
+        <div class="xm-field"><label data-i18n="common.email">Email</label><input name="email" type="email" required autocomplete="email" /></div>
         <div style="display:grid;grid-template-columns:100px 1fr;gap:0.75rem">
-          <div class="xm-field"><label>Code</label><input name="mobile_country" value="+971" required /></div>
-          <div class="xm-field"><label>Mobile</label><input name="mobile_number" required autocomplete="tel" /></div>
+          <div class="xm-field"><label data-i18n="auth.mobileCode">Code</label><input name="mobile_country" value="+971" required /></div>
+          <div class="xm-field"><label data-i18n="auth.mobile">Mobile</label><input name="mobile_number" required autocomplete="tel" /></div>
         </div>
         <div class="xm-field">
-          <label>Country</label>
+          <label data-i18n="auth.country">Country</label>
           <select name="country_code" required>
             <option value="AE">United Arab Emirates</option>
             <option value="IN">India</option>
@@ -50,12 +50,12 @@
           </select>
         </div>
         <div class="xm-field"><label>Address</label><input name="address" autocomplete="street-address" /></div>
-        <div class="xm-field"><label>Password</label><input name="password" type="password" required minlength="8" autocomplete="new-password" /></div>
+        <div class="xm-field"><label data-i18n="common.password">Password</label><input name="password" type="password" required minlength="8" autocomplete="new-password" /></div>
         <p style="font-size:0.8rem;color:var(--xm-muted);margin:-0.4rem 0 1rem">Min 8 characters with upper, lower, and a number.</p>
-        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn">Register</button>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn" data-i18n="auth.registerBtn">Create account</button>
       </form>
       <p style="margin-top:1.25rem;font-size:0.9rem;color:var(--xm-muted);text-align:center">
-        Already have an account? <a href="login.html">Sign in</a>
+        Already have an account? <a href="login.html" data-i18n="nav.signin">Sign in</a>
       </p>
     </div>
   </div>

@@ -20,6 +20,7 @@ Copy launcher icons from the repo branding pack:
 ```powershell
 # From repo root (Windows)
 .\scripts\sync-branding-to-mobile.ps1
+.\scripts\sync-i18n-to-mobile.ps1
 ```
 
 Then replace default Flutter icons with files under `assets/android/` and `assets/ios/` per Flutter launcher icon docs, or use `flutter_launcher_icons` if added later.

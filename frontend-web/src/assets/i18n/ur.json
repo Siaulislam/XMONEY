@@ -40,5 +40,14 @@
   "transfer.continue": "جاری رکھیں",
   "transfer.review": "جائزہ",
   "transfer.back": "واپس",
-  "transfer.submit": "ابھی رقم بھیجیں"
+  "transfer.submit": "ابھی رقم بھیجیں",
+  "auth.welcomeBack": "خوش آمدید",
+  "auth.signInSub": "اپنے XMONEY اکاؤنٹ میں سائن ان کریں",
+  "auth.forgotPassword": "پاس ورڈ بھول گئے؟",
+  "auth.createAccount": "اکاؤنٹ بنائیں",
+  "ben.add": "وصول کنندہ شامل کریں",
+  "ben.saved": "محفوظ وصول کنندگان",
+  "notif.markAll": "سب کو پڑھا ہوا نشان لگائیں",
+  "common.save": "محفوظ کریں",
+  "admin.signIn": "اسٹاف سائن ان"
 }

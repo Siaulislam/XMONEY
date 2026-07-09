@@ -26,13 +26,13 @@
   <div class="xm-auth-wrap" style="background:linear-gradient(160deg,#071526,#0B1F3A)">
     <div class="xm-card xm-auth-card">
       <div class="xm-logo xm-logo--card"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" class="xm-logo-card-img" width="140" height="38" /><span class="xm-logo-admin-tag">Admin</span></div>
-      <h1>Staff sign in</h1>
-      <p class="sub">Authorized personnel only</p>
+      <h1 data-i18n="admin.signIn">Staff sign in</h1>
+      <p class="sub" data-i18n="admin.staffOnly">Authorized personnel only</p>
       <div id="alert" hidden></div>
       <form id="loginForm">
-        <div class="xm-field"><label>Email</label><input name="email" type="email" required value="admin@xmoney.local" /></div>
-        <div class="xm-field"><label>Password</label><input name="password" type="password" required /></div>
-        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit">Sign in</button>
+        <div class="xm-field"><label data-i18n="common.email">Email</label><input name="email" type="email" required value="admin@xmoney.local" /></div>
+        <div class="xm-field"><label data-i18n="common.password">Password</label><input name="password" type="password" required /></div>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" data-i18n="nav.signin">Sign in</button>
       </form>
     </div>
   </div>

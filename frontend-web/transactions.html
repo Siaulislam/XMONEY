@@ -24,14 +24,14 @@
 <body>
   <div data-xm-shell>
     <div class="xm-filters">
-      <div class="xm-field"><label>Search</label><input id="q" placeholder="Reference or receiver" /></div>
-      <div class="xm-field"><label>Status</label>
+      <div class="xm-field"><label data-i18n="common.search">Search</label><input id="q" placeholder="Reference or receiver" data-i18n-placeholder="common.search" /></div>
+      <div class="xm-field"><label data-i18n="common.status">Status</label>
         <select id="status"><option value="">All</option><option>completed</option><option>processing</option><option>pending_payment</option><option>failed</option><option>cancelled</option></select>
       </div>
       <div class="xm-field"><label>From</label><input id="from" type="date" /></div>
       <div class="xm-field"><label>To</label><input id="to" type="date" /></div>
-      <button class="xm-btn xm-btn-primary" id="searchBtn">Search</button>
-      <button class="xm-btn xm-btn-outline" id="exportBtn">Export CSV</button>
+      <button class="xm-btn xm-btn-primary" id="searchBtn" data-i18n="common.search">Search</button>
+      <button class="xm-btn xm-btn-outline" id="exportBtn" data-i18n="common.export">Export CSV</button>
     </div>
     <div class="xm-card">
       <div class="xm-table-wrap">
@@ -85,7 +85,7 @@
     }
 
     (async () => {
-      const profile = await XMShell.mount({ title: 'Transactions', heading: 'Transaction history' });
+      const profile = await XMShell.mount({ title: 'Transactions', headingKey: 'txn.history', heading: 'Transaction history' });
       if (!profile) return;
       document.getElementById('searchBtn').onclick = () => { offset = 0; load(); };
       document.getElementById('prevBtn').onclick = () => { offset = Math.max(0, offset - limit); load(); };

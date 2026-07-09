@@ -25,7 +25,7 @@
   <div data-xm-shell>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
       <p style="color:var(--xm-muted);margin:0" id="unreadLabel">Loading…</p>
-      <button type="button" class="xm-btn xm-btn-outline" id="markAllBtn">Mark all read</button>
+      <button type="button" class="xm-btn xm-btn-outline" id="markAllBtn" data-i18n="notif.markAll">Mark all read</button>
     </div>
     <div class="xm-card" id="list">Loading…</div>
   </div>
@@ -38,7 +38,8 @@
       if (!res.success) { list.textContent = res.message || 'Failed to load'; return; }
       document.getElementById('unreadLabel').textContent = `${res.data.unread_count} unread`;
       if (!res.data.items.length) {
-        list.innerHTML = '<div class="xm-empty">No notifications yet.</div>';
+        const emptyMsg = (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t('notif.empty', 'No notifications yet.') : 'No notifications yet.';
+        list.innerHTML = `<div class="xm-empty">${emptyMsg}</div>`;
         return;
       }
       list.innerHTML = res.data.items.map(n => `

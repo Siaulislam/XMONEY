@@ -30,22 +30,22 @@
   </nav>
   <div class="xm-auth-wrap">
     <div class="xm-card xm-auth-card">
-      <h1>Welcome back</h1>
-      <p class="sub">Sign in to your XMONEY account</p>
+      <h1 data-i18n="auth.welcomeBack">Welcome back</h1>
+      <p class="sub" data-i18n="auth.signInSub">Sign in to your XMONEY account</p>
       <div id="alert" hidden></div>
       <form id="loginForm">
         <div class="xm-field">
-          <label for="email">Email</label>
+          <label for="email" data-i18n="common.email">Email</label>
           <input id="email" name="email" type="email" required autocomplete="username" />
         </div>
         <div class="xm-field">
-          <label for="password">Password</label>
+          <label for="password" data-i18n="common.password">Password</label>
           <input id="password" name="password" type="password" required autocomplete="current-password" />
         </div>
-        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn">Sign in</button>
+        <button class="xm-btn xm-btn-primary xm-btn-block" type="submit" id="submitBtn" data-i18n="nav.signin">Sign in</button>
       </form>
       <p style="margin-top:1.25rem;font-size:0.9rem;color:var(--xm-muted);text-align:center">
-        <a href="forgot-password.html">Forgot password?</a> · <a href="register.html">Create account</a>
+        <a href="forgot-password.html" data-i18n="auth.forgotPassword">Forgot password?</a> · <a href="register.html" data-i18n="auth.createAccount">Create account</a>
       </p>
     </div>
   </div>
