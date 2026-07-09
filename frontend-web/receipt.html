@@ -14,7 +14,7 @@
     <div class="xm-card" style="max-width:640px" id="receipt">
       <div class="xm-skeleton" style="height:8rem"></div>
     </div>
-    <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap">
+    <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap" id="actions">
       <a href="transactions.html" class="xm-btn xm-btn-outline">All transactions</a>
       <a href="transfer.html" class="xm-btn xm-btn-primary">New transfer</a>
       <button type="button" class="xm-btn xm-btn-outline" onclick="window.print()">Print</button>
@@ -70,6 +70,20 @@
             <tbody>${history || '<tr><td colspan="4">No history</td></tr>'}</tbody>
           </table>
         </div>`;
+
+      if (['created', 'pending_payment'].includes(t.status)) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'xm-btn xm-btn-danger';
+        cancelBtn.textContent = 'Cancel transfer';
+        cancelBtn.onclick = async () => {
+          if (!confirm('Cancel this transfer?')) return;
+          const r = await XMONEY.api('/v1/transfers/' + uuid + '/cancel', { method: 'POST', body: {} });
+          if (r.success) { XMONEY.toast('Transfer cancelled', 'success'); location.reload(); }
+          else XMONEY.toast(r.message || 'Cancel failed', 'error');
+        };
+        document.getElementById('actions').prepend(cancelBtn);
+      }
     })();
   </script>
 </body>

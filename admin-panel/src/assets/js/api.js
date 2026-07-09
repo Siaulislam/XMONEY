@@ -132,5 +132,30 @@ const XMONEY = (() => {
     return `${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency || ''}`.trim();
   }
 
-  return { API_BASE, api, setSession, clearSession, requireAuth, logout, getToken, showAlert, statusBadge, formatMoney };
+  function formatDate(value) {
+    if (!value) return '—';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
+  }
+
+  function toast(message, type = 'info') {
+    let el = document.getElementById('xm-admin-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'xm-admin-toast';
+      el.style.cssText = 'position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;max-width:320px';
+      document.body.appendChild(el);
+    }
+    const item = document.createElement('div');
+    item.className = `xm-alert xm-alert-${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}`;
+    item.style.marginTop = '0.5rem';
+    item.textContent = message;
+    el.appendChild(item);
+    setTimeout(() => item.remove(), 4000);
+  }
+
+  return {
+    API_BASE, api, setSession, clearSession, requireAuth, logout, getToken, getRefreshToken,
+    showAlert, statusBadge, formatMoney, formatDate, toast,
+  };
 })();

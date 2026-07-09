@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reports â€” XMONEY Admin</title>
+  <title>Reports — XMONEY Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/assets/css/xmoney.css" />
   <script src="config/runtime-config.js"></script>
@@ -11,17 +11,7 @@
 <body>
   <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
   <div class="xm-dash">
-    <aside class="xm-sidebar">
-      <a href="index.html">Dashboard</a>
-      <a href="users.html">Users</a>
-      <a href="kyc.html">KYC review</a>
-      <a href="transactions.html">Transactions</a>
-      <a href="rates.html">Rates</a>
-      <a href="fees.html">Fees</a>
-      <a href="currencies.html">Currencies</a>
-      <a href="reports.html" class="active">Reports</a>
-      <a href="audit.html">Audit logs</a>
-    </aside>
+    <aside class="xm-sidebar"></aside>
     <main class="xm-main">
       <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Reports</h1>
       <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
@@ -30,12 +20,14 @@
         <button class="xm-btn xm-btn-outline" data-type="revenue">Revenue</button>
         <button class="xm-btn xm-btn-outline" data-type="failed">Failed</button>
       </div>
-      <div class="xm-card"><pre id="out" style="white-space:pre-wrap;font-size:0.85rem;font-family:ui-monospace,monospace">Select a reportâ€¦</pre></div>
+      <div class="xm-card"><pre id="out" style="white-space:pre-wrap;font-size:0.85rem;font-family:ui-monospace,monospace">Select a report…</pre></div>
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('reports.html');
     document.querySelectorAll('[data-type]').forEach(btn => btn.onclick = async () => {
       const res = await XMONEY.api('/v1/admin/reports?type=' + btn.dataset.type);
       document.getElementById('out').textContent = JSON.stringify(res.data, null, 2);

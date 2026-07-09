@@ -36,9 +36,9 @@
       </div>
       <div class="xm-hero-panel">
         <div style="font-size:0.8rem;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Live customer rates</div>
-        <div class="xm-rate-row"><span>1 AED â†’ INR</span><strong>22.35</strong></div>
-        <div class="xm-rate-row"><span>1 AED â†’ PKR</span><strong>75.80</strong></div>
-        <div class="xm-rate-row"><span>1 USD â†’ INR</span><strong>82.75</strong></div>
+        <div id="liveRates">
+          <div class="xm-rate-row"><span>Loading rates…</span><strong>—</strong></div>
+        </div>
       </div>
     </div>
   </header>
@@ -80,8 +80,23 @@
   </section>
 
   <footer class="xm-footer">
-    <div class="xm-container">Â© 2026 XMONEY. Secure international money transfer platform.</div>
+    <div class="xm-container">© 2026 XMONEY. Secure international money transfer platform.</div>
   </footer>
+  <script src="src/assets/js/api.js"></script>
+  <script>
+    (async () => {
+      const base = (typeof XMONEY !== 'undefined' && XMONEY.API_BASE) ? XMONEY.API_BASE : (window.XMONEY_RUNTIME?.apiBaseUrl || '');
+      if (!base) return;
+      try {
+        const res = await fetch(`${base}/v1/rates`, { headers: { Accept: 'application/json' } });
+        const payload = await res.json();
+        if (!payload.success || !payload.data?.length) return;
+        document.getElementById('liveRates').innerHTML = payload.data.slice(0, 5).map((r) =>
+          `<div class="xm-rate-row"><span>1 ${r.source_currency} → ${r.target_currency}</span><strong>${r.customer_rate}</strong></div>`
+        ).join('');
+      } catch (_) { /* keep placeholder */ }
+    })();
+  </script>
 </body>
 </html>
 

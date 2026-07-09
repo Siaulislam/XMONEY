@@ -8,10 +8,12 @@ use XMoney\Controllers\BeneficiaryController;
 use XMoney\Controllers\HealthController;
 use XMoney\Controllers\KycController;
 use XMoney\Controllers\NotificationController;
+use XMoney\Controllers\PaymentController;
 use XMoney\Controllers\SettingsController;
 use XMoney\Controllers\TransferController;
 use XMoney\Controllers\UserController;
 use XMoney\Controllers\WalletController;
+use XMoney\Controllers\WebhookController;
 use XMoney\Middleware\AuthMiddleware;
 use XMoney\Middleware\RateLimitMiddleware;
 use XMoney\Utils\Router;
@@ -28,6 +30,8 @@ $admin = new AdminController();
 $health = new HealthController();
 $notifications = new NotificationController();
 $settings = new SettingsController();
+$payments = new PaymentController();
+$webhooks = new WebhookController();
 
 $customerAuth = [AuthMiddleware::customer()];
 $adminOps = [AuthMiddleware::admin(['super_admin', 'admin', 'support_staff', 'compliance_officer'])];
@@ -88,6 +92,13 @@ $router->get('/v1/transfers/{uuid}', [$transfer, 'show'], $customerAuth);
 $router->post('/v1/transfers/{uuid}/confirm', [$transfer, 'confirm'], $customerAuth);
 $router->post('/v1/transfers/{uuid}/cancel', [$transfer, 'cancel'], $customerAuth);
 
+// Payments
+$router->get('/v1/payments/{uuid}', [$payments, 'show'], $customerAuth);
+$router->post('/v1/payments/{uuid}/simulate-capture', [$payments, 'simulateCapture'], $customerAuth);
+
+// Payment provider webhooks (no JWT — verified per provider in future)
+$router->post('/v1/webhooks/payments/{provider}', [$webhooks, 'payment']);
+
 // Wallet
 $router->get('/v1/wallet', [$wallet, 'show'], $customerAuth);
 $router->get('/v1/wallet/history', [$wallet, 'history'], $customerAuth);
@@ -106,6 +117,7 @@ $router->post('/v1/admin/users/{uuid}/block', [$admin, 'blockUser'], $adminFull)
 $router->post('/v1/admin/users/{uuid}/unblock', [$admin, 'unblockUser'], $adminFull);
 $router->get('/v1/admin/kyc/pending', [$admin, 'kycPending'], $compliance);
 $router->post('/v1/admin/kyc/{uuid}/review', [$admin, 'reviewKyc'], $compliance);
+$router->get('/v1/admin/kyc/{uuid}/file', [$admin, 'kycFile'], $compliance);
 $router->get('/v1/admin/transactions', [$admin, 'transactions'], $adminOps);
 $router->post('/v1/admin/transactions/{uuid}/status', [$admin, 'updateTransactionStatus'], $adminFull);
 $router->post('/v1/admin/rates', [$admin, 'updateRate'], $adminFull);

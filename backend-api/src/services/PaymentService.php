@@ -6,27 +6,27 @@ namespace XMoney\Services;
 
 use XMoney\Config\App;
 use XMoney\Config\Database;
-use XMoney\Providers\Payment\PaymentProviderInterface;
-use XMoney\Providers\Payment\StubPaymentProvider;
+use XMoney\Providers\Payment\PaymentProviderRegistry;
 use XMoney\Utils\Security;
 
 /**
  * Provider-agnostic payment service layer.
- * Payment Service Layer → Payment Provider API
+ * Select provider via PAYMENT_DEFAULT_PROVIDER — no hard-coded gateways.
  */
 final class PaymentService
 {
-    public function __construct(
-        private readonly PaymentProviderInterface $provider = new StubPaymentProvider()
-    ) {
+    public function __construct(private readonly \XMoney\Providers\Payment\PaymentProviderInterface $provider)
+    {
     }
 
     public static function resolve(?string $code = null): self
     {
-        $code = $code ?: (App::env('PAYMENT_DEFAULT_PROVIDER', 'stub') ?? 'stub');
-        return match ($code) {
-            default => new self(new StubPaymentProvider()),
-        };
+        return new self(PaymentProviderRegistry::create($code));
+    }
+
+    public function providerCode(): string
+    {
+        return $this->provider->code();
     }
 
     public function initiatePayment(int $userId, float $amount, string $currency, ?int $transactionId, string $method = 'gateway'): array
@@ -66,6 +66,87 @@ final class PaymentService
             'status' => $result['status'],
             'provider' => $this->provider->code(),
             'provider_ref' => $result['provider_ref'],
+            'payload' => $result['payload'] ?? [],
         ];
+    }
+
+    public function captureByUuid(string $paymentUuid): array
+    {
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare('SELECT * FROM payments WHERE uuid = :uuid LIMIT 1');
+        $stmt->execute(['uuid' => $paymentUuid]);
+        $payment = $stmt->fetch();
+        if (!$payment) {
+            throw new \RuntimeException('Payment not found');
+        }
+        if (!$payment['provider_ref']) {
+            throw new \RuntimeException('Payment has no provider reference');
+        }
+
+        $provider = PaymentProviderRegistry::create($payment['provider_code']);
+        $result = $provider->capture((string) $payment['provider_ref']);
+
+        $pdo->prepare(
+            'UPDATE payments SET status = :status, provider_payload = :payload WHERE id = :id'
+        )->execute([
+            'status' => $result['status'] === 'captured' ? 'captured' : $result['status'],
+            'payload' => json_encode($result['payload'] ?? []),
+            'id' => $payment['id'],
+        ]);
+
+        if (!empty($payment['transaction_id']) && in_array($result['status'], ['captured', 'completed'], true)) {
+            $txn = new TransactionService();
+            $txn->updateStatus((int) $payment['transaction_id'], 'processing', 'system', null, 'Payment captured');
+            $txn->updateStatus((int) $payment['transaction_id'], 'completed', 'system', null, 'Transfer completed');
+        }
+
+        return $this->findByUuid($paymentUuid);
+    }
+
+    public function handleWebhook(string $providerCode, array $payload): array
+    {
+        $providerRef = $payload['provider_ref'] ?? $payload['payment_ref'] ?? null;
+        if (!$providerRef) {
+            throw new \RuntimeException('Webhook missing provider_ref');
+        }
+
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare(
+            'SELECT uuid FROM payments WHERE provider_code = :provider AND provider_ref = :ref LIMIT 1'
+        );
+        $stmt->execute(['provider' => $providerCode, 'ref' => $providerRef]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            throw new \RuntimeException('Payment not found for webhook');
+        }
+
+        return $this->captureByUuid((string) $row['uuid']);
+    }
+
+    public function findByUuid(string $uuid, ?int $userId = null): array
+    {
+        $pdo = Database::connection();
+        $sql = 'SELECT uuid, transaction_id, user_id, provider_code, method, amount, currency_code, status, provider_ref, created_at
+                FROM payments WHERE uuid = :uuid';
+        $params = ['uuid' => $uuid];
+        if ($userId !== null) {
+            $sql .= ' AND user_id = :uid';
+            $params['uid'] = $userId;
+        }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $row = $stmt->fetch();
+        if (!$row) {
+            throw new \RuntimeException('Payment not found');
+        }
+        return $row;
+    }
+
+    public function simulateCaptureForDevelopment(string $paymentUuid): array
+    {
+        if (!App::isDebug()) {
+            throw new \RuntimeException('Simulation only available in debug mode');
+        }
+        return $this->captureByUuid($paymentUuid);
     }
 }

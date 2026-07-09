@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Transactions â€” XMONEY Admin</title>
+  <title>Transactions — XMONEY Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/assets/css/xmoney.css" />
   <script src="config/runtime-config.js"></script>
@@ -11,17 +11,7 @@
 <body>
   <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
   <div class="xm-dash">
-    <aside class="xm-sidebar">
-      <a href="index.html">Dashboard</a>
-      <a href="users.html">Users</a>
-      <a href="kyc.html">KYC review</a>
-      <a href="transactions.html" class="active">Transactions</a>
-      <a href="rates.html">Rates</a>
-      <a href="fees.html">Fees</a>
-      <a href="currencies.html">Currencies</a>
-      <a href="reports.html">Reports</a>
-      <a href="audit.html">Audit logs</a>
-    </aside>
+    <aside class="xm-sidebar"></aside>
     <main class="xm-main">
       <h1 style="font-family:var(--xm-display);margin-bottom:1rem">All transfers</h1>
       <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap">
@@ -44,8 +34,10 @@
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('transactions.html');
     async function load() {
       const q = document.getElementById('q').value;
       const status = document.getElementById('status').value;
@@ -62,7 +54,7 @@
           <td>${XMONEY.statusBadge(t.status)}</td>
           <td>
             <select data-uuid="${t.uuid}" style="font-size:0.8rem;padding:0.3rem;border-radius:6px">
-              <option value="">Updateâ€¦</option>
+              <option value="">Update…</option>
               <option value="processing">processing</option>
               <option value="under_review">under_review</option>
               <option value="completed">completed</option>

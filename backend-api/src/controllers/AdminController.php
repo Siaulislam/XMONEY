@@ -187,7 +187,7 @@ final class AdminController
         $txns->execute(['uuid' => $uuid]);
 
         $wallets = $pdo->prepare(
-            'SELECT currency_code, balance, locked_balance, updated_at
+            'SELECT currency_code, balance, held_balance, updated_at
              FROM wallets WHERE user_id = (SELECT id FROM users WHERE uuid = :uuid)'
         );
         $wallets->execute(['uuid' => $uuid]);
@@ -286,6 +286,33 @@ final class AdminController
 
         (new AuditService())->log('admin', (int) $request['admin']['id'], 'kyc.' . $body['decision'], 'kyc_document', (int) $doc['id']);
         Response::success(null, 'KYC ' . $body['decision']);
+    }
+
+    public function kycFile(array $request): void
+    {
+        $uuid = $request['params']['uuid'] ?? '';
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare('SELECT file_path, file_mime, document_type FROM kyc_documents WHERE uuid = :uuid LIMIT 1');
+        $stmt->execute(['uuid' => $uuid]);
+        $doc = $stmt->fetch();
+        if (!$doc || empty($doc['file_path'])) {
+            Response::error('Document not found', 404);
+        }
+
+        $uploadRoot = realpath(\XMoney\Config\App::basePath(\XMoney\Config\App::env('UPLOAD_PATH', '../uploads') ?? '../uploads'));
+        if ($uploadRoot === false) {
+            Response::error('Upload storage unavailable', 500);
+        }
+        $fullPath = $uploadRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $doc['file_path']);
+        if (!is_file($fullPath)) {
+            Response::error('File not found on server', 404);
+        }
+
+        header('Content-Type: ' . ($doc['file_mime'] ?: 'application/octet-stream'));
+        header('Content-Disposition: inline; filename="' . basename($fullPath) . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($fullPath);
+        exit;
     }
 
     public function transactions(array $request): void

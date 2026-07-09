@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace XMoney\Services;
 
-use XMoney\Config\App;
 use XMoney\Config\Database;
-use XMoney\Providers\Notification\LogNotificationProvider;
-use XMoney\Providers\Notification\SmtpNotificationProvider;
+use XMoney\Providers\Notification\NotificationProviderRegistry;
 use XMoney\Utils\Security;
 
 final class NotificationService
@@ -37,8 +35,8 @@ final class NotificationService
             'status' => 'queued',
         ]);
 
-        $provider = $this->resolveProvider($channel);
-        $ok = $provider->send($channel, $title, $body, $payload ?? []);
+        $provider = NotificationProviderRegistry::forChannel($channel);
+        $ok = $provider->send($title, $body, array_merge($payload ?? [], ['channel' => $channel]));
         $pdo->prepare(
             'UPDATE notifications SET status = :status, sent_at = NOW(3) WHERE uuid = :uuid'
         )->execute([
@@ -51,10 +49,13 @@ final class NotificationService
     {
         $title = 'XMONEY Verification Code';
         $body = "Your XMONEY OTP for {$purpose} is {$otp}. It expires in 10 minutes.";
-        $provider = $this->resolveProvider($channel === 'sms' ? 'sms' : 'email');
-        $provider->send($channel, $title, $body, [
+        $deliveryChannel = $channel === 'sms' ? 'sms' : 'email';
+
+        $provider = NotificationProviderRegistry::forChannel($deliveryChannel);
+        $provider->send($title, $body, [
             'destination' => $destination,
             'purpose' => $purpose,
+            'channel' => $deliveryChannel,
         ]);
 
         $pdo = Database::connection();
@@ -64,10 +65,10 @@ final class NotificationService
         );
         $stmt->execute([
             'uuid' => Security::uuid(),
-            'channel' => $channel === 'sms' ? 'sms' : 'email',
+            'channel' => $deliveryChannel,
             'template' => 'otp_' . $purpose,
             'title' => $title,
-            'body' => App::isDebug() ? $body : 'Your XMONEY verification code has been sent.',
+            'body' => \XMoney\Config\App::isDebug() ? $body : 'Your XMONEY verification code has been sent.',
             'payload' => json_encode(['destination' => $destination, 'purpose' => $purpose]),
         ]);
     }
@@ -76,13 +77,5 @@ final class NotificationService
     {
         $this->queue($userId, 'email', $title, $body, $template);
         $this->queue($userId, 'in_app', $title, $body, $template);
-    }
-
-    private function resolveProvider(string $channel): LogNotificationProvider|SmtpNotificationProvider
-    {
-        if ($channel === 'email' && App::env('SMTP_HOST')) {
-            return new SmtpNotificationProvider();
-        }
-        return new LogNotificationProvider();
     }
 }

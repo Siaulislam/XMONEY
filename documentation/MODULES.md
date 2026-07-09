@@ -11,15 +11,18 @@
 | Platform settings API | Done | Transfer limits, security, notifications |
 | Admin user detail / unblock | Done | API + admin UI |
 | SMTP notification driver | Done | Falls back to log when SMTP not configured |
-| Payment provider layer | Done (stub) | Ready for bank/card/gateway adapters |
+| Payment provider layer | Done (modular) | Registry + placeholders: Stripe, Checkout, Wise, UAE Bank |
+| SMS / OTP providers | Done (modular) | Registry + placeholders: Twilio, AWS SNS, UAE SMS |
+| Admin shell + KYC file view | Done | Shared sidebar, document preview |
+| Payment webhooks + status API | Done | Stub/simulate for development |
 | FX engine | Done | Market − margin = customer rate |
 | Wallet ledger | Done | Optimistic locking + history |
 | Mobile structure | Scaffolded | Shared API contract |
 | Live FX API | Done | External provider via `EXCHANGE_API_URL` (Frankfurter-compatible) |
 | API smoke tests | Done | `backend-api/scripts/smoke-test.php` |
 | Public transfer limits API | Done | `GET /v1/settings/public` |
-| Live payment gateway | Next | Real provider |
-| SMTP / SMS / Push | Next | Replace log drivers |
+| Live payment gateway | Future | Placeholder providers registered — implement when licensed |
+| SMTP / SMS / Push | Modular (log/stub) | Configure drivers when ready — see PROVIDERS.md |
 | Flutter/RN apps | Next | Generate from scaffold |
 | cPanel production deploy | Waiting | Needs hosting credentials |
 

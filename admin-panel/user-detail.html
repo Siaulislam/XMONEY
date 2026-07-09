@@ -11,18 +11,7 @@
 <body>
   <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
   <div class="xm-dash">
-    <aside class="xm-sidebar">
-      <a href="index.html">Dashboard</a>
-      <a href="users.html" class="active">Users</a>
-      <a href="kyc.html">KYC review</a>
-      <a href="transactions.html">Transactions</a>
-      <a href="rates.html">Rates</a>
-      <a href="fees.html">Fees</a>
-      <a href="currencies.html">Currencies</a>
-      <a href="settings.html">Settings</a>
-      <a href="reports.html">Reports</a>
-      <a href="audit.html">Audit logs</a>
-    </aside>
+    <aside class="xm-sidebar"></aside>
     <main class="xm-main">
       <p><a href="users.html">&larr; Back to users</a></p>
       <h1 style="font-family:var(--xm-display);margin:1rem 0" id="title">User detail</h1>
@@ -36,8 +25,10 @@
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('user-detail.html');
     const params = new URLSearchParams(location.search);
     const uuid = params.get('uuid');
     if (!uuid) location.href = 'users.html';
@@ -59,7 +50,7 @@
       ).join('') || '<p>No KYC uploads</p>';
 
       document.getElementById('wallets').innerHTML = (res.data.wallets || []).map(w =>
-        `<p>${w.currency_code}: ${Number(w.balance).toFixed(2)} (locked ${Number(w.locked_balance).toFixed(2)})</p>`
+        `<p>${w.currency_code}: ${Number(w.balance).toFixed(2)} (held ${Number(w.held_balance || 0).toFixed(2)})</p>`
       ).join('') || '<p>No wallets</p>';
 
       document.getElementById('txns').innerHTML = `<table class="xm-table"><thead><tr><th>Ref</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>` +

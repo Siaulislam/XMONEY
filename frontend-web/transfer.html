@@ -115,6 +115,17 @@
         amt.placeholder = `${min} – ${max}`;
       }
 
+      const curRes = await XMONEY.api('/v1/currencies');
+      if (curRes.success && curRes.data.length) {
+        const srcSel = document.getElementById('srcCur');
+        srcSel.innerHTML = curRes.data.filter((c) => c.is_source).map((c) =>
+          `<option value="${c.code}">${c.code} — ${c.name}</option>`
+        ).join('');
+      }
+
+      const walletRes = await XMONEY.api('/v1/wallet');
+      const walletBalances = walletRes.success ? (walletRes.data?.wallets || []) : [];
+
       const bens = await XMONEY.api('/v1/beneficiaries');
       const sel = document.getElementById('benSelect');
       if (!bens.success || !bens.data.length) {
@@ -190,6 +201,15 @@
       document.getElementById('payBtn').onclick = async () => {
         const btn = document.getElementById('payBtn');
         const method = document.getElementById('payMethod').value;
+        if (method === 'wallet') {
+          const src = document.getElementById('srcCur').value;
+          const bal = walletBalances.find((w) => w.currency_code === src);
+          const needed = state.quote?.total_debit || 0;
+          if (!bal || Number(bal.balance) < Number(needed)) {
+            XMONEY.toast('Insufficient wallet balance for this transfer', 'error');
+            return;
+          }
+        }
         XMONEY.setLoading(btn, true, 'Processing…');
 
         const create = await XMONEY.api('/v1/transfers', {
@@ -212,16 +232,27 @@
           method: 'POST',
           body: { payment_method: method },
         });
-        XMONEY.setLoading(btn, false);
         if (!confirm.success) {
+          XMONEY.setLoading(btn, false);
           XMONEY.showAlert(document.getElementById('alert'), confirm.message || 'Payment failed');
           return;
         }
 
-        const status = confirm.data?.transaction?.status || confirm.data?.status || 'processing';
-        const uuid = create.data.uuid;
+        if (method !== 'wallet') {
+          const paymentUuid = confirm.data?.payment?.payment_uuid;
+          if (paymentUuid) {
+            const capture = await XMONEY.api(`/v1/payments/${paymentUuid}/simulate-capture`, { method: 'POST', body: {} });
+            if (!capture.success) {
+              XMONEY.setLoading(btn, false);
+              XMONEY.showAlert(document.getElementById('alert'), capture.message || 'Payment capture failed');
+              return;
+            }
+          }
+        }
+
+        XMONEY.setLoading(btn, false);
         XMONEY.toast('Transfer submitted', 'success');
-        location.href = 'receipt.html?uuid=' + encodeURIComponent(uuid);
+        location.href = 'receipt.html?uuid=' + encodeURIComponent(create.data.uuid);
       };
     })();
   </script>

@@ -11,17 +11,7 @@
 <body>
   <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
   <div class="xm-dash">
-    <aside class="xm-sidebar">
-      <a href="index.html">Dashboard</a>
-      <a href="users.html">Users</a>
-      <a href="kyc.html">KYC review</a>
-      <a href="transactions.html">Transactions</a>
-      <a href="rates.html">Rates</a>
-      <a href="fees.html" class="active">Fees</a>
-      <a href="currencies.html">Currencies</a>
-      <a href="reports.html">Reports</a>
-      <a href="audit.html">Audit logs</a>
-    </aside>
+    <aside class="xm-sidebar"></aside>
     <main class="xm-main">
       <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Fee management</h1>
       <div id="alert" hidden></div>
@@ -51,8 +41,10 @@
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('fees.html');
     async function load() {
       const res = await XMONEY.api('/v1/admin/fees');
       const el = document.getElementById('list');

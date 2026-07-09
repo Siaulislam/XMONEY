@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KYC Review â€” XMONEY Admin</title>
+  <title>KYC Review — XMONEY Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/assets/css/xmoney.css" />
   <script src="config/runtime-config.js"></script>
@@ -11,46 +11,52 @@
 <body>
   <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
   <div class="xm-dash">
-    <aside class="xm-sidebar">
-      <a href="index.html">Dashboard</a>
-      <a href="users.html">Users</a>
-      <a href="kyc.html" class="active">KYC review</a>
-      <a href="transactions.html">Transactions</a>
-      <a href="rates.html">Rates</a>
-      <a href="fees.html">Fees</a>
-      <a href="currencies.html">Currencies</a>
-      <a href="reports.html">Reports</a>
-      <a href="audit.html">Audit logs</a>
-    </aside>
+    <aside class="xm-sidebar"></aside>
     <main class="xm-main">
       <h1 style="font-family:var(--xm-display);margin-bottom:1rem">KYC pending review</h1>
       <div id="alert" hidden></div>
-      <div class="xm-card" id="list">Loadingâ€¦</div>
+      <div class="xm-card" id="list">Loading…</div>
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('kyc.html');
+
+    async function viewDocument(uuid) {
+      const res = await fetch(XMONEY.API_BASE + '/v1/admin/kyc/' + uuid + '/file', {
+        headers: { Authorization: 'Bearer ' + XMONEY.getToken(), Accept: '*/*' },
+      });
+      if (!res.ok) { XMONEY.toast('Could not load document', 'error'); return; }
+      const blob = await res.blob();
+      window.open(URL.createObjectURL(blob), '_blank');
+    }
+
     async function load() {
       const res = await XMONEY.api('/v1/admin/kyc/pending');
       const el = document.getElementById('list');
       if (!res.success || !res.data.length) { el.textContent = 'No pending KYC documents.'; return; }
       el.innerHTML = res.data.map(d => `
         <div style="padding:1rem 0;border-bottom:1px solid var(--xm-border)">
-          <strong>${d.full_name}</strong> Â· ${d.email}<br/>
-          <span style="color:var(--xm-muted)">${d.document_type} Â· ${d.document_number || 'â€”'} Â· ${d.country_code || ''}</span>
-          <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+          <strong>${d.full_name}</strong> · ${d.email}<br/>
+          <span style="color:var(--xm-muted)">${d.document_type} · ${d.document_number || '—'} · ${d.country_code || ''}</span>
+          <div style="margin-top:0.6rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+            <button class="xm-btn xm-btn-outline" style="padding:0.4rem 0.8rem" data-view="${d.uuid}">View document</button>
             <button class="xm-btn xm-btn-primary" style="padding:0.4rem 0.8rem" data-ok="${d.uuid}">Approve</button>
             <button class="xm-btn xm-btn-danger" style="padding:0.4rem 0.8rem" data-no="${d.uuid}">Reject</button>
           </div>
         </div>`).join('');
+      el.querySelectorAll('[data-view]').forEach(btn => btn.onclick = () => viewDocument(btn.dataset.view));
       el.querySelectorAll('[data-ok]').forEach(btn => btn.onclick = async () => {
         await XMONEY.api('/v1/admin/kyc/' + btn.dataset.ok + '/review', { method: 'POST', body: { decision: 'approved' } });
+        XMONEY.toast('KYC approved', 'success');
         load();
       });
       el.querySelectorAll('[data-no]').forEach(btn => btn.onclick = async () => {
         const reason = prompt('Rejection reason') || 'Document not acceptable';
         await XMONEY.api('/v1/admin/kyc/' + btn.dataset.no + '/review', { method: 'POST', body: { decision: 'rejected', rejection_reason: reason } });
+        XMONEY.toast('KYC rejected', 'success');
         load();
       });
     }
@@ -58,5 +64,3 @@
   </script>
 </body>
 </html>
-
-

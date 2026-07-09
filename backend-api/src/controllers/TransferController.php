@@ -17,7 +17,6 @@ final class TransferController
     public function __construct(
         private readonly ExchangeService $exchange = new ExchangeService(),
         private readonly TransactionService $transactions = new TransactionService(),
-        private readonly PaymentService $payments = new PaymentService(),
         private readonly WalletService $wallets = new WalletService()
     ) {
     }
@@ -139,7 +138,7 @@ final class TransferController
                 $this->transactions->updateStatus((int) $txn['id'], 'processing', 'system', null, 'Paid via wallet');
                 $this->transactions->updateStatus((int) $txn['id'], 'completed', 'system', null, 'Wallet transfer settled');
             } else {
-                $payment = $this->payments->initiatePayment(
+                $payment = PaymentService::resolve()->initiatePayment(
                     $userId,
                     (float) $txn['total_debit'],
                     $txn['source_currency'],

@@ -34,6 +34,23 @@
         <div id="list">Loading…</div>
       </div>
     </div>
+    <div id="editModal" hidden class="xm-card" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:1rem;z-index:100">
+      <div class="xm-card" style="max-width:480px;width:100%;max-height:90vh;overflow:auto">
+        <h3 style="margin-bottom:1rem">Edit beneficiary</h3>
+        <form id="editForm">
+          <input type="hidden" name="uuid" />
+          <div class="xm-field"><label>Receiver name</label><input name="receiver_name" required /></div>
+          <div class="xm-field"><label>Bank name</label><input name="bank_name" /></div>
+          <div class="xm-field"><label>Account number</label><input name="account_number" /></div>
+          <div class="xm-field"><label>IBAN</label><input name="iban" /></div>
+          <div class="xm-field"><label>Mobile</label><input name="mobile_number" /></div>
+          <div style="display:flex;gap:0.5rem;margin-top:1rem">
+            <button type="button" class="xm-btn xm-btn-outline" id="editCancel">Cancel</button>
+            <button type="submit" class="xm-btn xm-btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
   <style>@media(max-width:800px){.ben-grid{grid-template-columns:1fr!important}}</style>
   <script src="src/assets/js/api.js"></script>
@@ -42,13 +59,15 @@
     async function load() {
       const res = await XMONEY.api('/v1/beneficiaries');
       const el = document.getElementById('list');
-      if (!res.success || !res.data.length) { el.innerHTML = '<div class="xm-empty">No beneficiaries yet.</div>'; return; }
+      if (!res.success || !res.data.length) { el.innerHTML = '<div class="xm-empty">No beneficiaries yet.</div>'; window.__bens = []; return; }
+      window.__bens = res.data;
       el.innerHTML = res.data.map(b => `
         <div style="padding:0.85rem 0;border-bottom:1px solid var(--xm-border)">
           <strong>${b.receiver_name}</strong> ${XMONEY.statusBadge(b.verification_status)}<br/>
           <span style="color:var(--xm-muted);font-size:0.85rem">${b.country_code} · ${b.currency_code} · ${b.bank_name || '—'} · ${b.account_number || b.iban || b.mobile_number || ''}</span>
           <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
             <a class="xm-btn xm-btn-primary" style="padding:0.35rem 0.7rem;font-size:0.8rem" href="transfer.html">Send</a>
+            <button class="xm-btn xm-btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-edit="${b.uuid}">Edit</button>
             <button class="xm-btn xm-btn-outline" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-verify="${b.uuid}">Verify</button>
             <button class="xm-btn xm-btn-danger" style="padding:0.35rem 0.7rem;font-size:0.8rem" data-del="${b.uuid}">Delete</button>
           </div>
@@ -64,7 +83,41 @@
         XMONEY.toast('Verification requested', 'success');
         load();
       });
+      el.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = () => {
+        const b = (window.__bens || []).find((x) => x.uuid === btn.dataset.edit);
+        if (!b) return;
+        const form = document.getElementById('editForm');
+        form.uuid.value = b.uuid;
+        form.receiver_name.value = b.receiver_name || '';
+        form.bank_name.value = b.bank_name || '';
+        form.account_number.value = b.account_number || '';
+        form.iban.value = b.iban || '';
+        form.mobile_number.value = b.mobile_number || '';
+        const modal = document.getElementById('editModal');
+        modal.hidden = false;
+        modal.style.display = 'flex';
+      });
     }
+    document.getElementById('editCancel').onclick = () => {
+      const modal = document.getElementById('editModal');
+      modal.hidden = true;
+      modal.style.display = 'none';
+    };
+    document.getElementById('editForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const uuid = fd.get('uuid');
+      const body = Object.fromEntries([...fd.entries()].filter(([k]) => k !== 'uuid'));
+      const res = await XMONEY.api('/v1/beneficiaries/' + uuid, { method: 'PUT', body });
+      if (res.success) {
+        XMONEY.toast('Beneficiary updated', 'success');
+        const modal = document.getElementById('editModal');
+        modal.hidden = true;
+        modal.style.display = 'none';
+        load();
+      }
+      else XMONEY.toast(res.message || 'Update failed', 'error');
+    };
     (async () => {
       const profile = await XMShell.mount({ title: 'Beneficiaries', heading: 'Beneficiaries' });
       if (!profile) return;

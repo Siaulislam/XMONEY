@@ -8,11 +8,20 @@ use XMoney\Config\App;
 
 /**
  * Development / fallback notification provider.
- * Writes to logs/notifications.log — replace with SMTP/SMS/Push providers in production.
+ * Writes to logs/notifications.log — replace with real drivers via configuration.
  */
-final class LogNotificationProvider
+final class LogNotificationProvider implements NotificationProviderInterface
 {
-    public function send(string $channel, string $title, string $body, array $context = []): bool
+    public function __construct(private readonly string $channelName = 'email')
+    {
+    }
+
+    public function channel(): string
+    {
+        return $this->channelName;
+    }
+
+    public function send(string $title, string $body, array $context = []): bool
     {
         $logPath = App::basePath('../logs/notifications.log');
         $dir = dirname($logPath);
@@ -23,7 +32,7 @@ final class LogNotificationProvider
         $line = sprintf(
             "[%s] channel=%s title=%s body=%s context=%s%s",
             date('c'),
-            $channel,
+            $this->channelName,
             $title,
             $body,
             json_encode($context),
