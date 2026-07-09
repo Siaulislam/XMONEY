@@ -15,7 +15,7 @@ Until the API is uploaded to `/home/smartdms/public_html/xmoney/`, browser and m
    curl https://qamar.tasjeel.ae/xmoney/api/v1/health
    php backend-api/scripts/smoke-test.php https://qamar.tasjeel.ae/xmoney/api
    ```
-4. For **staging E2E** (OTP debug + dev wallet deposit), temporarily set `APP_DEBUG=true` in server `api/.env` — use `APP_DEBUG=false` only for production go-live.
+4. For **staging E2E** (OTP debug + dev wallet deposit), use `config/env.staging.example` as the basis for server `api/.env` (`APP_DEBUG=true`). Switch to production values (`APP_DEBUG=false`) only for go-live.
 
 ## Staging vs production
 
