@@ -1,0 +1,45 @@
+/* XMONEY Theme — Light / Dark / System */
+[data-theme="dark"] {
+  --xm-surface: #0A0F18;
+  --xm-card: #121A28;
+  --xm-border: #243044;
+  --xm-text: #E8EDF5;
+  --xm-muted: #94A3B8;
+  --xm-input-bg: #0F1624;
+  --xm-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --xm-focus-ring: 0 0 0 3px rgba(255, 193, 7, 0.35);
+}
+
+[data-theme="dark"] .xm-field input,
+[data-theme="dark"] .xm-field select,
+[data-theme="dark"] .xm-field textarea {
+  background: var(--xm-input-bg);
+  color: var(--xm-text);
+  border-color: var(--xm-border);
+}
+
+[data-theme="dark"] .xm-alert-error { background: #3f1515; border-color: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .xm-alert-success { background: #064e3b; border-color: #047857; color: #a7f3d0; }
+[data-theme="dark"] .xm-alert-info { background: #1e3a5f; border-color: #1d4ed8; color: #bfdbfe; }
+
+[data-theme="dark"] .xm-badge-success { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .xm-badge-warning { background: #78350f; color: #fde68a; }
+[data-theme="dark"] .xm-badge-danger { background: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .xm-badge-info { background: #1e3a8a; color: #bfdbfe; }
+[data-theme="dark"] .xm-badge-muted { background: #1e293b; color: #cbd5e1; }
+
+[data-theme="dark"] .xm-skeleton {
+  background: linear-gradient(90deg, #1a2436 25%, #243044 50%, #1a2436 75%);
+  background-size: 200% 100%;
+}
+
+[data-contrast="high"] {
+  --xm-border: #000000;
+  --xm-text: #000000;
+  --xm-muted: #1a1a1a;
+}
+[data-theme="dark"][data-contrast="high"] {
+  --xm-border: #ffffff;
+  --xm-text: #ffffff;
+  --xm-muted: #e2e8f0;
+}

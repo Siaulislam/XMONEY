@@ -1,4 +1,11 @@
 /* XMONEY Design System — Professional Fintech */
+@import url('tokens.css');
+@import url('themes.css');
+@import url('responsive.css');
+@import url('accessibility.css');
+@import url('rtl.css');
+@import url('controls.css');
+
 :root {
   --xm-navy: #0B1F3A;
   --xm-navy-deep: #071526;
@@ -8,11 +15,6 @@
   --xm-gold: #FFC107;
   --xm-brand-black: #000000;
   --xm-brand-white: #FFFFFF;
-  --xm-surface: #F5F7FA;
-  --xm-card: #FFFFFF;
-  --xm-border: #E2E8F0;
-  --xm-text: #0F172A;
-  --xm-muted: #64748B;
   --xm-success: #059669;
   --xm-danger: #DC2626;
   --xm-warning: #D97706;
@@ -338,7 +340,8 @@ img { max-width: 100%; display: block; }
   border: 1.5px solid var(--xm-border);
   border-radius: 10px;
   font: inherit;
-  background: #fff;
+  background: var(--xm-input-bg, #fff);
+  color: var(--xm-text);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -533,26 +536,7 @@ table.xm-table {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 900px) {
-  .xm-grid-3,
-  .xm-stats { grid-template-columns: 1fr 1fr; }
-  .xm-dash { grid-template-columns: 1fr; }
-  .xm-sidebar {
-    display: flex; gap: 0.25rem; overflow-x: auto; padding: 0.75rem;
-    flex-direction: row; align-items: center;
-  }
-  .xm-sidebar-brand { display: none; }
-  .xm-sidebar-nav { display: flex; gap: 0.25rem; }
-  .xm-sidebar a { white-space: nowrap; margin-bottom: 0; }
-  .xm-nav-links { display: none; }
-  .xm-topbar { padding: 1rem; }
-  .xm-main { padding: 1rem; }
-}
-
-@media (max-width: 560px) {
-  .xm-grid-3,
-  .xm-stats { grid-template-columns: 1fr; }
-}
+/* Responsive overrides moved to responsive.css */
 
 /* Charts */
 .xm-chart-bars {
@@ -608,8 +592,7 @@ table.xm-table {
 }
 .xm-wallet-hero .label { opacity: 0.75; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .xm-wallet-hero .balance { font-family: var(--xm-display); font-size: 2rem; font-weight: 700; margin: 0.25rem 0 1rem; }
-.xm-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-@media (max-width: 800px) { .xm-grid-2 { grid-template-columns: 1fr; } }
+.xm-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.25rem; }
 
 /* Pagination */
 .xm-pagination {

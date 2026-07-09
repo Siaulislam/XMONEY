@@ -15,9 +15,10 @@ import '../screens/kyc/kyc_screen.dart';
 import '../screens/beneficiaries/beneficiaries_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../core/theme/theme_controller.dart';
 
 class AppRouter {
-  AppRouter({required this.session}) : api = ApiClient(session);
+  AppRouter({required this.session, this.themeController}) : api = ApiClient(session);
 
   static const splash = '/';
   static const login = '/login';
@@ -34,6 +35,7 @@ class AppRouter {
   static const settings = '/settings';
 
   final SessionManager session;
+  final ThemeController? themeController;
   final ApiClient api;
 
   Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -70,7 +72,7 @@ class AppRouter {
       case notifications:
         return MaterialPageRoute(builder: (_) => NotificationsScreen(router: this));
       case settings:
-        return MaterialPageRoute(builder: (_) => SettingsScreen(router: this));
+        return MaterialPageRoute(builder: (_) => SettingsScreen(router: this, themeController: themeController));
       default:
         return MaterialPageRoute(builder: (_) => SplashScreen(router: this));
     }

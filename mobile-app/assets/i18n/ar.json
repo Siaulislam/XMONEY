@@ -1,0 +1,17 @@
+{
+  "app.name": "XMONEY",
+  "nav.home": "الرئيسية",
+  "nav.send": "إرسال",
+  "nav.history": "السجل",
+  "nav.wallet": "المحفظة",
+  "nav.more": "المزيد",
+  "nav.signin": "تسجيل الدخول",
+  "nav.register": "إنشاء حساب",
+  "nav.logout": "تسجيل الخروج",
+  "theme.light": "فاتح",
+  "theme.dark": "داكن",
+  "theme.system": "النظام",
+  "lang.en": "الإنجليزية",
+  "lang.ar": "العربية",
+  "lang.ur": "الأردية"
+}

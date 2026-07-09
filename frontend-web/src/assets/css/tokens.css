@@ -1,0 +1,45 @@
+/* XMONEY Design Tokens — semantic variables for themes & RTL */
+:root {
+  /* Brand (constant) */
+  --xm-navy: #0B1F3A;
+  --xm-navy-deep: #071526;
+  --xm-blue: #1A4B8C;
+  --xm-teal: #0D9488;
+  --xm-teal-light: #14B8A6;
+  --xm-gold: #FFC107;
+  --xm-brand-black: #000000;
+  --xm-brand-white: #FFFFFF;
+
+  /* Light theme (default) */
+  --xm-surface: #F5F7FA;
+  --xm-card: #FFFFFF;
+  --xm-border: #E2E8F0;
+  --xm-text: #0F172A;
+  --xm-muted: #64748B;
+  --xm-input-bg: #FFFFFF;
+  --xm-nav-text: #FFFFFF;
+  --xm-shadow: 0 4px 24px rgba(11, 31, 58, 0.08);
+  --xm-focus-ring: 0 0 0 3px rgba(13, 148, 136, 0.35);
+
+  /* Status */
+  --xm-success: #059669;
+  --xm-danger: #DC2626;
+  --xm-warning: #D97706;
+
+  /* Layout */
+  --xm-radius: 12px;
+  --xm-font: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --xm-display: "Outfit", "DM Sans", system-ui, sans-serif;
+  --xm-sidebar-w: clamp(220px, 22vw, 260px);
+  --xm-container: min(1120px, calc(100% - 2rem));
+  --xm-space: clamp(0.75rem, 2vw, 1.75rem);
+
+  /* Fluid type scale */
+  --xm-text-xs: clamp(0.72rem, 0.68rem + 0.2vw, 0.8rem);
+  --xm-text-sm: clamp(0.82rem, 0.78rem + 0.2vw, 0.92rem);
+  --xm-text-base: clamp(0.92rem, 0.88rem + 0.25vw, 1rem);
+  --xm-text-lg: clamp(1.05rem, 1rem + 0.35vw, 1.2rem);
+  --xm-text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  --xm-text-2xl: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --xm-text-hero: clamp(1.75rem, 1.2rem + 2.5vw, 3.25rem);
+}

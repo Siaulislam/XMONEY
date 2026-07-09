@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
 import '../../core/widgets/xm_ui.dart';
+import '../../core/theme/theme_controller.dart';
+import '../../core/l10n/xm_strings.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, required this.router});
+  const SettingsScreen({super.key, required this.router, this.themeController});
+
   final AppRouter router;
+  final ThemeController? themeController;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -14,6 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _current = TextEditingController();
   final _next = TextEditingController();
   bool _busy = false;
+  final _s = XmStrings.instance;
 
   Future<void> _changePassword() async {
     setState(() => _busy = true);
@@ -37,11 +42,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tc = widget.themeController;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(_s.t('nav.settings', 'Settings'))),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 375 ? 12 : 16),
         children: [
+          if (tc != null) ...[
+            Text(_s.t('theme.system', 'Theme'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            SegmentedButton<XmThemeMode>(
+              segments: [
+                ButtonSegment(value: XmThemeMode.light, label: Text(_s.t('theme.light', 'Light'))),
+                ButtonSegment(value: XmThemeMode.dark, label: Text(_s.t('theme.dark', 'Dark'))),
+                ButtonSegment(value: XmThemeMode.system, label: Text(_s.t('theme.system', 'System'))),
+              ],
+              selected: {tc.themeMode},
+              onSelectionChanged: (s) => tc.setThemeMode(s.first),
+            ),
+            const SizedBox(height: 20),
+            DropdownButtonFormField<String>(
+              value: _s.lang,
+              decoration: InputDecoration(labelText: _s.t('lang.en', 'Language')),
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                DropdownMenuItem(value: 'ur', child: Text('اردو')),
+              ],
+              onChanged: (v) { if (v != null) tc.setLocale(v); },
+            ),
+            const Divider(height: 32),
+          ],
           const Text('Security', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextField(controller: _current, decoration: const InputDecoration(labelText: 'Current password'), obscureText: true),
@@ -52,17 +83,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: _busy ? null : _changePassword,
             child: Text(_busy ? 'Saving…' : 'Change password'),
           ),
-          const Divider(height: 32),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('App version'),
-            subtitle: const Text('1.0.0'),
-          ),
           const SizedBox(height: 24),
           OutlinedButton(
             onPressed: _logout,
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sign out'),
+            style: OutlinedButton.styleFrom(foregroundColor: Colors.red, minimumSize: const Size.fromHeight(44)),
+            child: Text(_s.t('nav.logout', 'Sign out')),
           ),
         ],
       ),

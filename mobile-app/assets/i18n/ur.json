@@ -1,0 +1,17 @@
+{
+  "app.name": "XMONEY",
+  "nav.home": "ہوم",
+  "nav.send": "بھیجیں",
+  "nav.history": "تاریخ",
+  "nav.wallet": "والیٹ",
+  "nav.more": "مزید",
+  "nav.signin": "سائن ان",
+  "nav.register": "اکاؤنٹ بنائیں",
+  "nav.logout": "سائن آؤٹ",
+  "theme.light": "روشن",
+  "theme.dark": "تاریک",
+  "theme.system": "سسٹم",
+  "lang.en": "انگریزی",
+  "lang.ar": "عربی",
+  "lang.ur": "اردو"
+}

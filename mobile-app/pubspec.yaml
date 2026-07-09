@@ -15,6 +15,7 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.5.1
   image_picker: ^1.1.2
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -31,3 +32,6 @@ flutter:
     - assets/branding/splash-android.png
     - assets/branding/splash-ios.png
     - assets/branding/app-icon-1024.png
+    - assets/i18n/en.json
+    - assets/i18n/ar.json
+    - assets/i18n/ur.json

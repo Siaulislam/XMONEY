@@ -1,0 +1,42 @@
+/* XMONEY RTL — Arabic & Urdu */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .xm-table th,
+[dir="rtl"] .xm-table td {
+  text-align: right;
+}
+
+[dir="rtl"] .xm-logo-admin-tag {
+  margin-left: 0;
+  margin-right: 0.35rem;
+}
+
+[dir="rtl"] .xm-rate-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .xm-pagination {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .xm-toast-host {
+  right: auto;
+  left: 1rem;
+}
+
+[dir="rtl"] .xm-nav-drawer.is-open {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+  box-shadow: 8px 0 32px rgba(0,0,0,0.25);
+}
+
+[dir="rtl"] .xm-sidebar {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+[dir="rtl"] .xm-ui-controls {
+  flex-direction: row-reverse;
+}
