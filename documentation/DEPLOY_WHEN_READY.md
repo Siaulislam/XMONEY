@@ -9,7 +9,8 @@ Until the API is uploaded to `/home/smartdms/public_html/`, browser and mobile c
 ## When you are ready
 
 1. Confirm GitHub Secrets for workflow `Deploy XMONEY` (see `.github/workflows/deploy-xmoney.yml` header).
-2. Run workflow **Deploy XMONEY** manually (`workflow_dispatch`) — auto-deploy on push is disabled.
+2. **Auto-deploy:** every push to `main` runs **Deploy XMONEY** and uploads to the server (no manual approval in the workflow).
+3. **Optional manual run:** Actions → Deploy XMONEY → Run workflow (if you need redeploy without a code push).
 3. After upload, verify:
    ```bash
    curl https://smartdms.me/api/v1/health

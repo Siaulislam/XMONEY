@@ -49,7 +49,13 @@
 
 ---
 
-## Manual upload (no Composer on server)
+## Auto deploy
+
+- Every **push to `main`** triggers **Deploy XMONEY** and uploads to `public_html/` via FTP.
+- No workflow approval step is configured in the YAML — deploy runs immediately when secrets are set.
+- If jobs still show **Pending** waiting for approval, disable **Settings → Environments → Required reviewers** in GitHub (repo/org setting, not in code).
+
+## Manual deploy (optional)
 
 1. GitHub → **Actions** → **Build cPanel Package** → **Run workflow**
 2. Download artifact `xmoney-cpanel-package.zip`

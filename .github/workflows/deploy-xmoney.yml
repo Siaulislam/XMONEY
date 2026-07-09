@@ -5,7 +5,8 @@
 #   /home/smartdms/public_html/
 # Public URL:
 #   https://smartdms.me/
-# Manual deploy only. Do not auto-deploy on push.
+# Auto-deploy on push to main + optional manual run.
+# No environment approval gate — deploys directly via FTP secrets.
 #
 # Required GitHub Secrets (exact names):
 #   FTP_HOST, FTP_PORT, FTP_USERNAME, FTP_PASSWORD, FTP_REMOTE_PATH
@@ -19,6 +20,8 @@
 name: Deploy XMONEY
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 concurrency:
