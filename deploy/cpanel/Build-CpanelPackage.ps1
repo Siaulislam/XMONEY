@@ -171,6 +171,65 @@ After upload:
    - https://smartdms.me/api/v1/health
 "@ | Set-Content (Join-Path $Out 'UPLOAD_TO_PUBLIC_HTML.txt') -Encoding UTF8
 
+@"
+XMONEY SERVER CHECKLIST (verify in cPanel after upload)
+=======================================================
+
+Your folder structure is CORRECT if public_html contains:
+  admin/   api/   config/   database/   src/   storage/   index.html   .htaccess
+
+CRITICAL FILES — open each path in File Manager:
+
+[ ] public_html/src/assets/css/xmoney.css
+[ ] public_html/src/assets/css/tokens.css
+[ ] public_html/src/assets/branding/xmoney-logo-nav.png
+[ ] public_html/config/runtime-config.js
+[ ] public_html/api/.env          (copy from api/.env.example)
+[ ] public_html/api/vendor/       (created by composer install)
+[ ] public_html/api/public/index.php
+
+AFTER UPLOAD — run in cPanel Terminal:
+
+  cd ~/public_html/api
+  cp .env.example .env
+  nano .env
+  composer install --no-dev --optimize-autoloader
+
+Fill .env with:
+  DB_NAME=smartdms_XMONEY
+  DB_USER=smartdms_xmoney
+  DB_PASS=your_password
+  JWT_SECRET=long_random_secret_min_32_chars
+  APP_URL=https://smartdms.me/api
+
+TEST URLS:
+  https://smartdms.me/src/assets/css/xmoney.css   -> must show CSS (not 404)
+  https://smartdms.me/config/runtime-config.js    -> must show JS config
+  https://smartdms.me/api/v1/health               -> must return JSON (not 500)
+
+WHY PAGE LOOKS UNSTYLED:
+  xmoney.css is missing or css/ folder is empty -> re-upload full zip contents.
+
+WHY API SHOWS 500:
+  api/vendor/ missing OR api/.env missing -> run composer + create .env.
+"@ | Set-Content (Join-Path $Out 'SERVER_CHECKLIST.txt') -Encoding UTF8
+
+# Optional: bundle Composer vendor if composer is available locally
+$composer = Get-Command composer -ErrorAction SilentlyContinue
+if ($composer) {
+  Write-Host 'Installing API dependencies into package (vendor/)...'
+  Push-Location (Join-Path $Out 'api')
+  composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist 2>&1 | Write-Host
+  Pop-Location
+  if (Test-Path (Join-Path $Out 'api\vendor\autoload.php')) {
+    Write-Host 'API vendor/ included in package.'
+  } else {
+    Write-Host 'WARNING: vendor/ not created — run composer install on server after upload.'
+  }
+} else {
+  Write-Host 'Composer not on PATH — run composer install on server after upload.'
+}
+
 # Zip
 $zip = Join-Path $PSScriptRoot 'dist\xmoney-cpanel-package.zip'
 if (Test-Path $zip) { Remove-Item $zip -Force }
