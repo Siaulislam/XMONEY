@@ -8,7 +8,7 @@
 #>
 param(
   [switch]$CheckApi,
-  [string]$ApiBase = 'https://qamar.tasjeel.ae/xmoney/api'
+  [string]$ApiBase = 'https://qamar.tasjeel.ae/api'
 )
 
 $ErrorActionPreference = 'Stop'

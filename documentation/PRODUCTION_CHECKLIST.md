@@ -17,7 +17,7 @@
 - [ ] Strong `JWT_SECRET` (32+ random bytes)
 - [ ] `CORS_ALLOWED_ORIGINS` restricted to production domains
 - [ ] Upload directory writable (`storage/uploads` or configured path)
-- [ ] `php scripts/smoke-test.php https://your-domain/xmoney/api` — all checks pass
+- [ ] `php scripts/smoke-test.php https://your-domain/api` — all checks pass
 - [ ] Rate limits verified on auth endpoints
 - [ ] Payment/SMS providers remain placeholder until authorized
 
@@ -45,7 +45,7 @@
 
 ## Infrastructure
 
-- [ ] FTP/deploy path: `/home/smartdms/public_html/xmoney/`
+- [ ] FTP/deploy path: `/home/smartdms/public_html/`
 - [ ] `.htaccess` routes API to `backend-api/public`
 - [ ] PHP 8.1+ with required extensions (pdo_mysql, json, mbstring, fileinfo)
 - [ ] Cron/queue not required for phase 1 (document if added later)

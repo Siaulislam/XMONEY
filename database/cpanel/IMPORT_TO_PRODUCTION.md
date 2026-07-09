@@ -32,7 +32,7 @@
 ## After import — set admin password (on server later)
 
 ```bash
-cd ~/public_html/xmoney/api
+cd ~/public_html/api
 php scripts/seed-admin.php "ChangeMe@XMONEY2026"
 ```
 

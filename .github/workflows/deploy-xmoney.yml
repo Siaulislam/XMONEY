@@ -2,10 +2,10 @@
 # XMONEY — Production deploy to cPanel (isolated)
 # ============================================================
 # Approved deploy target (this hosting):
-#   /home/smartdms/public_html/xmoney/
+#   /home/smartdms/public_html/
 # Public URL:
-#   https://qamar.tasjeel.ae/xmoney/
-# NEVER deploy to /public_html/ root (main site root).
+#   https://qamar.tasjeel.ae/
+# Manual deploy only. Do not auto-deploy on push.
 #
 # Required GitHub Secrets (exact names):
 #   FTP_HOST, FTP_PORT, FTP_USERNAME, FTP_PASSWORD, FTP_REMOTE_PATH
@@ -67,7 +67,7 @@ jobs:
             exit 1
           fi
 
-      - name: HARD FAIL unless FTP path is XMONEY-only
+      - name: HARD FAIL unless FTP path is hosting root
         env:
           FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
         run: |
@@ -84,34 +84,16 @@ jobs:
           echo "Configured FTP_REMOTE_PATH (raw): ${PATH_RAW}"
           echo "Normalized path: ${PATH_TRIM}/"
 
-          # Absolute deny list — would overwrite the whole site
+          # Approved production root only
           case "$PATH_TRIM" in
-            /public_html|/|/home/smartdms/public_html|/home/smartdms/smartdms.me)
-              echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' targets the whole site or domain root. Must be the xmoney subfolder only."
+            /home/smartdms/public_html|/public_html)
+              echo "PATH VALIDATION PASSED: deploy target is hosting root (${PATH_TRIM}/)."
+              ;;
+            /|/home/smartdms/smartdms.me)
+              echo "::error::REFUSED: FTP_REMOTE_PATH='${PATH_RAW}' is not the approved public_html root for this hosting."
               exit 1
               ;;
           esac
-
-          # Approved XMONEY folder ONLY (never parent public_html)
-          case "$PATH_TRIM" in
-            /home/smartdms/public_html/xmoney|/public_html/xmoney)
-              echo "PATH VALIDATION PASSED: deploy target is XMONEY-only (${PATH_TRIM}/)."
-              ;;
-            *)
-              echo "::error::REFUSED: FTP_REMOTE_PATH must be exactly:"
-              echo "  /home/smartdms/public_html/xmoney/"
-              echo "  (or /public_html/xmoney/)"
-              echo "Got: '${PATH_RAW}'"
-              echo "This protects the main site root from being overwritten."
-              exit 1
-              ;;
-          esac
-
-          BASE="$(basename "$PATH_TRIM")"
-          if [ "$BASE" != "xmoney" ]; then
-            echo "::error::REFUSED: path basename must be lowercase xmoney (got '${BASE}')"
-            exit 1
-          fi
 
       - name: Validate XMONEY database + APP_URL (isolation)
         env:
@@ -141,15 +123,15 @@ jobs:
 
           # Expected production API URL for this hosting
           APP_TRIM="${XMONEY_APP_URL%/}"
-          if [[ "$APP_TRIM" != "https://qamar.tasjeel.ae/xmoney/api" ]]; then
-            echo "::warning::XMONEY_APP_URL is '${XMONEY_APP_URL}' — expected https://qamar.tasjeel.ae/xmoney/api"
+          if [[ "$APP_TRIM" != "https://qamar.tasjeel.ae/api" ]]; then
+            echo "::warning::XMONEY_APP_URL is '${XMONEY_APP_URL}' — expected https://qamar.tasjeel.ae/api"
           fi
           if [[ "${XMONEY_APP_URL}" != http* ]]; then
             echo "::error::XMONEY_APP_URL must start with http:// or https://"
             exit 1
           fi
-          if [[ "${XMONEY_APP_URL,,}" != *"/xmoney/api"* ]]; then
-            echo "::error::XMONEY_APP_URL must include /xmoney/api"
+          if [[ "${XMONEY_APP_URL,,}" != *"/api"* ]]; then
+            echo "::error::XMONEY_APP_URL must include /api"
             exit 1
           fi
 
@@ -191,7 +173,7 @@ jobs:
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
-          # If APP_URL is https://domain/xmoney/api → CORS https://domain
+          # If APP_URL is https://domain/api → CORS https://domain
           CORS_ORIGIN="$(echo -n "$XMONEY_APP_URL" | sed -E 's#(https?://[^/]+).*#\1#')"
 
           cat > "$PKG/api/.env" <<EOF
@@ -233,7 +215,7 @@ jobs:
           EOF
           sed -i 's/^[[:space:]]*//' "$PKG/api/.env"
 
-          # Derive web/admin base path from APP_URL path (e.g. /Xmoney/ or /)
+          # Derive web/admin base path from APP_URL path (e.g. / or /subsite/)
           APP_PATH="$(echo -n "$XMONEY_APP_URL" | sed -E 's#https?://[^/]+##; s#/api/?$##')"
           if [ -z "$APP_PATH" ] || [ "$APP_PATH" = "/" ]; then
             WEB_BASE="/"
@@ -292,7 +274,7 @@ jobs:
           XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
         run: |
           set -euo pipefail
-          # APP_URL should be like https://domain/xmoney/api
+          # APP_URL should be like https://domain/api
           HEALTH_URL="${XMONEY_APP_URL%/}/v1/health"
           echo "Checking: $HEALTH_URL"
           # Allow time for FTP settle

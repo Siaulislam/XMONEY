@@ -9,14 +9,14 @@ XMONEY is designed to run **beside** an existing site without touching it:
 
 | Resource | XMONEY | Existing site |
 |----------|--------|---------------|
-| Folder | `public_html/xmoney/` only | Untouched |
+| Folder | `public_html/` only | Active root |
 | Database | `smartdms_XMONEY` | Untouched |
 | DB user | `smartdms_xmoney` | Untouched |
-| Config | `xmoney/api/.env` | Untouched |
+| Config | `api/.env` | Active deployment config |
 
 Read: [documentation/ISOLATION.md](documentation/ISOLATION.md) · [documentation/CPANEL_DEPLOYMENT.md](documentation/CPANEL_DEPLOYMENT.md)
 
-When you are ready, fill `deploy/cpanel/CREDENTIALS.template.txt` (copy to `CREDENTIALS.local.txt`) and we will create the DB, import tables, upload only into `xmoney/`, and configure env — without modifying your existing project.
+When you are ready, fill `deploy/cpanel/CREDENTIALS.template.txt` (copy to `CREDENTIALS.local.txt`) and we will create the DB, import tables, upload into `public_html/`, and configure env for the root deployment.
 
 ## Project structure
 
@@ -65,7 +65,7 @@ cd C:\XMONEY\deploy\cpanel
 .\Build-CpanelPackage.ps1
 ```
 
-Upload the package **only** into `public_html/xmoney/`.
+Upload the package **only** into `public_html/`.
 
 ## Documentation
 

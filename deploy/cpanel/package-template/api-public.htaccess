@@ -1,5 +1,5 @@
 # XMONEY API — Apache front controller
-# Lives at: public_html/xmoney/api/public/.htaccess
+# Lives at: public_html/api/public/.htaccess
 
 <IfModule mod_rewrite.c>
   RewriteEngine On

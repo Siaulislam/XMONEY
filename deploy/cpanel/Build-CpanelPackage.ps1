@@ -4,8 +4,8 @@
 
 .DESCRIPTION
   Creates deploy/cpanel/dist/xmoney-cpanel-package/ containing ONLY XMONEY files.
-  Upload that folder's CONTENTS into public_html/xmoney/ on the server.
-  This script never touches any existing project files on the server.
+  Upload that folder's CONTENTS into public_html/ on the server.
+  This script never touches files outside the XMONEY deployment set.
 
 .EXAMPLE
   .\Build-CpanelPackage.ps1
@@ -113,9 +113,9 @@ Get-ChildItem (Join-Path $Out 'admin') -Filter '*.html' -File | ForEach-Object {
 @"
 XMONEY cPanel Package
 =====================
-Upload the CONTENTS of this folder to: public_html/xmoney/
+Upload the CONTENTS of this folder to: public_html/
 
-DO NOT upload into or overwrite any other public_html folder.
+Upload into the approved hosting root only.
 
 Next steps:
 1. Create MySQL database + user for XMONEY only (see database/)
@@ -123,7 +123,7 @@ Next steps:
 3. Copy api/.env.example -> api/.env and fill XMONEY credentials
 4. Copy config/runtime-config.example.js -> config/runtime-config.js and set apiBaseUrl
 5. On server: cd api && composer install --no-dev && php scripts/seed-admin.php
-6. Visit /xmoney/ and /xmoney/admin/ and /xmoney/api/v1/health
+6. Visit / and /admin/ and /api/v1/health
 
 Isolation policy: documentation/ISOLATION.md
 "@ | Set-Content (Join-Path $Out 'DEPLOY_README.txt') -Encoding UTF8
@@ -137,4 +137,4 @@ Write-Host ""
 Write-Host "Package ready:"
 Write-Host "  Folder: $Out"
 Write-Host "  Zip:    $zip"
-Write-Host "Upload ONLY into public_html/xmoney/"
+Write-Host "Upload ONLY into public_html/"

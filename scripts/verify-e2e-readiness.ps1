@@ -4,10 +4,10 @@
 
 .EXAMPLE
   .\scripts\verify-e2e-readiness.ps1
-  .\scripts\verify-e2e-readiness.ps1 -ApiBase https://qamar.tasjeel.ae/xmoney/api
+  .\scripts\verify-e2e-readiness.ps1 -ApiBase https://qamar.tasjeel.ae/api
 #>
 param(
-  [string]$ApiBase = 'https://qamar.tasjeel.ae/xmoney/api'
+  [string]$ApiBase = 'https://qamar.tasjeel.ae/api'
 )
 
 $ErrorActionPreference = 'Continue'

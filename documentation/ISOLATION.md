@@ -5,8 +5,8 @@ XMONEY is a **completely independent application** on the same cPanel account as
 ## Hard rules
 
 1. **Folder isolation**  
-   Deploy only under `public_html/xmoney/` (or a dedicated subdomain document root that points only to XMONEY).  
-   Never write into, overwrite, rename, or delete sibling folders under `public_html/`.
+   Deploy only under `public_html/` for this hosting layout.  
+   Never write outside the approved XMONEY deployment files in that root.
 
 2. **Database isolation**  
    Use the dedicated XMONEY MySQL database: `smartdms_XMONEY`.  
@@ -16,7 +16,7 @@ XMONEY is a **completely independent application** on the same cPanel account as
    Use the dedicated XMONEY MySQL user: `smartdms_xmoney` with grants **only** on `smartdms_XMONEY`.
 
 4. **Config isolation**  
-   All secrets live in `backend-api/.env` (production: `public_html/xmoney/api/.env`).  
+   All secrets live in `backend-api/.env` (production: `public_html/api/.env`).  
    Never hard-code DB name, user, password, domain, or API URLs in source code.
 
 5. **Migration isolation**  
@@ -29,20 +29,14 @@ XMONEY is a **completely independent application** on the same cPanel account as
 
 ```
 public_html/
-├── .github/                   ← leave untouched
-├── admin-panel/               ← leave untouched
-├── backend-api/               ← leave untouched
-├── frontend-web/              ← leave untouched
-├── (other existing folders)   ← leave untouched
-└── xmoney/                    ← XMONEY ONLY
-    ├── .htaccess
-    ├── index.html             (customer web)
-    ├── admin/                 (admin panel)
-    ├── api/                   (backend API)
-    ├── storage/               (uploads, logs, backups)
-    └── config/                (public runtime URLs only)
+├── .htaccess                  (XMONEY root rules)
+├── index.html                 (customer web)
+├── admin/                     (admin panel)
+├── api/                       (backend API)
+├── storage/                   (uploads, logs, backups)
+└── config/                    (public runtime URLs only)
 ```
 
 ## Optional subdomain (recommended)
 
-Point `xmoney.yourdomain.com` (or `api.xmoney…` / `admin.xmoney…`) at `public_html/xmoney` without changing the main site document root.
+If a subdomain is introduced later, point it at `public_html` only if it is intended to serve this XMONEY deployment directly.

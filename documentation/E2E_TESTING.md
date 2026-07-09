@@ -8,7 +8,7 @@ Use this when the platform is ready for full manual and automated E2E validation
 |------|--------|
 | Database `smartdms_XMONEY` with schema + seeds | Required |
 | Migrations 002 + 003 applied | Required (003 confirmed on `smartdms_XMONEY`) |
-| Backend API deployed to `/xmoney/api` | Required — DB-only is not enough for browser/mobile tests |
+| Backend API deployed to `/api` | Required — DB-only is not enough for browser/mobile tests |
 | `APP_DEBUG=true` on API (staging only) | Required for OTP debug + dev wallet |
 | API reachable from browser/mobile | Required |
 
@@ -16,16 +16,16 @@ Use this when the platform is ready for full manual and automated E2E validation
 
 ```bash
 # Read-only smoke test
-php backend-api/scripts/smoke-test.php https://qamar.tasjeel.ae/xmoney/api
+php backend-api/scripts/smoke-test.php https://qamar.tasjeel.ae/api
 
 # Full write flow (register → OTP → wallet → transfer → admin)
-php backend-api/scripts/e2e-flow-test.php https://qamar.tasjeel.ae/xmoney/api
+php backend-api/scripts/e2e-flow-test.php https://qamar.tasjeel.ae/api
 ```
 
 Set optional env vars:
 
 ```bash
-XMONEY_API_BASE=https://qamar.tasjeel.ae/xmoney/api
+XMONEY_API_BASE=https://qamar.tasjeel.ae/api
 XMONEY_ADMIN_EMAIL=admin@xmoney.local
 XMONEY_ADMIN_PASSWORD=your-admin-password
 ```

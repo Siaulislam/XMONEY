@@ -4,9 +4,9 @@
 
 | Setting | Exact value |
 |---------|-------------|
-| **FTP_REMOTE_PATH** | `/home/smartdms/public_html/xmoney/` |
-| **Public site** | `https://qamar.tasjeel.ae/xmoney/` |
-| **XMONEY_APP_URL** | `https://qamar.tasjeel.ae/xmoney/api` |
+| **FTP_REMOTE_PATH** | `/home/smartdms/public_html/` |
+| **Public site** | `https://qamar.tasjeel.ae/` |
+| **XMONEY_APP_URL** | `https://qamar.tasjeel.ae/api` |
 | **XMONEY_DB_HOST** | `localhost` |
 | **XMONEY_DB_NAME** | `smartdms_XMONEY` |
 | **XMONEY_DB_USER** | `smartdms_xmoney` |
@@ -28,19 +28,19 @@
 | `FTP_PORT` | `21` |
 | `FTP_USERNAME` | FTP user for XMONEY (or account with access only as needed) |
 | `FTP_PASSWORD` | FTP password |
-| `FTP_REMOTE_PATH` | `/home/smartdms/public_html/xmoney/` |
+| `FTP_REMOTE_PATH` | `/home/smartdms/public_html/` |
 | `XMONEY_DB_HOST` | `localhost` |
 | `XMONEY_DB_NAME` | `smartdms_XMONEY` |
 | `XMONEY_DB_USER` | `smartdms_xmoney` |
 | `XMONEY_DB_PASS` | XMONEY DB password |
 | `XMONEY_JWT_SECRET` | 32+ random characters |
-| `XMONEY_APP_URL` | `https://qamar.tasjeel.ae/xmoney/api` |
+| `XMONEY_APP_URL` | `https://qamar.tasjeel.ae/api` |
 
 ---
 
 ## Safety
 
-- Deploys **only** into `public_html/xmoney/`
+- Deploys **only** into `public_html/`
 - Never syncs or cleans `public_html/` root
 - Uses database `smartdms_XMONEY` only
 - `dangerous-clean-slate: false`

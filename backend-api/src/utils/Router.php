@@ -106,16 +106,12 @@ final class Router
     }
 
     /**
-     * Normalize paths for local (/v1/...) and cPanel (/xmoney/api/v1/...).
+     * Normalize paths for local (/v1/...) and cPanel (/api/v1/...).
      */
     private static function normalizePath(string $path): string
     {
         // Strip known deployment prefixes until /v1 or /
         $prefixes = [
-            '/Xmoney/api/public',
-            '/Xmoney/api',
-            '/xmoney/api/public',
-            '/xmoney/api',
             '/api/public',
             '/api',
         ];

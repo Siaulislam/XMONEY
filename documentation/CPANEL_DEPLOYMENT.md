@@ -10,7 +10,7 @@ Full isolation rules: [ISOLATION.md](ISOLATION.md)
 
 | Resource | Required value |
 |----------|----------------|
-| Folder | `public_html/xmoney/` |
+| Folder | `public_html/` |
 | Database | `smartdms_XMONEY` |
 | DB user | `smartdms_xmoney` |
 | Privileges | ALL on XMONEY DB only |
@@ -24,7 +24,7 @@ Use the XMONEY database/user above exactly. **Never reuse** any other database o
 Fill `deploy/cpanel/CREDENTIALS.template.txt` and send securely. Required:
 
 - cPanel URL / username / password (or API token)
-- Preferred folder: `public_html/xmoney/`
+- Preferred folder: `public_html/`
 - Domain or subdomain for XMONEY
 - Confirmation that a **new** database + user may be created
 
@@ -67,7 +67,7 @@ mysql -h localhost -u smartdms_xmoney -p smartdms_XMONEY < 03_seed.sql
 
 ## Phase D — Upload project (XMONEY folder only)
 
-Upload the built package into **`public_html/xmoney/`** only.
+Upload the built package into **`public_html/`** only.
 
 Build locally:
 
@@ -78,7 +78,7 @@ cd C:\XMONEY\deploy\cpanel
 
 Output: `deploy/cpanel/dist/xmoney-cpanel-package/`
 
-Upload contents of that folder into `public_html/xmoney/`.
+Upload contents of that folder into `public_html/`.
 
 ---
 
@@ -90,7 +90,7 @@ Upload contents of that folder into `public_html/xmoney/`.
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://your-domain.com/xmoney/api
+APP_URL=https://your-domain.com/api
 
 DB_HOST=localhost
 DB_NAME=smartdms_XMONEY
@@ -105,7 +105,7 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com
 4. Set admin password:
 
 ```bash
-cd ~/public_html/xmoney/api
+cd ~/public_html/api
 php scripts/seed-admin.php "YourStrongAdminPassword"
 ```
 
@@ -116,8 +116,8 @@ php scripts/seed-admin.php "YourStrongAdminPassword"
 ## Phase F — Verify isolation
 
 - Existing site URL still loads unchanged
-- `https://your-domain.com/xmoney/` loads XMONEY
-- `https://your-domain.com/xmoney/api/v1/health` returns healthy
+- `https://your-domain.com/` loads XMONEY
+- `https://your-domain.com/api/v1/health` returns healthy
 - phpMyAdmin shows XMONEY tables **only** under `smartdms_XMONEY`
 - Existing database table list unchanged
 
@@ -125,6 +125,6 @@ php scripts/seed-admin.php "YourStrongAdminPassword"
 
 ## Future updates
 
-- Deploy only into `public_html/xmoney/`
+- Deploy only into `public_html/`
 - Run new migrations only against `smartdms_XMONEY`
 - Never run XMONEY SQL against the existing app database

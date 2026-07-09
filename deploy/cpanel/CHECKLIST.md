@@ -4,7 +4,7 @@ Use this when credentials are provided. Tick only XMONEY actions.
 
 ## Pre-flight
 - [ ] Existing site URL tested (baseline)
-- [ ] Confirmed deploy path: `public_html/xmoney/` only
+- [ ] Confirmed deploy path: `public_html/` only
 - [ ] Confirmed NEW database name (not existing app DB)
 - [ ] Confirmed NEW database user (grants only on XMONEY DB)
 
@@ -19,18 +19,18 @@ Use this when credentials are provided. Tick only XMONEY actions.
 
 ## Files
 - [ ] Build package: `deploy/cpanel/Build-CpanelPackage.ps1`
-- [ ] Upload into `public_html/xmoney/` only
+- [ ] Upload into `public_html/` only
 - [ ] Confirm sibling folders untouched
 - [ ] `api/.env` created from production template
 - [ ] `config/runtime-config.js` set with public API URL
-- [ ] `composer install --no-dev` inside `xmoney/api`
+- [ ] `composer install --no-dev` inside `api`
 - [ ] `php scripts/seed-admin.php` run
 - [ ] `storage/` writable
 
 ## Verify
 - [ ] Existing website still works
-- [ ] `/xmoney/` loads customer app
-- [ ] `/xmoney/admin/` loads admin
-- [ ] `/xmoney/api/v1/health` healthy
+- [ ] `/` loads customer app
+- [ ] `/admin/` loads admin
+- [ ] `/api/v1/health` healthy
 - [ ] Admin login works
 - [ ] No XMONEY tables in existing database

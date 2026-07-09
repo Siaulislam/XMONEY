@@ -1,6 +1,6 @@
 # XMONEY — API Reference (v1)
 
-Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
+Base path: `/v1` (local) or `/api/v1` (cPanel)
 
 ## Public
 
