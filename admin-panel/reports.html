@@ -22,23 +22,23 @@
   <script src="src/assets/js/xm-core.js"></script>
 </head>
 <body>
-  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo xm-logo--admin"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" width="132" height="36" class="xm-logo-img" /><span class="xm-logo-admin-tag">Admin</span></a></div></nav>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo xm-logo--admin"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" width="132" height="36" class="xm-logo-img" /><span class="xm-logo-admin-tag" data-i18n="admin.tag">Admin</span></a></div></nav>
   <div class="xm-dash">
     <aside class="xm-sidebar"></aside>
     <main class="xm-main">
-      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Reports</h1>
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem" data-i18n="admin.reportsTitle">Reports</h1>
       <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
-        <button class="xm-btn xm-btn-outline" data-type="daily">Daily</button>
-        <button class="xm-btn xm-btn-outline" data-type="monthly">Monthly</button>
-        <button class="xm-btn xm-btn-outline" data-type="revenue">Revenue</button>
-        <button class="xm-btn xm-btn-outline" data-type="failed">Failed</button>
-        <button class="xm-btn xm-btn-primary" id="exportBtn">Export CSV</button>
+        <button class="xm-btn xm-btn-outline" data-type="daily" data-i18n="admin.daily">Daily</button>
+        <button class="xm-btn xm-btn-outline" data-type="monthly" data-i18n="admin.monthly">Monthly</button>
+        <button class="xm-btn xm-btn-outline" data-type="revenue" data-i18n="admin.revenue">Revenue</button>
+        <button class="xm-btn xm-btn-outline" data-type="failed" data-i18n="admin.failed">Failed</button>
+        <button class="xm-btn xm-btn-primary" id="exportBtn" data-i18n="common.export">Export CSV</button>
       </div>
       <div class="xm-card">
         <div class="xm-table-wrap">
           <table class="xm-table">
-            <thead id="thead"><tr><th>Period</th><th>Transactions</th><th>Volume</th><th>Revenue</th><th>Failed</th></tr></thead>
-            <tbody id="body"><tr><td colspan="5">Select a report type…</td></tr></tbody>
+            <thead id="thead"><tr><th data-i18n="admin.period">Period</th><th data-i18n="admin.transactionsCount">Transactions</th><th data-i18n="common.volume">Volume</th><th data-i18n="admin.revenue">Revenue</th><th data-i18n="admin.failed">Failed</th></tr></thead>
+            <tbody id="body"><tr><td colspan="5" data-i18n="admin.selectReport">Select a report type…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -49,6 +49,7 @@
   <script>
     (async () => {
     if (!await XMONEY_ADMIN_SHELL.mountAsync('reports.html')) return;
+    const tt = (key, fallback) => (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t(key, fallback) : fallback;
     let lastRows = [];
     let lastType = 'daily';
 
@@ -58,22 +59,22 @@
       const head = document.getElementById('thead');
       const body = document.getElementById('body');
       if (type === 'failed') {
-        head.innerHTML = '<tr><th>Reference</th><th>Amount</th><th>Currency</th><th>Reason</th><th>Date</th></tr>';
+        head.innerHTML = `<tr><th>${tt('txn.reference', 'Reference')}</th><th>${tt('txn.send', 'Amount')}</th><th>${tt('wallet.currency', 'Currency')}</th><th>${tt('admin.failureReason', 'Reason')}</th><th>${tt('txn.date', 'Date')}</th></tr>`;
         body.innerHTML = rows.map(r => `<tr>
           <td>${r.reference_code}</td><td>${r.send_amount}</td><td>${r.source_currency}</td>
-          <td>${r.failure_reason || '—'}</td><td>${XMONEY.formatDate(r.created_at)}</td></tr>`).join('') || '<tr><td colspan="5">No failed transactions</td></tr>';
+          <td>${r.failure_reason || '—'}</td><td>${XMONEY.formatDate(r.created_at)}</td></tr>`).join('') || `<tr><td colspan="5">${tt('admin.noFailedTransactions', 'No failed transactions')}</td></tr>`;
         return;
       }
       if (type === 'revenue') {
-        head.innerHTML = '<tr><th>Day</th><th>Volume</th><th>Fees</th><th>Completed</th></tr>';
+        head.innerHTML = `<tr><th>${tt('admin.day', 'Day')}</th><th>${tt('common.volume', 'Volume')}</th><th>${tt('admin.fees', 'Fees')}</th><th>${tt('status.completed', 'Completed')}</th></tr>`;
         body.innerHTML = rows.map(r => `<tr>
-          <td>${r.day}</td><td>${Number(r.volume).toLocaleString()}</td><td>${Number(r.fees).toLocaleString()}</td><td>${r.completed}</td></tr>`).join('') || '<tr><td colspan="4">No data</td></tr>';
+          <td>${r.day}</td><td>${Number(r.volume).toLocaleString()}</td><td>${Number(r.fees).toLocaleString()}</td><td>${r.completed}</td></tr>`).join('') || `<tr><td colspan="4">${tt('common.noData', 'No data')}</td></tr>`;
         return;
       }
-      head.innerHTML = '<tr><th>Period</th><th>Transactions</th><th>Volume</th><th>Revenue</th><th>Failed</th></tr>';
+      head.innerHTML = `<tr><th>${tt('admin.period', 'Period')}</th><th>${tt('admin.transactionsCount', 'Transactions')}</th><th>${tt('common.volume', 'Volume')}</th><th>${tt('admin.revenue', 'Revenue')}</th><th>${tt('admin.failed', 'Failed')}</th></tr>`;
       body.innerHTML = rows.map(r => `<tr>
         <td>${r.day || r.period}</td><td>${r.txn_count}</td><td>${Number(r.volume).toLocaleString()}</td>
-        <td>${Number(r.revenue).toLocaleString()}</td><td>${r.failed_count}</td></tr>`).join('') || '<tr><td colspan="5">No data</td></tr>';
+        <td>${Number(r.revenue).toLocaleString()}</td><td>${r.failed_count}</td></tr>`).join('') || `<tr><td colspan="5">${tt('common.noData', 'No data')}</td></tr>`;
     }
 
     document.querySelectorAll('[data-type]').forEach(btn => btn.onclick = async () => {

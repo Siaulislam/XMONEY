@@ -22,15 +22,15 @@
   <script src="src/assets/js/xm-core.js"></script>
 </head>
 <body>
-  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo xm-logo--admin"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" width="132" height="36" class="xm-logo-img" /><span class="xm-logo-admin-tag">Admin</span></a></div></nav>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo xm-logo--admin"><img src="src/assets/branding/xmoney-logo-nav.png" alt="XMONEY" width="132" height="36" class="xm-logo-img" /><span class="xm-logo-admin-tag" data-i18n="admin.tag">Admin</span></a></div></nav>
   <div class="xm-dash">
     <aside class="xm-sidebar"></aside>
     <main class="xm-main">
-      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">All transfers</h1>
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem" data-i18n="admin.transactionsTitle">All transfers</h1>
       <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap">
-        <input id="q" class="xm-field" style="margin:0;padding:0.6rem;border:1.5px solid var(--xm-border);border-radius:10px" placeholder="Search reference / name" />
+        <input id="q" class="xm-field" style="margin:0;padding:0.6rem;border:1.5px solid var(--xm-border);border-radius:10px" placeholder="Search reference / name" data-i18n-placeholder="admin.searchTransfer" />
         <select id="status" style="padding:0.6rem;border-radius:10px;border:1.5px solid var(--xm-border)">
-          <option value="">All statuses</option>
+          <option value="" data-i18n="admin.allStatuses">All statuses</option>
           <option>created</option><option>pending_payment</option><option>processing</option>
           <option>under_review</option><option>completed</option><option>failed</option>
           <option>cancelled</option><option>refunded</option>
@@ -39,7 +39,7 @@
       <div class="xm-card">
         <div class="xm-table-wrap">
           <table class="xm-table">
-            <thead><tr><th>Ref</th><th>Sender</th><th>Receiver</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th data-i18n="txn.reference">Ref</th><th>Sender</th><th data-i18n="txn.receiver">Receiver</th><th data-i18n="txn.send">Amount</th><th data-i18n="common.status">Status</th><th data-i18n="admin.actions">Actions</th></tr></thead>
             <tbody id="body"></tbody>
           </table>
         </div>
@@ -51,6 +51,7 @@
   <script>
     (async () => {
     if (!await XMONEY_ADMIN_SHELL.mountAsync('transactions.html')) return;
+    const tt = (key, fallback) => (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t(key, fallback) : fallback;
     async function load() {
       const q = document.getElementById('q').value;
       const status = document.getElementById('status').value;
@@ -67,7 +68,7 @@
           <td>${XMONEY.statusBadge(t.status)}</td>
           <td>
             <select data-uuid="${t.uuid}" style="font-size:0.8rem;padding:0.3rem;border-radius:6px">
-              <option value="">Update…</option>
+              <option value="">${tt('admin.update', 'Update…')}</option>
               <option value="processing">processing</option>
               <option value="under_review">under_review</option>
               <option value="completed">completed</option>
@@ -76,7 +77,7 @@
               <option value="refunded">refunded</option>
             </select>
           </td>
-        </tr>`).join('') || '<tr><td colspan="6">No transactions</td></tr>';
+        </tr>`).join('') || `<tr><td colspan="6">${tt('admin.noTransactions', 'No transactions')}</td></tr>`;
       document.querySelectorAll('select[data-uuid]').forEach(sel => {
         sel.onchange = async () => {
           if (!sel.value) return;

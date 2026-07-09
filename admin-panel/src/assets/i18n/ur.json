@@ -98,10 +98,19 @@
   "admin.userManagement": "صارف نظم و نسق",
   "admin.operationsDashboard": "آپریشنز ڈیش بورڈ",
   "admin.topCorridors": "نمایاں کوریڈورز",
+  "admin.transactionsTitle": "تمام ٹرانسفرز",
+  "admin.reportsTitle": "رپورٹس",
+  "admin.daily": "روزانہ",
+  "admin.monthly": "ماہانہ",
+  "admin.revenue": "آمدنی",
+  "admin.failed": "ناکام",
   "otp.title": "OTP کی تصدیق کریں",
   "otp.verify": "تصدیق کریں",
   "otp.sent": "OTP بھیج دیا گیا",
   "mobile.transfer.insufficientBalance": "والیٹ بیلنس ناکافی ہے",
   "mobile.wallet.available": "دستیاب",
-  "mobile.ben.none": "ابھی کوئی وصول کنندہ نہیں"
+  "mobile.ben.none": "ابھی کوئی وصول کنندہ نہیں",
+  "mobile.profile.edit": "پروفائل میں ترمیم",
+  "mobile.txn.statusHistory": "اسٹیٹس ہسٹری",
+  "mobile.settings.security": "سیکیورٹی"
 }

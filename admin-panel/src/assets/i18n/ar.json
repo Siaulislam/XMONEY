@@ -98,10 +98,19 @@
   "admin.userManagement": "إدارة المستخدمين",
   "admin.operationsDashboard": "لوحة العمليات",
   "admin.topCorridors": "أعلى المسارات",
+  "admin.transactionsTitle": "كل التحويلات",
+  "admin.reportsTitle": "التقارير",
+  "admin.daily": "يومي",
+  "admin.monthly": "شهري",
+  "admin.revenue": "الإيرادات",
+  "admin.failed": "فاشل",
   "otp.title": "التحقق من OTP",
   "otp.verify": "تحقق",
   "otp.sent": "تم إرسال OTP",
   "mobile.transfer.insufficientBalance": "رصيد المحفظة غير كافٍ",
   "mobile.wallet.available": "المتاح",
-  "mobile.ben.none": "لا يوجد مستفيدون بعد"
+  "mobile.ben.none": "لا يوجد مستفيدون بعد",
+  "mobile.profile.edit": "تعديل الملف الشخصي",
+  "mobile.txn.statusHistory": "سجل الحالة",
+  "mobile.settings.security": "الأمان"
 }
