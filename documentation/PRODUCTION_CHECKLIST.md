@@ -5,8 +5,8 @@
 ## Database
 
 - [ ] `smartdms_XMONEY` imported with core schema (`database/schema.sql` or migration `001`)
-- [ ] Migration `002_transfer_daily_limit_setting.sql` applied
-- [ ] Migration `003_wallet_payments_analytics.sql` applied via phpMyAdmin
+- [x] Migration `002_transfer_daily_limit_setting.sql` applied
+- [x] Migration `003_wallet_payments_analytics.sql` applied via phpMyAdmin (`wallet_id`, `purpose` on `payments`)
 - [ ] `schema_migrations` table lists all applied versions
 - [ ] Admin user seeded (`php backend-api/scripts/seed-admin.php`)
 - [ ] Production DB credentials in `backend-api/.env` (not committed)
