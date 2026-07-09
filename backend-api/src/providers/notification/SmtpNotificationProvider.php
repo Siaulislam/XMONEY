@@ -29,7 +29,14 @@ final class SmtpNotificationProvider implements NotificationProviderInterface
             return false;
         }
 
-        $from = App::env('SMTP_FROM', App::env('MAIL_FROM', 'noreply@xmoney.local'));
+        $fromAddress = App::env('SMTP_FROM')
+            ?? App::env('MAIL_FROM')
+            ?? App::env('MAIL_FROM_ADDRESS')
+            ?? 'noreply@xmoney.local';
+        $fromName = App::env('MAIL_FROM_NAME', 'XMONEY') ?? 'XMONEY';
+        $from = str_contains($fromAddress, '<')
+            ? $fromAddress
+            : sprintf('%s <%s>', $fromName, $fromAddress);
         $port = (int) (App::env('SMTP_PORT', '587') ?? '587');
         $secure = strtolower((string) (App::env('SMTP_SECURE', 'tls') ?? 'tls'));
 

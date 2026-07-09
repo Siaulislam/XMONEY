@@ -9,6 +9,19 @@ Production authentication for customers and staff.
 2. OTP emailed (logged in local/dev)
 3. `POST /v1/auth/verify-otp` purpose=`registration` → status `active`
 
+### Production OTP email
+- Configure SMTP in `public_html/api/.env`
+- Recommended mailbox for this hosting: `xmoney@smartdms.me`
+- Recommended SMTP:
+  - `MAIL_DRIVER=smtp`
+  - `SMTP_HOST=mail.smartdms.me`
+  - `SMTP_PORT=465`
+  - `SMTP_SECURE=ssl`
+  - `SMTP_USER=xmoney@smartdms.me`
+  - `SMTP_PASS=<server-only secret>`
+  - `MAIL_FROM_ADDRESS=xmoney@smartdms.me`
+  - `MAIL_FROM_NAME=XMONEY`
+
 ### Login
 1. Lock check → password verify → reject `pending` / blocked statuses
 2. Reset failed-login counter
