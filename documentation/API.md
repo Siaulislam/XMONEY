@@ -17,6 +17,8 @@ Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
 | POST | `/auth/reset-password` | Reset password + revoke all sessions |
 | GET | `/currencies` | Active currencies |
 | GET | `/rates` | Active customer rates |
+| GET | `/settings/public` | Transfer limits + public platform settings |
+| POST | `/webhooks/payments/{provider}` | Payment provider webhooks (stub + future gateways) |
 | POST | `/admin/auth/login` | Staff login |
 | POST | `/admin/auth/logout` | Staff logout |
 | POST | `/admin/auth/refresh` | Staff token refresh |
@@ -36,6 +38,8 @@ Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
 | POST | `/transfers/quote` |
 | GET/POST | `/transfers` |
 | GET/POST | `/transfers/{uuid}`, `…/confirm`, `…/cancel` |
+| GET | `/payments/{uuid}` |
+| POST | `/payments/{uuid}/simulate-capture` | Development only (`APP_DEBUG`) |
 | GET/POST | `/wallet`, `/wallet/history`, `/wallet/deposit` |
 
 ## Admin (Bearer admin JWT)
@@ -44,8 +48,11 @@ Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
 |--------|----------|
 | GET | `/admin/dashboard` |
 | GET | `/admin/users` |
+| GET | `/admin/users/{uuid}` |
 | POST | `/admin/users/{uuid}/block` |
+| POST | `/admin/users/{uuid}/unblock` |
 | GET | `/admin/kyc/pending` |
+| GET | `/admin/kyc/{uuid}/file` |
 | POST | `/admin/kyc/{uuid}/review` |
 | GET | `/admin/transactions` |
 | POST | `/admin/transactions/{uuid}/status` |
@@ -54,6 +61,9 @@ Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
 | GET/PATCH | `/admin/currencies`, `/admin/currencies/{code}` |
 | GET | `/admin/reports?type=daily\|monthly\|revenue\|failed` |
 | GET | `/admin/audit-logs` |
+| GET/PUT | `/admin/settings` |
+
+Provider configuration: see [PROVIDERS.md](./PROVIDERS.md).
 
 ## Auth headers
 
