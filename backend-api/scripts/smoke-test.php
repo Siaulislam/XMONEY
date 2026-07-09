@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * Usage:
  *   php scripts/smoke-test.php
- *   php scripts/smoke-test.php https://qamar.tasjeel.ae/api
+ *   php scripts/smoke-test.php https://smartdms.me/api
  *
  * Optional env:
  *   XMONEY_API_BASE, XMONEY_ADMIN_EMAIL, XMONEY_ADMIN_PASSWORD

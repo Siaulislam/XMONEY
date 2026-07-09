@@ -16,16 +16,16 @@ Use this when the platform is ready for full manual and automated E2E validation
 
 ```bash
 # Read-only smoke test
-php backend-api/scripts/smoke-test.php https://qamar.tasjeel.ae/api
+php backend-api/scripts/smoke-test.php https://smartdms.me/api
 
 # Full write flow (register → OTP → wallet → transfer → admin)
-php backend-api/scripts/e2e-flow-test.php https://qamar.tasjeel.ae/api
+php backend-api/scripts/e2e-flow-test.php https://smartdms.me/api
 ```
 
 Set optional env vars:
 
 ```bash
-XMONEY_API_BASE=https://qamar.tasjeel.ae/api
+XMONEY_API_BASE=https://smartdms.me/api
 XMONEY_ADMIN_EMAIL=admin@xmoney.local
 XMONEY_ADMIN_PASSWORD=your-admin-password
 ```

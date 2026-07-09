@@ -5,8 +5,8 @@
 | Setting | Exact value |
 |---------|-------------|
 | **FTP_REMOTE_PATH** | `/home/smartdms/public_html/` |
-| **Public site** | `https://qamar.tasjeel.ae/` |
-| **XMONEY_APP_URL** | `https://qamar.tasjeel.ae/api` |
+| **Public site** | `https://smartdms.me/` |
+| **XMONEY_APP_URL** | `https://smartdms.me/api` |
 | **XMONEY_DB_HOST** | `localhost` |
 | **XMONEY_DB_NAME** | `smartdms_XMONEY` |
 | **XMONEY_DB_USER** | `smartdms_xmoney` |
@@ -34,7 +34,7 @@
 | `XMONEY_DB_USER` | `smartdms_xmoney` |
 | `XMONEY_DB_PASS` | XMONEY DB password |
 | `XMONEY_JWT_SECRET` | 32+ random characters |
-| `XMONEY_APP_URL` | `https://qamar.tasjeel.ae/api` |
+| `XMONEY_APP_URL` | `https://smartdms.me/api` |
 
 ---
 

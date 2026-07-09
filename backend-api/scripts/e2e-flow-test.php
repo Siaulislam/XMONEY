@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * Usage:
  *   php scripts/e2e-flow-test.php
- *   php scripts/e2e-flow-test.php https://qamar.tasjeel.ae/api
+ *   php scripts/e2e-flow-test.php https://smartdms.me/api
  */
 
 $base = rtrim($argv[1] ?? getenv('XMONEY_API_BASE') ?: 'http://localhost:8080', '/');

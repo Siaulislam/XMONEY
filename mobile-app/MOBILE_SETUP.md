@@ -30,7 +30,7 @@ Then replace default Flutter icons with files under `assets/android/` and `asset
 `assets/config.json` points at the API base URL (default production staging):
 
 ```json
-{ "apiBaseUrl": "https://qamar.tasjeel.ae/api" }
+{ "apiBaseUrl": "https://smartdms.me/api" }
 ```
 
 For local API testing, edit before `flutter run`.

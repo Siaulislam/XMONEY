@@ -8,7 +8,7 @@
 #>
 param(
   [switch]$CheckApi,
-  [string]$ApiBase = 'https://qamar.tasjeel.ae/api'
+  [string]$ApiBase = 'https://smartdms.me/api'
 )
 
 $ErrorActionPreference = 'Stop'

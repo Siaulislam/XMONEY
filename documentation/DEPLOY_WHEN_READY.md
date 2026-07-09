@@ -4,7 +4,7 @@
 
 ## What deploy unlocks
 
-Until the API is uploaded to `/home/smartdms/public_html/`, browser and mobile clients cannot complete E2E tests against `https://qamar.tasjeel.ae/api` (health endpoint currently unavailable).
+Until the API is uploaded to `/home/smartdms/public_html/`, browser and mobile clients cannot complete E2E tests against `https://smartdms.me/api` (health endpoint currently unavailable).
 
 ## When you are ready
 
@@ -12,8 +12,8 @@ Until the API is uploaded to `/home/smartdms/public_html/`, browser and mobile c
 2. Run workflow **Deploy XMONEY** manually (`workflow_dispatch`) — auto-deploy on push is disabled.
 3. After upload, verify:
    ```bash
-   curl https://qamar.tasjeel.ae/api/v1/health
-   php backend-api/scripts/smoke-test.php https://qamar.tasjeel.ae/api
+   curl https://smartdms.me/api/v1/health
+   php backend-api/scripts/smoke-test.php https://smartdms.me/api
    ```
 4. For **staging E2E** (OTP debug + dev wallet deposit), use `config/env.staging.example` as the basis for server `api/.env` (`APP_DEBUG=true`). Switch to production values (`APP_DEBUG=false`) only for go-live.
 

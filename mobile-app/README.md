@@ -28,7 +28,7 @@ Configure API URL in `assets/config.json`:
 
 ```json
 {
-  "apiBaseUrl": "https://qamar.tasjeel.ae/api"
+  "apiBaseUrl": "https://smartdms.me/api"
 }
 ```
 

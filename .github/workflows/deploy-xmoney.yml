@@ -4,7 +4,7 @@
 # Approved deploy target (this hosting):
 #   /home/smartdms/public_html/
 # Public URL:
-#   https://qamar.tasjeel.ae/
+#   https://smartdms.me/
 # Manual deploy only. Do not auto-deploy on push.
 #
 # Required GitHub Secrets (exact names):
@@ -123,8 +123,8 @@ jobs:
 
           # Expected production API URL for this hosting
           APP_TRIM="${XMONEY_APP_URL%/}"
-          if [[ "$APP_TRIM" != "https://qamar.tasjeel.ae/api" ]]; then
-            echo "::warning::XMONEY_APP_URL is '${XMONEY_APP_URL}' — expected https://qamar.tasjeel.ae/api"
+          if [[ "$APP_TRIM" != "https://smartdms.me/api" ]]; then
+            echo "::warning::XMONEY_APP_URL is '${XMONEY_APP_URL}' — expected https://smartdms.me/api"
           fi
           if [[ "${XMONEY_APP_URL}" != http* ]]; then
             echo "::error::XMONEY_APP_URL must start with http:// or https://"

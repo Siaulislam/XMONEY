@@ -4,10 +4,10 @@
 
 .EXAMPLE
   .\scripts\verify-e2e-readiness.ps1
-  .\scripts\verify-e2e-readiness.ps1 -ApiBase https://qamar.tasjeel.ae/api
+  .\scripts\verify-e2e-readiness.ps1 -ApiBase https://smartdms.me/api
 #>
 param(
-  [string]$ApiBase = 'https://qamar.tasjeel.ae/api'
+  [string]$ApiBase = 'https://smartdms.me/api'
 )
 
 $ErrorActionPreference = 'Continue'
