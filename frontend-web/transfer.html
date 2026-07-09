@@ -136,8 +136,14 @@
         ).join('');
       }
 
-      const walletRes = await XMONEY.api('/v1/wallet');
-      const walletBalances = walletRes.success ? (walletRes.data?.wallets || []) : [];
+      const walletsRes = await XMONEY.api('/v1/wallets');
+      const walletBalances = walletsRes.success && Array.isArray(walletsRes.data) ? walletsRes.data : [];
+
+      function walletAvailable(currency) {
+        const w = walletBalances.find((x) => x.currency_code === currency);
+        if (w) return Number(w.available_balance ?? w.balance ?? 0);
+        return 0;
+      }
 
       const bens = await XMONEY.api('/v1/beneficiaries');
       const sel = document.getElementById('benSelect');
@@ -216,9 +222,9 @@
         const method = document.getElementById('payMethod').value;
         if (method === 'wallet') {
           const src = document.getElementById('srcCur').value;
-          const bal = walletBalances.find((w) => w.currency_code === src);
+          const available = walletAvailable(src);
           const needed = state.quote?.total_debit || 0;
-          if (!bal || Number(bal.balance) < Number(needed)) {
+          if (available < Number(needed)) {
             XMONEY.toast('Insufficient wallet balance for this transfer', 'error');
             return;
           }

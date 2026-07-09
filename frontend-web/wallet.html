@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -30,6 +30,15 @@
       <div style="opacity:0.85;font-size:0.9rem">Total <span id="bal">—</span> · Held <span id="held">—</span></div>
     </div>
     <div class="xm-grid-2">
+      <div class="xm-card" id="devDepositCard" hidden>
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Development deposit</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Instant wallet credit for local/staging testing only.</p>
+        <form id="devDepositForm">
+          <div class="xm-field"><label>Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
+          <div class="xm-field"><label>Currency</label><select name="currency" id="devCurrency"><option value="AED">AED</option></select></div>
+          <button class="xm-btn xm-btn-outline" type="submit" id="devDepositBtn">Add test funds</button>
+        </form>
+      </div>
       <div class="xm-card">
         <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Top up wallet</h2>
         <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Funds are added via the modular payment provider (stub in development).</p>
@@ -116,6 +125,28 @@
       if (!profile) return;
       await loadWallets();
       await loadHistory();
+
+      const pub = await XMONEY.api('/v1/settings/public');
+      if (pub.success && pub.data.development_mode) {
+        document.getElementById('devDepositCard').hidden = false;
+        const devCur = document.getElementById('devCurrency');
+        devCur.innerHTML = document.getElementById('currency').innerHTML;
+        document.getElementById('devDepositForm').onsubmit = async (e) => {
+          e.preventDefault();
+          const body = Object.fromEntries(new FormData(e.target).entries());
+          body.amount = Number(body.amount);
+          const btn = document.getElementById('devDepositBtn');
+          XMONEY.setLoading(btn, true, 'Adding…');
+          const res = await XMONEY.api('/v1/wallet/deposit', { method: 'POST', body });
+          XMONEY.setLoading(btn, false);
+          if (!res.success) { XMONEY.showAlert(document.getElementById('alert'), res.message); return; }
+          XMONEY.toast('Test funds added', 'success');
+          e.target.reset();
+          loadWallets();
+          loadHistory();
+        };
+      }
+
       document.getElementById('topUpForm').onsubmit = async (e) => {
         e.preventDefault();
         const body = Object.fromEntries(new FormData(e.target).entries());

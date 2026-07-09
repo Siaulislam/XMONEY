@@ -41,12 +41,31 @@ const XMONEY = (() => {
     localStorage.removeItem(KEYS.user);
   }
 
+  function getUser() {
+    try {
+      return JSON.parse(localStorage.getItem(KEYS.user) || 'null');
+    } catch {
+      return null;
+    }
+  }
+
   function requireAuth() {
     if (!getToken() && !getRefreshToken()) {
       window.location.href = 'login.html';
       return false;
     }
     return true;
+  }
+
+  async function ensureSession() {
+    if (!requireAuth()) return null;
+    const res = await api('/v1/admin/dashboard');
+    if (!res.success) {
+      clearSession();
+      if (!window.location.pathname.includes('login')) window.location.href = 'login.html';
+      return null;
+    }
+    return getUser();
   }
 
   async function refreshSession() {
@@ -155,7 +174,7 @@ const XMONEY = (() => {
   }
 
   return {
-    API_BASE, api, setSession, clearSession, requireAuth, logout, getToken, getRefreshToken,
+    API_BASE, api, setSession, clearSession, requireAuth, ensureSession, logout, getToken, getRefreshToken, getUser,
     showAlert, statusBadge, formatMoney, formatDate, toast,
   };
 })();

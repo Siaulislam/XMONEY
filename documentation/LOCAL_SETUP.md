@@ -79,9 +79,16 @@ Login: `admin@xmoney.local` / password from `seed-admin.php`
 
 ## 5. Suggested local smoke test
 
+```bash
+php C:\XMONEY\backend-api\scripts\smoke-test.php http://localhost:8080
+php C:\XMONEY\backend-api\scripts\e2e-flow-test.php http://localhost:8080
+```
+
+Manual checklist: `documentation/E2E_TESTING.md`
+
 1. Register customer → verify OTP (shown in debug / `logs/notifications.log`)
 2. Admin approves KYC
-3. Deposit wallet (dev endpoint)
+3. Deposit wallet (dev endpoint on Wallet page when `APP_DEBUG=true`)
 4. Add beneficiary → get quote → create & confirm transfer
 5. Admin completes transfer → check reports
 

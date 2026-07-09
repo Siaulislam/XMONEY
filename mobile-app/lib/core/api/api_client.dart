@@ -134,6 +134,20 @@ class ApiClient {
   Future<Map<String, dynamic>> forgotPassword(String email) =>
       post('/v1/auth/forgot-password', {'email': email});
 
+  Future<Map<String, dynamic>> forgotPassword(String email) =>
+      post('/v1/auth/forgot-password', {'email': email});
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String otp,
+    required String password,
+  }) =>
+      post('/v1/auth/reset-password', {
+        'email': email,
+        'otp': otp,
+        'password': password,
+      });
+
   Future<Map<String, dynamic>> changePassword(String current, String next) =>
       post('/v1/me/change-password', {'current_password': current, 'new_password': next});
 

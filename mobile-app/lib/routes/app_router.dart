@@ -3,7 +3,7 @@ import '../core/api/api_client.dart';
 import '../core/api/session_manager.dart';
 import '../screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
-import '../screens/auth/register_screen.dart';
+import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/shell/main_shell_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -23,6 +23,7 @@ class AppRouter {
   static const splash = '/';
   static const login = '/login';
   static const register = '/register';
+  static const forgotPassword = '/forgot-password';
   static const verifyOtp = '/verify-otp';
   static const home = '/home';
   static const wallet = '/wallet';
@@ -46,6 +47,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => LoginScreen(router: this));
       case register:
         return MaterialPageRoute(builder: (_) => RegisterScreen(router: this));
+      case forgotPassword:
+        return MaterialPageRoute(builder: (_) => ForgotPasswordScreen(router: this));
       case verifyOtp:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(

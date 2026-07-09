@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace XMoney\Controllers;
 
+use XMoney\Config\App;
 use XMoney\Services\SettingsService;
 use XMoney\Utils\Response;
 
@@ -19,6 +20,7 @@ final class SettingsController
             'transfer_max_amount' => $settings->getNumber('transfer.max_amount_aed', 50000),
             'transfer_daily_limit' => $settings->getNumber('transfer.daily_limit_aed', 100000),
             'kyc_required' => $settings->getBool('kyc.required_for_transfer', true),
+            'development_mode' => App::isDebug(),
         ]);
     }
 }

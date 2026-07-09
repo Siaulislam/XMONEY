@@ -77,10 +77,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _loading ? null : _submit,
                 child: Text(_loading ? 'Signing in…' : 'Sign in'),
               ),
-              TextButton(
-                onPressed: () => Navigator.pushNamed(context, AppRouter.register),
-                child: const Text('Create a free account'),
-              ),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, AppRouter.register),
+              child: const Text('Create a free account'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, AppRouter.forgotPassword),
+              child: const Text('Forgot password?'),
+            ),
             ],
           ),
         ),

@@ -32,6 +32,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     setState(() => _loading = false);
     if (res['success'] == true) {
+      final otp = res['data']?['otp'];
+      if (otp is Map && otp['debug_otp'] != null) {
+        if (!mounted) return;
+        showXmSnack(context, 'Dev OTP: ${otp['debug_otp']}');
+      }
       Navigator.pushNamed(
         context,
         AppRouter.verifyOtp,
