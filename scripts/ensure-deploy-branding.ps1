@@ -11,12 +11,53 @@ $root = Resolve-Path (Join-Path $PSScriptRoot '..')
 $master = Join-Path $root 'assets\logos\xmoney-logo-master.png'
 $generate = Join-Path $PSScriptRoot 'generate-brand-assets.ps1'
 $sync = Join-Path $PSScriptRoot 'sync-branding-to-apps.ps1'
+$targets = @(
+  (Join-Path $root 'frontend-web\src\assets\branding'),
+  (Join-Path $root 'admin-panel\src\assets\branding')
+)
+$requiredBrandingFiles = @(
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'apple-touch-icon.png',
+  'pwa-192x192.png',
+  'pwa-512x512.png',
+  'android-chrome-192x192.png',
+  'android-chrome-512x512.png',
+  'og-image.png',
+  'social-sharing.png',
+  'xmoney-logo-nav.png',
+  'xmoney-monogram.png',
+  'xmoney-logo.svg'
+)
 
-if ((Test-Path $master) -and (Test-Path $generate)) {
+function Test-BrandingReady {
+  foreach ($target in $targets) {
+    foreach ($file in $requiredBrandingFiles) {
+      if (-not (Test-Path (Join-Path $target $file))) {
+        return $false
+      }
+    }
+  }
+  return (
+    (Test-Path (Join-Path $root 'frontend-web\favicon.ico')) -and
+    (Test-Path (Join-Path $root 'admin-panel\favicon.ico'))
+  )
+}
+
+if (Test-BrandingReady) {
+  Write-Host 'Branding assets already present.'
+  return
+}
+
+if ($IsWindows -and (Test-Path $master) -and (Test-Path $generate)) {
   & $generate
   if (Test-Path $sync) { & $sync }
   Write-Host 'Branding generated from master logo.'
   return
+}
+
+if (-not $IsWindows) {
+  throw 'Branding assets are missing and automatic generation is only supported on Windows. Commit the generated branding files or run the package build on Windows first.'
 }
 
 Add-Type -AssemblyName System.Drawing
@@ -90,11 +131,6 @@ function Save-Ico([string[]]$PngPaths, [string]$OutPath) {
   $bw.Dispose()
   $ms.Dispose()
 }
-
-$targets = @(
-  (Join-Path $root 'frontend-web\src\assets\branding'),
-  (Join-Path $root 'admin-panel\src\assets\branding')
-)
 
 $files = @{
   'favicon-16x16.png' = { param($d) Save-Png (New-BrandedBitmap 16 16 'XM') (Join-Path $d 'favicon-16x16.png') }
