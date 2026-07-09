@@ -16,11 +16,7 @@
 name: Deploy XMONEY
 
 on:
-  workflow_dispatch:
-  # Auto-deploy disabled during development phase.
-  # Re-enable when ready for production:
-  # push:
-  #   branches: [main]
+  workflow_dispatch: {}
 
 concurrency:
   group: xmoney-deploy-production
