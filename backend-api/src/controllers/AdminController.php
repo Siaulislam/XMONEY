@@ -563,6 +563,45 @@ final class AdminController
         Response::success($stmt->fetchAll());
     }
 
+    public function payments(array $request): void
+    {
+        $pdo = Database::connection();
+        $status = $request['query']['status'] ?? null;
+        $purpose = $request['query']['purpose'] ?? null;
+        $q = trim((string) ($request['query']['q'] ?? ''));
+        $limit = min(200, max(1, (int) ($request['query']['limit'] ?? 100)));
+
+        $sql = 'SELECT p.uuid, p.provider_code, p.method, p.purpose, p.amount, p.currency_code, p.status,
+                       p.provider_ref, p.created_at, u.email, pr.full_name,
+                       t.reference_code AS transfer_reference
+                FROM payments p
+                JOIN users u ON u.id = p.user_id
+                JOIN profiles pr ON pr.user_id = u.id
+                LEFT JOIN transactions t ON t.id = p.transaction_id
+                WHERE 1=1';
+        $params = [];
+        if ($status) {
+            $sql .= ' AND p.status = :status';
+            $params['status'] = $status;
+        }
+        if ($purpose) {
+            $sql .= ' AND p.purpose = :purpose';
+            $params['purpose'] = $purpose;
+        }
+        if ($q !== '') {
+            $sql .= ' AND (p.uuid LIKE :q OR p.provider_ref LIKE :q2 OR u.email LIKE :q3 OR pr.full_name LIKE :q4 OR t.reference_code LIKE :q5)';
+            $params['q'] = "%{$q}%";
+            $params['q2'] = "%{$q}%";
+            $params['q3'] = "%{$q}%";
+            $params['q4'] = "%{$q}%";
+            $params['q5'] = "%{$q}%";
+        }
+        $sql .= ' ORDER BY p.id DESC LIMIT ' . $limit;
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        Response::success($stmt->fetchAll());
+    }
+
     public function currenciesAdmin(array $request): void
     {
         $pdo = Database::connection();

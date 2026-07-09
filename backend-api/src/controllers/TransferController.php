@@ -165,7 +165,18 @@ final class TransferController
         $userId = (int) $request['user']['id'];
         $limit = min(100, max(1, (int) ($request['query']['limit'] ?? 50)));
         $offset = max(0, (int) ($request['query']['offset'] ?? 0));
-        Response::success($this->transactions->listForUser($userId, $limit, $offset));
+        $filters = [
+            'status' => $request['query']['status'] ?? null,
+            'q' => trim((string) ($request['query']['q'] ?? '')) ?: null,
+            'from' => $request['query']['from'] ?? null,
+            'to' => $request['query']['to'] ?? null,
+        ];
+        Response::success([
+            'rows' => $this->transactions->listForUser($userId, $limit, $offset, $filters),
+            'total' => $this->transactions->countForUser($userId, $filters),
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
     }
 
     public function show(array $request): void

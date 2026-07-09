@@ -10,6 +10,7 @@ use XMoney\Config\App;
 use XMoney\Config\Database;
 use XMoney\Middleware\CorsMiddleware;
 use XMoney\Middleware\RequestIdMiddleware;
+use XMoney\Middleware\SecurityHeadersMiddleware;
 use XMoney\Utils\Response;
 use XMoney\Utils\Router;
 
@@ -18,9 +19,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 App::bootstrap(dirname(__DIR__));
 
 header('Content-Type: application/json; charset=utf-8');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('Referrer-Policy: no-referrer');
+SecurityHeadersMiddleware::apply();
 
 $requestId = RequestIdMiddleware::handle();
 CorsMiddleware::handle();

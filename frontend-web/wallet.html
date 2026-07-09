@@ -11,64 +11,116 @@
 <body>
   <div data-xm-shell>
     <div id="alert" hidden></div>
-    <div class="xm-stats" style="grid-template-columns:repeat(3,1fr)">
-      <div class="xm-stat"><div class="label">Balance</div><div class="value" id="bal">—</div></div>
-      <div class="xm-stat"><div class="label">Available</div><div class="value" id="avail">—</div></div>
-      <div class="xm-stat"><div class="label">Held</div><div class="value" id="held">—</div></div>
+    <div class="xm-wallet-hero">
+      <div class="label">Available balance</div>
+      <div class="balance" id="avail">—</div>
+      <div style="opacity:0.85;font-size:0.9rem">Total <span id="bal">—</span> · Held <span id="held">—</span></div>
     </div>
-    <div class="xm-card" style="max-width:420px;margin-bottom:1.25rem">
-      <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Deposit (development)</h2>
-      <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:0.75rem">Credits your AED wallet for local testing. Production will use the payment provider layer.</p>
-      <form id="depForm" style="display:flex;gap:0.5rem;align-items:end">
-        <div class="xm-field" style="flex:1;margin:0"><label>Amount (AED)</label><input name="amount" type="number" min="1" step="0.01" required /></div>
-        <button class="xm-btn xm-btn-primary" type="submit" id="depBtn">Deposit</button>
-      </form>
+    <div class="xm-grid-2">
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Top up wallet</h2>
+        <p style="font-size:0.85rem;color:var(--xm-muted);margin-bottom:1rem">Funds are added via the modular payment provider (stub in development).</p>
+        <form id="topUpForm">
+          <div class="xm-field"><label>Amount</label><input name="amount" type="number" min="1" step="0.01" required /></div>
+          <div class="xm-field"><label>Currency</label>
+            <select name="currency" id="currency"><option value="AED">AED</option></select>
+          </div>
+          <div class="xm-field"><label>Payment method</label>
+            <select name="payment_method"><option value="card">Card</option><option value="gateway">Payment gateway</option></select>
+          </div>
+          <button class="xm-btn xm-btn-primary" type="submit" id="topBtn">Top up now</button>
+        </form>
+      </div>
+      <div class="xm-card">
+        <h2 style="font-size:1.05rem;margin-bottom:0.75rem">All wallets</h2>
+        <div id="wallets">Loading…</div>
+      </div>
     </div>
-    <div class="xm-card">
-      <h2 style="font-size:1.05rem;margin-bottom:0.75rem">History</h2>
+    <div class="xm-card" style="margin-top:1.25rem">
+      <div class="xm-filters">
+        <div class="xm-field"><label>Type</label>
+          <select id="typeFilter"><option value="">All</option><option value="deposit">Deposit</option><option value="transfer_debit">Transfer debit</option><option value="refund">Refund</option></select>
+        </div>
+        <button class="xm-btn xm-btn-outline" id="filterBtn">Apply</button>
+      </div>
       <div class="xm-table-wrap">
         <table class="xm-table">
-          <thead><tr><th>Type</th><th>Amount</th><th>Before</th><th>After</th><th>Date</th></tr></thead>
-          <tbody id="hist"><tr><td colspan="5">Loading…</td></tr></tbody>
+          <thead><tr><th>Type</th><th>Amount</th><th>Before</th><th>After</th><th>Description</th><th>Date</th></tr></thead>
+          <tbody id="hist"><tr><td colspan="6">Loading…</td></tr></tbody>
         </table>
       </div>
+      <div class="xm-pagination"><span id="pageInfo"></span><div><button class="xm-btn xm-btn-outline" id="prevBtn">Previous</button> <button class="xm-btn xm-btn-outline" id="nextBtn">Next</button></div></div>
     </div>
   </div>
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    async function load() {
-      const [w, h] = await Promise.all([XMONEY.api('/v1/wallet'), XMONEY.api('/v1/wallet/history')]);
+    let offset = 0;
+    const limit = 25;
+
+    async function loadWallets() {
+      const res = await XMONEY.api('/v1/wallets');
+      if (!res.success) return;
+      document.getElementById('wallets').innerHTML = (res.data || []).map(w =>
+        `<p><strong>${w.currency_code}</strong> — ${XMONEY.formatMoney(w.available_balance, w.currency_code)} available</p>`
+      ).join('') || '<p>No wallets</p>';
+      const sel = document.getElementById('currency');
+      if (res.data?.length) {
+        sel.innerHTML = res.data.map(w => `<option value="${w.currency_code}">${w.currency_code}</option>`).join('');
+      }
+    }
+
+    async function loadHistory() {
+      const currency = document.getElementById('currency').value || 'AED';
+      const type = document.getElementById('typeFilter').value;
+      const q = new URLSearchParams({ currency, limit, offset });
+      if (type) q.set('type', type);
+      const h = await XMONEY.api('/v1/wallet/history?' + q.toString());
+      const w = await XMONEY.api('/v1/wallet?currency=' + currency);
       if (w.success) {
         document.getElementById('bal').textContent = XMONEY.formatMoney(w.data.balance, w.data.currency);
         document.getElementById('avail').textContent = XMONEY.formatMoney(w.data.available_balance, w.data.currency);
         document.getElementById('held').textContent = XMONEY.formatMoney(w.data.held_balance, w.data.currency);
       }
       const body = document.getElementById('hist');
-      if (!h.success || !h.data.length) { body.innerHTML = '<tr><td colspan="5">No wallet activity.</td></tr>'; return; }
-      body.innerHTML = h.data.map(r => `
-        <tr>
-          <td>${r.type}</td>
-          <td>${XMONEY.formatMoney(r.amount)}</td>
-          <td>${XMONEY.formatMoney(r.balance_before)}</td>
-          <td>${XMONEY.formatMoney(r.balance_after)}</td>
-          <td>${new Date(r.created_at).toLocaleString()}</td>
-        </tr>`).join('');
+      const rows = h.success ? (h.data.rows || []) : [];
+      if (!rows.length) { body.innerHTML = '<tr><td colspan="6">No wallet activity.</td></tr>'; }
+      else {
+        body.innerHTML = rows.map(r => `<tr>
+          <td>${r.type}</td><td>${XMONEY.formatMoney(r.amount)}</td>
+          <td>${XMONEY.formatMoney(r.balance_before)}</td><td>${XMONEY.formatMoney(r.balance_after)}</td>
+          <td>${r.description || r.reference_type || '—'}</td>
+          <td>${new Date(r.created_at).toLocaleString()}</td></tr>`).join('');
+      }
+      const total = h.data?.total || 0;
+      document.getElementById('pageInfo').textContent = `Showing ${offset + 1}–${Math.min(offset + limit, total)} of ${total}`;
+      document.getElementById('prevBtn').disabled = offset <= 0;
+      document.getElementById('nextBtn').disabled = offset + limit >= total;
     }
+
     (async () => {
       const profile = await XMShell.mount({ title: 'Wallet', heading: 'Wallet' });
       if (!profile) return;
-      document.getElementById('depForm').onsubmit = async (e) => {
+      await loadWallets();
+      await loadHistory();
+      document.getElementById('topUpForm').onsubmit = async (e) => {
         e.preventDefault();
-        const amount = Number(new FormData(e.target).get('amount'));
-        const btn = document.getElementById('depBtn');
-        XMONEY.setLoading(btn, true, 'Depositing…');
-        const res = await XMONEY.api('/v1/wallet/deposit', { method: 'POST', body: { amount, currency: 'AED' } });
+        const body = Object.fromEntries(new FormData(e.target).entries());
+        body.amount = Number(body.amount);
+        const btn = document.getElementById('topBtn');
+        XMONEY.setLoading(btn, true, 'Processing…');
+        const res = await XMONEY.api('/v1/wallet/top-up', { method: 'POST', body });
         XMONEY.setLoading(btn, false);
-        if (!res.success) XMONEY.showAlert(document.getElementById('alert'), res.message);
-        else { XMONEY.toast('Deposit recorded', 'success'); e.target.reset(); load(); }
+        if (!res.success) { XMONEY.showAlert(document.getElementById('alert'), res.message); return; }
+        XMONEY.toast('Wallet topped up successfully', 'success');
+        e.target.reset();
+        loadWallets();
+        loadHistory();
       };
-      load();
+      document.getElementById('filterBtn').onclick = () => { offset = 0; loadHistory(); };
+      document.getElementById('prevBtn').onclick = () => { offset = Math.max(0, offset - limit); loadHistory(); };
+      document.getElementById('nextBtn').onclick = () => { offset += limit; loadHistory(); };
+      document.getElementById('currency').onchange = () => { offset = 0; loadHistory(); };
     })();
   </script>
 </body>

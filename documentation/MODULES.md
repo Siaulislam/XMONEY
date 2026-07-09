@@ -17,7 +17,10 @@
 | Payment webhooks + status API | Done | Stub/simulate for development |
 | FX engine | Done | Market − margin = customer rate |
 | Wallet ledger | Done | Optimistic locking + history |
-| Mobile structure | Scaffolded | Shared API contract |
+| Mobile apps | Done | Flutter Android & iOS source (`mobile-app/lib`) |
+| Wallet top-up | Done | Modular payment provider + `/v1/wallet/top-up` |
+| Analytics | Done | Customer + admin analytics APIs |
+| Admin payments | Done | `admin-panel/payments.html` |
 | Live FX API | Done | External provider via `EXCHANGE_API_URL` (Frankfurter-compatible) |
 | API smoke tests | Done | `backend-api/scripts/smoke-test.php` |
 | Public transfer limits API | Done | `GET /v1/settings/public` |

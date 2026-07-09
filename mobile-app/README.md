@@ -1,51 +1,66 @@
-# XMONEY Mobile Application
+# XMONEY Flutter Mobile App
 
-Cross-platform mobile foundation for Android and iOS.
+Professional Android & iOS client for the XMONEY platform.
 
-## Recommended stack (production path)
+## Prerequisites
 
-| Layer | Choice | Notes |
-|-------|--------|-------|
-| Shared UI / logic | **Flutter** or **React Native** | Single codebase → Android + iOS |
-| Native folders | `android/` · `ios/` | Platform projects / wrappers |
-| API | XMONEY Backend (`/api/v1/*`) | Same JWT auth as web |
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.16+
+- Android Studio / Xcode for device builds
 
-This repository currently scaffolds the **native project folders** and a **shared API contract** so either Flutter or React Native can be initialized without redesigning the backend.
+## First-time setup
 
-## Shared modules (`shared/`)
-
-- `api-contract.md` — endpoint map for mobile clients
-- `config.example.json` — environment endpoints
-
-## Next steps to generate full native apps
-
-### Option A — Flutter (recommended for fintech)
+The Dart source is included. Generate native platform folders once:
 
 ```bash
-cd C:\XMONEY\mobile-app
+cd mobile-app
 flutter create --org com.xmoney --project-name xmoney_app .
-# Move generated android/ ios/ into place if needed
 ```
 
-### Option B — React Native
+This merges Android/iOS projects with the existing `lib/` code. If prompted to overwrite `lib/main.dart`, **keep the existing XMONEY files**.
+
+Install dependencies:
 
 ```bash
-cd C:\XMONEY\mobile-app
-npx @react-native-community/cli init XMoneyApp
+flutter pub get
 ```
 
-## Feature parity with web
+Configure API URL in `assets/config.json`:
 
-1. Auth (register, OTP, login, logout, forgot password)
-2. Profile & device management
-3. KYC document upload (camera + gallery)
-4. Beneficiaries CRUD
-5. Transfer quote → create → confirm
-6. Wallet balance & history
-7. Push notifications (FCM / APNs)
+```json
+{
+  "apiBaseUrl": "https://qamar.tasjeel.ae/xmoney/api"
+}
+```
 
-## Security notes
+## Run
 
-- Store JWT refresh tokens in Keychain (iOS) / EncryptedSharedPreferences (Android)
-- Certificate pinning recommended before production
-- Biometric unlock optional for returning sessions
+```bash
+# Android emulator / device
+flutter run
+
+# iOS simulator (macOS only)
+flutter run -d ios
+
+# Release APK
+flutter build apk --release
+
+# iOS archive (macOS + Xcode)
+flutter build ios --release
+```
+
+## Features
+
+| Screen | API |
+|--------|-----|
+| Login | `POST /v1/auth/login` |
+| Dashboard | `/v1/analytics/summary`, `/v1/transfers` |
+| Wallet | `/v1/wallet`, `/v1/wallet/top-up`, `/v1/wallet/history` |
+| Send money | `/v1/beneficiaries`, `/v1/transfers/quote`, `/v1/transfers` |
+| Transactions | `/v1/transfers` |
+| Profile | `/v1/me`, logout |
+
+## Security
+
+- Tokens stored in `flutter_secure_storage` (Keychain / EncryptedSharedPreferences)
+- Stable device UUID sent as `X-Device-Id`
+- Silent refresh on 401

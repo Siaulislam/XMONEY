@@ -19,8 +19,16 @@
         <button class="xm-btn xm-btn-outline" data-type="monthly">Monthly</button>
         <button class="xm-btn xm-btn-outline" data-type="revenue">Revenue</button>
         <button class="xm-btn xm-btn-outline" data-type="failed">Failed</button>
+        <button class="xm-btn xm-btn-primary" id="exportBtn">Export CSV</button>
       </div>
-      <div class="xm-card"><pre id="out" style="white-space:pre-wrap;font-size:0.85rem;font-family:ui-monospace,monospace">Select a report…</pre></div>
+      <div class="xm-card">
+        <div class="xm-table-wrap">
+          <table class="xm-table">
+            <thead id="thead"><tr><th>Period</th><th>Transactions</th><th>Volume</th><th>Revenue</th><th>Failed</th></tr></thead>
+            <tbody id="body"><tr><td colspan="5">Select a report type…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </main>
   </div>
   <script src="src/assets/js/api.js"></script>
@@ -28,12 +36,47 @@
   <script>
     if (!XMONEY.requireAuth()) throw new Error('auth');
     XMONEY_ADMIN_SHELL.mount('reports.html');
+    let lastRows = [];
+    let lastType = 'daily';
+
+    function render(type, rows) {
+      lastType = type;
+      lastRows = rows;
+      const head = document.getElementById('thead');
+      const body = document.getElementById('body');
+      if (type === 'failed') {
+        head.innerHTML = '<tr><th>Reference</th><th>Amount</th><th>Currency</th><th>Reason</th><th>Date</th></tr>';
+        body.innerHTML = rows.map(r => `<tr>
+          <td>${r.reference_code}</td><td>${r.send_amount}</td><td>${r.source_currency}</td>
+          <td>${r.failure_reason || '—'}</td><td>${XMONEY.formatDate(r.created_at)}</td></tr>`).join('') || '<tr><td colspan="5">No failed transactions</td></tr>';
+        return;
+      }
+      if (type === 'revenue') {
+        head.innerHTML = '<tr><th>Day</th><th>Volume</th><th>Fees</th><th>Completed</th></tr>';
+        body.innerHTML = rows.map(r => `<tr>
+          <td>${r.day}</td><td>${Number(r.volume).toLocaleString()}</td><td>${Number(r.fees).toLocaleString()}</td><td>${r.completed}</td></tr>`).join('') || '<tr><td colspan="4">No data</td></tr>';
+        return;
+      }
+      head.innerHTML = '<tr><th>Period</th><th>Transactions</th><th>Volume</th><th>Revenue</th><th>Failed</th></tr>';
+      body.innerHTML = rows.map(r => `<tr>
+        <td>${r.day || r.period}</td><td>${r.txn_count}</td><td>${Number(r.volume).toLocaleString()}</td>
+        <td>${Number(r.revenue).toLocaleString()}</td><td>${r.failed_count}</td></tr>`).join('') || '<tr><td colspan="5">No data</td></tr>';
+    }
+
     document.querySelectorAll('[data-type]').forEach(btn => btn.onclick = async () => {
       const res = await XMONEY.api('/v1/admin/reports?type=' + btn.dataset.type);
-      document.getElementById('out').textContent = JSON.stringify(res.data, null, 2);
+      render(btn.dataset.type, res.data?.rows || []);
     });
+
+    document.getElementById('exportBtn').onclick = () => {
+      if (!lastRows.length) return;
+      const keys = Object.keys(lastRows[0]);
+      const csv = keys.join(',') + '\n' + lastRows.map(r => keys.map(k => r[k]).join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      a.download = `xmoney-report-${lastType}.csv`;
+      a.click();
+    };
   </script>
 </body>
 </html>
-
-

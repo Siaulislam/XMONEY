@@ -471,9 +471,11 @@ CREATE TABLE payments (
   id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   uuid              CHAR(36) NOT NULL,
   transaction_id    BIGINT UNSIGNED NULL,
+  wallet_id         BIGINT UNSIGNED NULL,
   user_id           BIGINT UNSIGNED NOT NULL,
   provider_code     VARCHAR(50) NOT NULL COMMENT 'stripe, bank_transfer, etc',
   method            ENUM('card','bank_transfer','wallet','gateway','other') NOT NULL,
+  purpose           ENUM('transfer','wallet_topup','other') NOT NULL DEFAULT 'transfer',
   amount            DECIMAL(18,4) NOT NULL,
   currency_code     CHAR(3) NOT NULL,
   status            ENUM('initiated','pending','authorized','captured','failed','refunded','cancelled') NOT NULL DEFAULT 'initiated',
@@ -489,6 +491,7 @@ CREATE TABLE payments (
   KEY idx_pay_user (user_id),
   KEY idx_pay_status (status),
   CONSTRAINT fk_pay_txn FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE SET NULL,
+  CONSTRAINT fk_pay_wallet FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE SET NULL,
   CONSTRAINT fk_pay_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

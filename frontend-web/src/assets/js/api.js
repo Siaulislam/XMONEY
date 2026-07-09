@@ -240,9 +240,15 @@ const XMONEY = (() => {
     }
   }
 
+  function listData(res) {
+    if (!res || !res.success) return [];
+    const d = res.data;
+    return Array.isArray(d) ? d : (d?.rows || []);
+  }
+
   return {
     API_BASE, api, setSession, clearSession, requireAuth, ensureSession, logout,
     getToken, getRefreshToken, getDeviceId, getUser, refreshSession,
-    showAlert, toast, statusBadge, formatMoney, setLoading,
+    showAlert, toast, statusBadge, formatMoney, setLoading, listData,
   };
 })();

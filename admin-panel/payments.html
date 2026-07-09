@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payments — XMONEY Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/assets/css/xmoney.css" />
+  <script src="config/runtime-config.js"></script>
+</head>
+<body>
+  <nav class="xm-nav"><div class="xm-container xm-nav-inner"><a href="index.html" class="xm-logo"><span class="xm-logo-mark">X</span> XMONEY Admin</a></div></nav>
+  <div class="xm-dash">
+    <aside class="xm-sidebar"></aside>
+    <main class="xm-main">
+      <h1 style="font-family:var(--xm-display);margin-bottom:1rem">Payments</h1>
+      <div class="xm-filters">
+        <div class="xm-field"><label>Search</label><input id="q" placeholder="UUID, email, reference…" /></div>
+        <div class="xm-field"><label>Status</label>
+          <select id="status"><option value="">All</option><option>pending</option><option>captured</option><option>failed</option><option>initiated</option></select>
+        </div>
+        <div class="xm-field"><label>Purpose</label>
+          <select id="purpose"><option value="">All</option><option value="transfer">Transfer</option><option value="wallet_topup">Wallet top-up</option></select>
+        </div>
+        <button class="xm-btn xm-btn-primary" id="searchBtn">Search</button>
+      </div>
+      <div class="xm-card">
+        <div class="xm-table-wrap">
+          <table class="xm-table">
+            <thead><tr><th>UUID</th><th>User</th><th>Purpose</th><th>Amount</th><th>Provider</th><th>Status</th><th>Reference</th><th>Date</th></tr></thead>
+            <tbody id="body"><tr><td colspan="8">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="src/assets/js/api.js"></script>
+  <script src="src/assets/js/shell.js"></script>
+  <script>
+    if (!XMONEY.requireAuth()) throw new Error('auth');
+    XMONEY_ADMIN_SHELL.mount('payments.html');
+    async function load() {
+      const p = new URLSearchParams();
+      const q = document.getElementById('q').value.trim();
+      const status = document.getElementById('status').value;
+      const purpose = document.getElementById('purpose').value;
+      if (q) p.set('q', q);
+      if (status) p.set('status', status);
+      if (purpose) p.set('purpose', purpose);
+      const res = await XMONEY.api('/v1/admin/payments?' + p.toString());
+      const body = document.getElementById('body');
+      if (!res.success || !res.data.length) { body.innerHTML = '<tr><td colspan="8">No payments found.</td></tr>'; return; }
+      body.innerHTML = res.data.map(p => `<tr>
+        <td style="font-size:0.75rem">${p.uuid.slice(0,8)}…</td>
+        <td>${p.full_name}<br/><small>${p.email}</small></td>
+        <td>${p.purpose || '—'}</td>
+        <td>${XMONEY.formatMoney(p.amount, p.currency_code)}</td>
+        <td>${p.provider_code}</td>
+        <td>${XMONEY.statusBadge(p.status)}</td>
+        <td>${p.transfer_reference || p.provider_ref || '—'}</td>
+        <td>${XMONEY.formatDate(p.created_at)}</td></tr>`).join('');
+    }
+    document.getElementById('searchBtn').onclick = load;
+    load();
+  </script>
+</body>
+</html>

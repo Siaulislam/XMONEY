@@ -31,6 +31,23 @@ final class PaymentService
 
     public function initiatePayment(int $userId, float $amount, string $currency, ?int $transactionId, string $method = 'gateway'): array
     {
+        return $this->createPayment($userId, $amount, $currency, $method, 'transfer', $transactionId, null);
+    }
+
+    public function initiateWalletTopUp(int $userId, int $walletId, float $amount, string $currency, string $method = 'card'): array
+    {
+        return $this->createPayment($userId, $amount, $currency, $method, 'wallet_topup', null, $walletId);
+    }
+
+    private function createPayment(
+        int $userId,
+        float $amount,
+        string $currency,
+        string $method,
+        string $purpose,
+        ?int $transactionId,
+        ?int $walletId
+    ): array {
         $pdo = Database::connection();
         $uuid = Security::uuid();
 
@@ -39,21 +56,25 @@ final class PaymentService
             'amount' => $amount,
             'currency' => $currency,
             'transaction_id' => $transactionId,
+            'wallet_id' => $walletId,
+            'purpose' => $purpose,
             'method' => $method,
         ]);
 
         $stmt = $pdo->prepare(
             'INSERT INTO payments
-             (uuid, transaction_id, user_id, provider_code, method, amount, currency_code, status, provider_ref, provider_payload)
+             (uuid, transaction_id, wallet_id, user_id, provider_code, method, purpose, amount, currency_code, status, provider_ref, provider_payload)
              VALUES
-             (:uuid, :txn, :user_id, :provider, :method, :amount, :currency, :status, :ref, :payload)'
+             (:uuid, :txn, :wallet, :user_id, :provider, :method, :purpose, :amount, :currency, :status, :ref, :payload)'
         );
         $stmt->execute([
             'uuid' => $uuid,
             'txn' => $transactionId,
+            'wallet' => $walletId,
             'user_id' => $userId,
             'provider' => $this->provider->code(),
             'method' => $method,
+            'purpose' => $purpose,
             'amount' => $amount,
             'currency' => $currency,
             'status' => $result['status'],
@@ -66,6 +87,7 @@ final class PaymentService
             'status' => $result['status'],
             'provider' => $this->provider->code(),
             'provider_ref' => $result['provider_ref'],
+            'purpose' => $purpose,
             'payload' => $result['payload'] ?? [],
         ];
     }
@@ -100,6 +122,19 @@ final class PaymentService
             $txn->updateStatus((int) $payment['transaction_id'], 'completed', 'system', null, 'Transfer completed');
         }
 
+        if (($payment['purpose'] ?? '') === 'wallet_topup' && !empty($payment['wallet_id'])
+            && in_array($result['status'], ['captured', 'completed'], true)) {
+            $wallets = new WalletService();
+            $wallets->credit(
+                (int) $payment['wallet_id'],
+                (float) $payment['amount'],
+                'deposit',
+                'payment',
+                (int) $payment['id'],
+                'Wallet top-up via ' . $payment['provider_code']
+            );
+        }
+
         return $this->findByUuid($paymentUuid);
     }
 
@@ -126,7 +161,7 @@ final class PaymentService
     public function findByUuid(string $uuid, ?int $userId = null): array
     {
         $pdo = Database::connection();
-        $sql = 'SELECT uuid, transaction_id, user_id, provider_code, method, amount, currency_code, status, provider_ref, created_at
+        $sql = 'SELECT uuid, transaction_id, wallet_id, user_id, provider_code, method, purpose, amount, currency_code, status, provider_ref, created_at
                 FROM payments WHERE uuid = :uuid';
         $params = ['uuid' => $uuid];
         if ($userId !== null) {

@@ -40,12 +40,15 @@ Base path: `/v1` (local) or `/xmoney/api/v1` (cPanel)
 | GET/POST | `/transfers/{uuid}`, `…/confirm`, `…/cancel` |
 | GET | `/payments/{uuid}` |
 | POST | `/payments/{uuid}/simulate-capture` | Development only (`APP_DEBUG`) |
-| GET/POST | `/wallet`, `/wallet/history`, `/wallet/deposit` |
+| GET/POST | `/wallet`, `/wallets`, `/wallet/history`, `/wallet/top-up`, `/wallet/deposit` |
+| GET | `/analytics/summary` |
 
 ## Admin (Bearer admin JWT)
 
 | Method | Endpoint |
 |--------|----------|
+| GET | `/admin/analytics` |
+| GET | `/admin/payments` |
 | GET | `/admin/dashboard` |
 | GET | `/admin/users` |
 | GET | `/admin/users/{uuid}` |

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use XMoney\Controllers\AnalyticsController;
 use XMoney\Controllers\AdminController;
 use XMoney\Controllers\AuthController;
 use XMoney\Controllers\BeneficiaryController;
@@ -32,6 +33,7 @@ $notifications = new NotificationController();
 $settings = new SettingsController();
 $payments = new PaymentController();
 $webhooks = new WebhookController();
+$analytics = new AnalyticsController();
 
 $customerAuth = [AuthMiddleware::customer()];
 $adminOps = [AuthMiddleware::admin(['super_admin', 'admin', 'support_staff', 'compliance_officer'])];
@@ -100,9 +102,14 @@ $router->post('/v1/payments/{uuid}/simulate-capture', [$payments, 'simulateCaptu
 $router->post('/v1/webhooks/payments/{provider}', [$webhooks, 'payment']);
 
 // Wallet
+$router->get('/v1/wallets', [$wallet, 'listAll'], $customerAuth);
 $router->get('/v1/wallet', [$wallet, 'show'], $customerAuth);
 $router->get('/v1/wallet/history', [$wallet, 'history'], $customerAuth);
+$router->post('/v1/wallet/top-up', [$wallet, 'topUp'], $customerAuth);
 $router->post('/v1/wallet/deposit', [$wallet, 'deposit'], $customerAuth);
+
+// Analytics
+$router->get('/v1/analytics/summary', [$analytics, 'customerSummary'], $customerAuth);
 
 // Admin auth
 $router->post('/v1/admin/auth/login', [$admin, 'login'], $rlLogin);
@@ -111,6 +118,8 @@ $router->post('/v1/admin/auth/refresh', [$auth, 'refresh'], $rlRefresh);
 
 // Admin operations
 $router->get('/v1/admin/dashboard', [$admin, 'dashboard'], $adminOps);
+$router->get('/v1/admin/analytics', [$analytics, 'adminOverview'], $adminOps);
+$router->get('/v1/admin/payments', [$admin, 'payments'], $adminOps);
 $router->get('/v1/admin/users', [$admin, 'users'], $adminOps);
 $router->get('/v1/admin/users/{uuid}', [$admin, 'showUser'], $adminOps);
 $router->post('/v1/admin/users/{uuid}/block', [$admin, 'blockUser'], $adminFull);

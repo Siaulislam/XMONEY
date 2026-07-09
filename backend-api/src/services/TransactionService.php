@@ -171,23 +171,75 @@ final class TransactionService
         return $row;
     }
 
-    public function listForUser(int $userId, int $limit = 50, int $offset = 0): array
+    public function listForUser(int $userId, int $limit = 50, int $offset = 0, array $filters = []): array
     {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare(
-            'SELECT t.id, t.uuid, t.reference_code, t.source_currency, t.target_currency,
+        $sql = 'SELECT t.id, t.uuid, t.reference_code, t.source_currency, t.target_currency,
                     t.send_amount, t.receive_amount, t.fee_amount, t.total_debit, t.status, t.created_at,
                     b.receiver_name, b.country_code
              FROM transactions t
              JOIN beneficiaries b ON b.id = t.beneficiary_id
-             WHERE t.sender_user_id = :uid
-             ORDER BY t.id DESC LIMIT :lim OFFSET :off'
-        );
-        $stmt->bindValue('uid', $userId, \PDO::PARAM_INT);
+             WHERE t.sender_user_id = :uid';
+        $params = ['uid' => $userId];
+
+        if (!empty($filters['status'])) {
+            $sql .= ' AND t.status = :status';
+            $params['status'] = $filters['status'];
+        }
+        if (!empty($filters['from'])) {
+            $sql .= ' AND DATE(t.created_at) >= :from_date';
+            $params['from_date'] = $filters['from'];
+        }
+        if (!empty($filters['to'])) {
+            $sql .= ' AND DATE(t.created_at) <= :to_date';
+            $params['to_date'] = $filters['to'];
+        }
+        if (!empty($filters['q'])) {
+            $sql .= ' AND (t.reference_code LIKE :q OR b.receiver_name LIKE :q2)';
+            $params['q'] = '%' . $filters['q'] . '%';
+            $params['q2'] = '%' . $filters['q'] . '%';
+        }
+
+        $sql .= ' ORDER BY t.id DESC LIMIT :lim OFFSET :off';
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
         $stmt->bindValue('lim', $limit, \PDO::PARAM_INT);
         $stmt->bindValue('off', $offset, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
+    }
+
+    public function countForUser(int $userId, array $filters = []): int
+    {
+        $pdo = Database::connection();
+        $sql = 'SELECT COUNT(*) FROM transactions t
+                JOIN beneficiaries b ON b.id = t.beneficiary_id
+                WHERE t.sender_user_id = :uid';
+        $params = ['uid' => $userId];
+
+        if (!empty($filters['status'])) {
+            $sql .= ' AND t.status = :status';
+            $params['status'] = $filters['status'];
+        }
+        if (!empty($filters['from'])) {
+            $sql .= ' AND DATE(t.created_at) >= :from_date';
+            $params['from_date'] = $filters['from'];
+        }
+        if (!empty($filters['to'])) {
+            $sql .= ' AND DATE(t.created_at) <= :to_date';
+            $params['to_date'] = $filters['to'];
+        }
+        if (!empty($filters['q'])) {
+            $sql .= ' AND (t.reference_code LIKE :q OR b.receiver_name LIKE :q2)';
+            $params['q'] = '%' . $filters['q'] . '%';
+            $params['q2'] = '%' . $filters['q'] . '%';
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
     }
 
     private function logStatus(int $txnId, ?string $from, string $to, string $actorType, ?int $actorId, ?string $note): void

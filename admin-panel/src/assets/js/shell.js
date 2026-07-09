@@ -7,6 +7,7 @@ const XMONEY_ADMIN_SHELL = (() => {
     ['users.html', 'Users'],
     ['kyc.html', 'KYC review'],
     ['transactions.html', 'Transactions'],
+    ['payments.html', 'Payments'],
     ['rates.html', 'Rates'],
     ['fees.html', 'Fees'],
     ['currencies.html', 'Currencies'],
