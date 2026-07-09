@@ -162,10 +162,11 @@ This package already includes:
 - storage/, database SQL pack, .htaccess
 
 After upload:
-1. Copy api/.env.example -> api/.env and fill DB + JWT values
-2. In cPanel Terminal: cd ~/public_html/api && composer install --no-dev
-3. Optional: php scripts/seed-admin.php "YourStrongPassword"
-4. Test:
+1. Copy api/.env.example -> api/.env and fill DB + JWT + SMTP values
+2. Ensure api/vendor/ exists (included if you used GitHub "Build cPanel Package" workflow)
+3. If api/vendor/ is missing and Composer is not on the server, download the zip from GitHub Actions artifact instead
+4. Optional: php scripts/seed-admin.php "YourStrongPassword"
+5. Test:
    - https://smartdms.me/
    - https://smartdms.me/admin/
    - https://smartdms.me/api/v1/health
@@ -188,7 +189,12 @@ CRITICAL FILES — open each path in File Manager:
 [ ] public_html/api/vendor/       (created by composer install)
 [ ] public_html/api/public/index.php
 
-AFTER UPLOAD — run in cPanel Terminal:
+AFTER UPLOAD — if api/vendor/ is missing (Composer not on server):
+
+  Use GitHub Actions -> "Build cPanel Package" -> download artifact zip
+  That zip already includes api/vendor/.
+
+If Composer IS available on the server:
 
   cd ~/public_html/api
   cp .env.example .env
@@ -201,6 +207,14 @@ Fill .env with:
   DB_PASS=your_password
   JWT_SECRET=long_random_secret_min_32_chars
   APP_URL=https://smartdms.me/api
+  MAIL_DRIVER=smtp
+  SMTP_HOST=mail.smartdms.me
+  SMTP_PORT=465
+  SMTP_SECURE=ssl
+  SMTP_USER=xmoney@smartdms.me
+  SMTP_PASS=your_mailbox_password
+  MAIL_FROM_ADDRESS=xmoney@smartdms.me
+  MAIL_FROM_NAME=XMONEY
 
 TEST URLS:
   https://smartdms.me/src/assets/css/xmoney.css   -> must show CSS (not 404)

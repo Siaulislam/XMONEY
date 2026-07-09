@@ -11,6 +11,9 @@
 #   FTP_HOST, FTP_PORT, FTP_USERNAME, FTP_PASSWORD, FTP_REMOTE_PATH
 #   XMONEY_DB_HOST, XMONEY_DB_NAME, XMONEY_DB_USER, XMONEY_DB_PASS
 #   XMONEY_JWT_SECRET, XMONEY_APP_URL
+# Optional (OTP email via SMTP):
+#   XMONEY_SMTP_HOST, XMONEY_SMTP_PORT, XMONEY_SMTP_SECURE
+#   XMONEY_SMTP_USER, XMONEY_SMTP_PASS, XMONEY_MAIL_FROM_ADDRESS, XMONEY_MAIL_FROM_NAME
 # ============================================================
 
 name: Deploy XMONEY
@@ -161,6 +164,7 @@ jobs:
         run: |
           set -euo pipefail
           composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          test -f vendor/autoload.php
 
       - name: Generate production api/.env from GitHub Secrets only
         env:
@@ -170,11 +174,32 @@ jobs:
           XMONEY_DB_PASS: ${{ secrets.XMONEY_DB_PASS }}
           XMONEY_JWT_SECRET: ${{ secrets.XMONEY_JWT_SECRET }}
           XMONEY_APP_URL: ${{ secrets.XMONEY_APP_URL }}
+          XMONEY_SMTP_HOST: ${{ secrets.XMONEY_SMTP_HOST }}
+          XMONEY_SMTP_PORT: ${{ secrets.XMONEY_SMTP_PORT }}
+          XMONEY_SMTP_SECURE: ${{ secrets.XMONEY_SMTP_SECURE }}
+          XMONEY_SMTP_USER: ${{ secrets.XMONEY_SMTP_USER }}
+          XMONEY_SMTP_PASS: ${{ secrets.XMONEY_SMTP_PASS }}
+          XMONEY_MAIL_FROM_ADDRESS: ${{ secrets.XMONEY_MAIL_FROM_ADDRESS }}
+          XMONEY_MAIL_FROM_NAME: ${{ secrets.XMONEY_MAIL_FROM_NAME }}
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
           # If APP_URL is https://domain/api → CORS https://domain
           CORS_ORIGIN="$(echo -n "$XMONEY_APP_URL" | sed -E 's#(https?://[^/]+).*#\1#')"
+
+          SMTP_HOST="${XMONEY_SMTP_HOST:-mail.smartdms.me}"
+          SMTP_PORT="${XMONEY_SMTP_PORT:-465}"
+          SMTP_SECURE="${XMONEY_SMTP_SECURE:-ssl}"
+          SMTP_USER="${XMONEY_SMTP_USER:-xmoney@smartdms.me}"
+          MAIL_FROM_ADDRESS="${XMONEY_MAIL_FROM_ADDRESS:-xmoney@smartdms.me}"
+          MAIL_FROM_NAME="${XMONEY_MAIL_FROM_NAME:-XMONEY}"
+
+          if [ -n "${XMONEY_SMTP_PASS:-}" ] && [ -n "${SMTP_USER}" ]; then
+            MAIL_DRIVER=smtp
+          else
+            MAIL_DRIVER=log
+            echo "::warning::XMONEY_SMTP_PASS not set — OTP emails will log only until SMTP secret is added."
+          fi
 
           cat > "$PKG/api/.env" <<EOF
           APP_NAME=XMONEY
@@ -205,9 +230,14 @@ jobs:
           EXCHANGE_API_URL=
           EXCHANGE_API_KEY=
           PAYMENT_DEFAULT_PROVIDER=stub
-          MAIL_DRIVER=log
-          MAIL_FROM_ADDRESS=noreply@localhost
-          MAIL_FROM_NAME=XMONEY
+          MAIL_DRIVER=${MAIL_DRIVER}
+          SMTP_HOST=${SMTP_HOST}
+          SMTP_PORT=${SMTP_PORT}
+          SMTP_SECURE=${SMTP_SECURE}
+          SMTP_USER=${SMTP_USER}
+          SMTP_PASS=${XMONEY_SMTP_PASS:-}
+          MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+          MAIL_FROM_NAME=${MAIL_FROM_NAME}
           SMS_DRIVER=log
           PUSH_DRIVER=log
           LOG_PATH=../storage/logs
@@ -241,11 +271,13 @@ jobs:
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
-          if grep -RIn --exclude-dir=vendor -E 'smartdms_smartdms_db|smartdms\.me|ZIAAI' "$PKG" 2>/dev/null | head -20; then
+          if grep -RIn --exclude-dir=vendor -E 'smartdms_smartdms_db|ZIAAI-Project' "$PKG" 2>/dev/null | head -20; then
             echo "::warning::Package contains old-project references — verify no foreign source files were packaged."
           fi
-          # Must contain XMONEY API entrypoint
+          # Must contain XMONEY API entrypoint and Composer autoload
           test -f "$PKG/api/public/index.php"
+          test -f "$PKG/api/vendor/autoload.php"
+          test -f "$PKG/api/.env"
           test -f "$PKG/index.html"
           test -d "$PKG/admin"
           echo "Package structure OK for XMONEY-only deploy."

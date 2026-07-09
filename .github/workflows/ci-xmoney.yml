@@ -52,5 +52,12 @@ jobs:
           test -f "$pkg/database/02_schema_no_create_db.sql"
           echo "Package structure OK"
 
+      - name: Verify package can install API vendor
+        working-directory: deploy/cpanel/dist/xmoney-cpanel-package/api
+        run: |
+          set -euo pipefail
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          test -f vendor/autoload.php
+
       - name: Verify migration 003 present
         run: test -f database/migrations/003_wallet_payments_analytics.sql

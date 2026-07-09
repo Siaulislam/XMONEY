@@ -1,0 +1,63 @@
+# Build a complete cPanel upload zip (includes api/vendor/) — no FTP deploy.
+# Use this when uploading manually to public_html/ and Composer is not on the server.
+name: Build cPanel Package
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2 + Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, openssl, json, fileinfo
+          tools: composer:v2
+          coverage: none
+
+      - name: Build cPanel package folder
+        shell: pwsh
+        run: |
+          Set-Location deploy/cpanel
+          ./Build-CpanelPackage.ps1
+
+      - name: Install API dependencies into package (no-dev)
+        working-directory: deploy/cpanel/dist/xmoney-cpanel-package/api
+        run: |
+          set -euo pipefail
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          test -f vendor/autoload.php
+
+      - name: Verify package is complete
+        run: |
+          set -euo pipefail
+          PKG="deploy/cpanel/dist/xmoney-cpanel-package"
+          test -f "$PKG/api/vendor/autoload.php"
+          test -f "$PKG/api/public/index.php"
+          test -f "$PKG/src/assets/css/xmoney.css"
+          test -f "$PKG/index.html"
+          echo "Package complete (vendor included)."
+
+      - name: Create zip archive
+        run: |
+          set -euo pipefail
+          cd deploy/cpanel/dist
+          rm -f xmoney-cpanel-package.zip
+          zip -r xmoney-cpanel-package.zip xmoney-cpanel-package
+          ls -lh xmoney-cpanel-package.zip
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xmoney-cpanel-package
+          path: deploy/cpanel/dist/xmoney-cpanel-package.zip
+          retention-days: 14

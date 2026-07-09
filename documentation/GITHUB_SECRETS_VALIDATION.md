@@ -13,10 +13,9 @@
 
 ### Blocked paths (workflow refuses)
 
-- `/home/smartdms/public_html` (main site root)
-- `/public_html`
-- `/home/smartdms/smartdms.me`
-- Any path whose last folder is not lowercase `xmoney`
+- `/` (account root)
+- `/home/smartdms/smartdms.me` (addon domain folder — not the deploy target)
+- Any path that is not the approved `public_html` root
 
 ---
 
@@ -36,11 +35,33 @@
 | `XMONEY_JWT_SECRET` | 32+ random characters |
 | `XMONEY_APP_URL` | `https://smartdms.me/api` |
 
+## Optional secrets (OTP email)
+
+| Secret | Default if omitted |
+|--------|-------------------|
+| `XMONEY_SMTP_HOST` | `mail.smartdms.me` |
+| `XMONEY_SMTP_PORT` | `465` |
+| `XMONEY_SMTP_SECURE` | `ssl` |
+| `XMONEY_SMTP_USER` | `xmoney@smartdms.me` |
+| `XMONEY_SMTP_PASS` | *(required for real email — without it deploy uses `MAIL_DRIVER=log`)* |
+| `XMONEY_MAIL_FROM_ADDRESS` | `xmoney@smartdms.me` |
+| `XMONEY_MAIL_FROM_NAME` | `XMONEY` |
+
+---
+
+## Manual upload (no Composer on server)
+
+1. GitHub → **Actions** → **Build cPanel Package** → **Run workflow**
+2. Download artifact `xmoney-cpanel-package.zip`
+3. Extract into `public_html/` (must include `api/vendor/`)
+4. Create `public_html/api/.env` from `api/.env.example` with DB, JWT, and SMTP values
+5. Test `https://smartdms.me/api/v1/health` → must return JSON `200`
+
 ---
 
 ## Safety
 
 - Deploys **only** into `public_html/`
-- Never syncs or cleans `public_html/` root
 - Uses database `smartdms_XMONEY` only
 - `dangerous-clean-slate: false`
+- Deploy workflow bundles `api/vendor/` automatically (no server Composer required)
