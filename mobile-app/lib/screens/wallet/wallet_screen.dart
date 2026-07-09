@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _WalletScreenState extends State<WalletScreen> {
   final _devAmount = TextEditingController(text: '500');
   bool _loading = true;
   bool _devMode = false;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -49,11 +51,11 @@ class _WalletScreenState extends State<WalletScreen> {
     });
     if (!mounted) return;
     if (res['success'] == true) {
-      showXmSnack(context, 'Test funds added');
+      showXmSnack(context, _s.t('mobile.wallet.testFundsAdded', 'Test funds added'));
       await _load();
     } else {
       setState(() => _loading = false);
-      showXmSnack(context, res['message'] as String? ?? 'Deposit failed', error: true);
+      showXmSnack(context, res['message'] as String? ?? _s.t('mobile.wallet.depositFailed', 'Deposit failed'), error: true);
     }
   }
 
@@ -68,11 +70,15 @@ class _WalletScreenState extends State<WalletScreen> {
     });
     if (!mounted) return;
     if (res['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wallet topped up')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_s.t('mobile.wallet.toppedUp', 'Wallet topped up'))),
+      );
       await _load();
     } else {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] as String? ?? 'Top-up failed')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] as String? ?? _s.t('mobile.wallet.topupFailed', 'Top-up failed'))),
+      );
     }
   }
 
@@ -80,7 +86,7 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '', decimalDigits: 2);
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallet')),
+      appBar: AppBar(title: Text(_s.t('nav.wallet', 'Wallet'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -92,7 +98,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Available'),
+                        Text(_s.t('mobile.wallet.available', 'Available')),
                         Text(
                           _wallet != null ? '${fmt.format(_wallet!['available_balance'])} ${_wallet!['currency']}' : '—',
                           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -108,10 +114,10 @@ class _WalletScreenState extends State<WalletScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text('Top up', style: TextStyle(fontWeight: FontWeight.bold)),
-                        TextField(controller: _amount, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Amount')),
+                        Text(_s.t('wallet.topUp', 'Top up'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                        TextField(controller: _amount, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: _s.t('wallet.amount', 'Amount'))),
                         const SizedBox(height: 12),
-                        ElevatedButton(onPressed: _topUp, child: const Text('Top up now')),
+                        ElevatedButton(onPressed: _topUp, child: Text(_s.t('wallet.topUpNow', 'Top up now'))),
                       ],
                     ),
                   ),
@@ -124,17 +130,17 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text('Development deposit', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextField(controller: _devAmount, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Amount')),
+                          Text(_s.t('mobile.wallet.devDeposit', 'Development deposit'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          TextField(controller: _devAmount, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: _s.t('wallet.amount', 'Amount'))),
                           const SizedBox(height: 12),
-                          OutlinedButton(onPressed: _devDeposit, child: const Text('Add test funds')),
+                          OutlinedButton(onPressed: _devDeposit, child: Text(_s.t('wallet.addTestFunds', 'Add test funds'))),
                         ],
                       ),
                     ),
                   ),
                 ],
                 const SizedBox(height: 16),
-                const Text('History', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(_s.t('wallet.history', 'History'), style: const TextStyle(fontWeight: FontWeight.bold)),
                 ..._history.map((r) {
                   final m = r as Map<String, dynamic>;
                   return ListTile(

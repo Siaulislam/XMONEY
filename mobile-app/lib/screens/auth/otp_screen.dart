@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _OtpScreenState extends State<OtpScreen> {
   String? _error;
   int _resendIn = 0;
   Timer? _timer;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -58,13 +60,13 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() => _loading = false);
     if (res['success'] == true) {
       if (widget.purpose == 'registration') {
-        showXmSnack(context, 'Account verified. Please sign in.');
+        showXmSnack(context, _s.t('otp.accountVerified', 'Account verified. Please sign in.'));
         Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (_) => false);
       } else {
         Navigator.pushNamedAndRemoveUntil(context, AppRouter.home, (_) => false);
       }
     } else {
-      setState(() => _error = res['message'] as String? ?? 'Invalid OTP');
+      setState(() => _error = res['message'] as String? ?? _s.t('otp.invalid', 'Invalid OTP'));
     }
   }
 
@@ -73,17 +75,17 @@ class _OtpScreenState extends State<OtpScreen> {
     final res = await widget.router.api.resendOtp(email: widget.email, purpose: widget.purpose);
     if (!mounted) return;
     if (res['success'] == true) {
-      showXmSnack(context, 'OTP sent');
+      showXmSnack(context, _s.t('otp.sent', 'OTP sent'));
       _startResendTimer(60);
     } else {
-      showXmSnack(context, res['message'] as String? ?? 'Could not resend OTP', error: true);
+      showXmSnack(context, res['message'] as String? ?? _s.t('otp.resendFail', 'Could not resend OTP'), error: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Verify OTP')),
+      appBar: AppBar(title: Text(_s.t('otp.title', 'Verify OTP'))),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -91,11 +93,11 @@ class _OtpScreenState extends State<OtpScreen> {
           children: [
             const XmBrandLogo(height: 48),
             const SizedBox(height: 24),
-            Text('Enter the 6-digit code sent to\n${widget.email}', textAlign: TextAlign.center),
+            Text('${_s.t('otp.subtitle', 'Enter the 6-digit code sent to')}\n${widget.email}', textAlign: TextAlign.center),
             const SizedBox(height: 24),
             TextField(
               controller: _otp,
-              decoration: const InputDecoration(labelText: 'OTP code'),
+              decoration: InputDecoration(labelText: _s.t('otp.code', 'OTP code')),
               keyboardType: TextInputType.number,
               maxLength: 6,
               textAlign: TextAlign.center,
@@ -103,10 +105,15 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
             if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loading ? null : _verify, child: Text(_loading ? 'Verifying…' : 'Verify')),
+            ElevatedButton(
+              onPressed: _loading ? null : _verify,
+              child: Text(_loading ? _s.t('otp.verifying', 'Verifying…') : _s.t('otp.verify', 'Verify')),
+            ),
             TextButton(
               onPressed: _resendIn > 0 ? null : _resend,
-              child: Text(_resendIn > 0 ? 'Resend in $_resendIn s' : 'Resend code'),
+              child: Text(_resendIn > 0
+                  ? _s.t('otp.resendIn', 'Resend in {seconds} s').replaceAll('{seconds}', '$_resendIn')
+                  : _s.t('otp.resend', 'Resend code')),
             ),
           ],
         ),

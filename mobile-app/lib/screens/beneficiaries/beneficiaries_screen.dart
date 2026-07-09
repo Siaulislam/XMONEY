@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
 
 class BeneficiariesScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
   final _currency = TextEditingController(text: 'PKR');
   final _bank = TextEditingController();
   final _account = TextEditingController();
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -45,12 +47,12 @@ class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
     });
     if (!mounted) return;
     if (res['success'] == true) {
-      showXmSnack(context, 'Beneficiary added');
+      showXmSnack(context, _s.t('mobile.ben.added', 'Beneficiary added'));
       setState(() => _showForm = false);
       _name.clear(); _bank.clear(); _account.clear();
       await _load();
     } else {
-      showXmSnack(context, res['message'] as String? ?? 'Failed to add beneficiary', error: true);
+      showXmSnack(context, res['message'] as String? ?? _s.t('mobile.ben.addFailed', 'Failed to add beneficiary'), error: true);
     }
   }
 
@@ -58,7 +60,7 @@ class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
     final res = await widget.router.api.delete('/v1/beneficiaries/$uuid');
     if (!mounted) return;
     if (res['success'] == true) {
-      showXmSnack(context, 'Beneficiary removed');
+      showXmSnack(context, _s.t('mobile.ben.removed', 'Beneficiary removed'));
       await _load();
     }
   }
@@ -67,7 +69,7 @@ class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Beneficiaries'),
+        title: Text(_s.t('nav.beneficiaries', 'Beneficiaries')),
         actions: [
           IconButton(
             icon: Icon(_showForm ? Icons.close : Icons.add),
@@ -81,16 +83,16 @@ class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 if (_showForm) ...[
-                  TextField(controller: _name, decoration: const InputDecoration(labelText: 'Receiver name')),
-                  TextField(controller: _country, decoration: const InputDecoration(labelText: 'Country (ISO)')),
-                  TextField(controller: _currency, decoration: const InputDecoration(labelText: 'Currency')),
-                  TextField(controller: _bank, decoration: const InputDecoration(labelText: 'Bank name')),
-                  TextField(controller: _account, decoration: const InputDecoration(labelText: 'Account number')),
+                  TextField(controller: _name, decoration: InputDecoration(labelText: _s.t('ben.receiverName', 'Receiver name'))),
+                  TextField(controller: _country, decoration: InputDecoration(labelText: _s.t('auth.country', 'Country'))),
+                  TextField(controller: _currency, decoration: InputDecoration(labelText: _s.t('wallet.currency', 'Currency'))),
+                  TextField(controller: _bank, decoration: InputDecoration(labelText: _s.t('ben.bankName', 'Bank name'))),
+                  TextField(controller: _account, decoration: InputDecoration(labelText: _s.t('ben.accountNumber', 'Account number'))),
                   const SizedBox(height: 12),
-                  ElevatedButton(onPressed: _create, child: const Text('Save beneficiary')),
+                  ElevatedButton(onPressed: _create, child: Text(_s.t('mobile.ben.save', 'Save beneficiary'))),
                   const Divider(height: 32),
                 ],
-                if (_rows.isEmpty) const Text('No beneficiaries yet.'),
+                if (_rows.isEmpty) Text(_s.t('mobile.ben.none', 'No beneficiaries yet.')),
                 ..._rows.map((b) {
                   final m = b as Map<String, dynamic>;
                   return Card(

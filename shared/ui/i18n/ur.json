@@ -97,5 +97,11 @@
   "receipt.cancelTransfer": "ٹرانسفر منسوخ کریں",
   "admin.userManagement": "صارف نظم و نسق",
   "admin.operationsDashboard": "آپریشنز ڈیش بورڈ",
-  "admin.topCorridors": "نمایاں کوریڈورز"
+  "admin.topCorridors": "نمایاں کوریڈورز",
+  "otp.title": "OTP کی تصدیق کریں",
+  "otp.verify": "تصدیق کریں",
+  "otp.sent": "OTP بھیج دیا گیا",
+  "mobile.transfer.insufficientBalance": "والیٹ بیلنس ناکافی ہے",
+  "mobile.wallet.available": "دستیاب",
+  "mobile.ben.none": "ابھی کوئی وصول کنندہ نہیں"
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
 
 class TransferScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _TransferScreenState extends State<TransferScreen> {
   Map<String, dynamic>? _quote;
   bool _loading = true;
   String? _error;
+  final _s = XmStrings.instance;
 
   @override
   void initState() {
@@ -56,7 +58,7 @@ class _TransferScreenState extends State<TransferScreen> {
 
   Future<void> _quote() async {
     if (_selectedBen == null) {
-      setState(() => _error = 'Select a beneficiary');
+      setState(() => _error = _s.t('mobile.transfer.selectBen', 'Select a beneficiary'));
       return;
     }
     final ben = _beneficiaries.cast<Map<String, dynamic>>().firstWhere((b) => b['uuid'] == _selectedBen);
@@ -70,7 +72,7 @@ class _TransferScreenState extends State<TransferScreen> {
     if (res['success'] == true) {
       setState(() { _quote = res['data'] as Map<String, dynamic>?; _error = null; });
     } else {
-      setState(() => _error = res['message'] as String? ?? 'Quote failed');
+      setState(() => _error = res['message'] as String? ?? _s.t('mobile.transfer.quoteFailed', 'Quote failed'));
     }
   }
 
@@ -78,7 +80,7 @@ class _TransferScreenState extends State<TransferScreen> {
     if (_quote == null || _selectedBen == null) return;
     final needed = (_quote!['total_debit'] as num?)?.toDouble() ?? 0;
     if (_available(_srcCur) < needed) {
-      showXmSnack(context, 'Insufficient wallet balance', error: true);
+      showXmSnack(context, _s.t('mobile.transfer.insufficientBalance', 'Insufficient wallet balance'), error: true);
       return;
     }
     final create = await widget.router.api.post('/v1/transfers', {
@@ -89,19 +91,19 @@ class _TransferScreenState extends State<TransferScreen> {
     });
     if (create['success'] != true) {
       if (!mounted) return;
-      showXmSnack(context, create['message'] as String? ?? 'Transfer failed', error: true);
+      showXmSnack(context, create['message'] as String? ?? _s.t('mobile.transfer.transferFailed', 'Transfer failed'), error: true);
       return;
     }
     final uuid = (create['data'] as Map)['uuid'];
     final confirm = await widget.router.api.post('/v1/transfers/$uuid/confirm', {'payment_method': 'wallet'});
     if (!mounted) return;
     if (confirm['success'] == true) {
-      showXmSnack(context, 'Transfer submitted');
+      showXmSnack(context, _s.t('mobile.transfer.submitted', 'Transfer submitted'));
       _amount.clear();
       setState(() => _quote = null);
       _load();
     } else {
-      showXmSnack(context, confirm['message'] as String? ?? 'Payment failed', error: true);
+      showXmSnack(context, confirm['message'] as String? ?? _s.t('mobile.transfer.paymentFailed', 'Payment failed'), error: true);
     }
   }
 
@@ -109,7 +111,7 @@ class _TransferScreenState extends State<TransferScreen> {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '', decimalDigits: 2);
     return Scaffold(
-      appBar: AppBar(title: const Text('Send money')),
+      appBar: AppBar(title: Text(_s.t('nav.send', 'Send money'))),
       body: _loading
           ? const XmLoading()
           : SingleChildScrollView(
@@ -117,14 +119,16 @@ class _TransferScreenState extends State<TransferScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Available: ${fmt.format(_available(_srcCur))} $_srcCur'),
+                  Text(_s.t('mobile.transfer.available', 'Available: {amount} {currency}')
+                      .replaceAll('{amount}', fmt.format(_available(_srcCur)))
+                      .replaceAll('{currency}', _srcCur)),
                   const SizedBox(height: 12),
                   if (_beneficiaries.isEmpty)
-                    const Text('Add a beneficiary first (More → Beneficiaries).')
+                    Text(_s.t('mobile.transfer.addBenFirst', 'Add a beneficiary first (More -> Beneficiaries).'))
                   else ...[
                     DropdownButtonFormField<String>(
                       value: _selectedBen,
-                      decoration: const InputDecoration(labelText: 'Beneficiary'),
+                      decoration: InputDecoration(labelText: _s.t('transfer.beneficiary', 'Beneficiary')),
                       items: _beneficiaries.map((b) {
                         final m = b as Map<String, dynamic>;
                         return DropdownMenuItem(
@@ -138,20 +142,25 @@ class _TransferScreenState extends State<TransferScreen> {
                     TextField(
                       controller: _amount,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: 'Amount ($_srcCur)'),
+                      decoration: InputDecoration(labelText: '${_s.t('wallet.amount', 'Amount')} ($_srcCur)'),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 8),
                       Text(_error!, style: const TextStyle(color: Colors.red)),
                     ],
                     const SizedBox(height: 12),
-                    OutlinedButton(onPressed: _quote, child: const Text('Get quote')),
+                    OutlinedButton(onPressed: _quote, child: Text(_s.t('transfer.getQuote', 'Get quote'))),
                     if (_quote != null) ...[
                       const SizedBox(height: 12),
-                      Text('Receive: ${_quote!['receive_amount']} ${_quote!['target_currency']}'),
-                      Text('Fee: ${_quote!['fee_amount']} · Total: ${_quote!['total_debit']} $_srcCur'),
+                      Text(_s.t('mobile.transfer.receive', 'Receive: {amount} {currency}')
+                          .replaceAll('{amount}', '${_quote!['receive_amount']}')
+                          .replaceAll('{currency}', '${_quote!['target_currency']}')),
+                      Text(_s.t('mobile.transfer.feeTotal', 'Fee: {fee} · Total: {total} {currency}')
+                          .replaceAll('{fee}', '${_quote!['fee_amount']}')
+                          .replaceAll('{total}', '${_quote!['total_debit']}')
+                          .replaceAll('{currency}', _srcCur)),
                       const SizedBox(height: 16),
-                      ElevatedButton(onPressed: _send, child: const Text('Confirm & pay from wallet')),
+                      ElevatedButton(onPressed: _send, child: Text(_s.t('mobile.transfer.confirmWallet', 'Confirm & pay from wallet'))),
                     ],
                   ],
                 ],
