@@ -47,8 +47,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('reports.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('reports.html')) return;
     let lastRows = [];
     let lastType = 'daily';
 
@@ -90,6 +90,7 @@
       a.download = `xmoney-report-${lastType}.csv`;
       a.click();
     };
+  })();
   </script>
 </body>
 </html>

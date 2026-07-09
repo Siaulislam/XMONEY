@@ -51,5 +51,12 @@ const XMONEY_ADMIN_SHELL = (() => {
     document.addEventListener('xm-lang-change', () => mount(active));
   }
 
-  return { mount, LINKS };
+  async function mountAsync(activeHref) {
+    const user = await XMONEY.ensureSession();
+    if (!user) return false;
+    mount(activeHref);
+    return true;
+  }
+
+  return { mount, mountAsync, LINKS };
 })();

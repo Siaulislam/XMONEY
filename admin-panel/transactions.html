@@ -49,8 +49,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('transactions.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('transactions.html')) return;
     async function load() {
       const q = document.getElementById('q').value;
       const status = document.getElementById('status').value;
@@ -90,6 +90,7 @@
     document.getElementById('q').oninput = load;
     document.getElementById('status').onchange = load;
     load();
+  })();
   </script>
 </body>
 </html>

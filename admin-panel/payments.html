@@ -50,8 +50,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('payments.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('payments.html')) return;
     async function load() {
       const p = new URLSearchParams();
       const q = document.getElementById('q').value.trim();
@@ -75,6 +75,7 @@
     }
     document.getElementById('searchBtn').onclick = load;
     load();
+  })();
   </script>
 </body>
 </html>

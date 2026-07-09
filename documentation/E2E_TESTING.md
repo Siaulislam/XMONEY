@@ -7,7 +7,8 @@ Use this when the platform is ready for full manual and automated E2E validation
 | Item | Status |
 |------|--------|
 | Database `smartdms_XMONEY` with schema + seeds | Required |
-| Migrations 002 + 003 applied | Required |
+| Migrations 002 + 003 applied | Required (003 confirmed on `smartdms_XMONEY`) |
+| Backend API deployed to `/xmoney/api` | Required — DB-only is not enough for browser/mobile tests |
 | `APP_DEBUG=true` on API (staging only) | Required for OTP debug + dev wallet |
 | API reachable from browser/mobile | Required |
 

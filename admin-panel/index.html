@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -48,9 +48,8 @@
   <script src="src/assets/js/shell.js"></script>
   <script src="src/assets/js/charts.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('index.html');
     (async () => {
+      if (!await XMONEY_ADMIN_SHELL.mountAsync('index.html')) return;
       const [dash, analytics] = await Promise.all([
         XMONEY.api('/v1/admin/dashboard'),
         XMONEY.api('/v1/admin/analytics?days=30'),

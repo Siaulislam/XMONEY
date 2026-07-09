@@ -35,8 +35,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('settings.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('settings.html')) return;
     let rows = [];
 
     function field(row) {
@@ -72,6 +72,7 @@
       if (res.success) load();
     };
     load();
+  })();
   </script>
 </body>
 </html>

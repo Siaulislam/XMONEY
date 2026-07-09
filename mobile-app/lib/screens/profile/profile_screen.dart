@@ -34,6 +34,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ListTile(title: const Text('Email'), subtitle: Text(_profile?['email'] as String? ?? '—')),
           ListTile(title: const Text('KYC'), subtitle: Text(_profile?['kyc_status'] as String? ?? '—')),
           ListTile(title: const Text('Status'), subtitle: Text(_profile?['status'] as String? ?? '—')),
+          ListTile(
+            leading: const Icon(Icons.edit_outlined),
+            title: const Text('Edit profile'),
+            onTap: () async {
+              if (_profile == null) return;
+              final updated = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfileEditScreen(router: widget.router, profile: _profile!),
+                ),
+              );
+              if (updated != null) setState(() => _profile = updated);
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.verified_user_outlined),

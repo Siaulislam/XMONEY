@@ -41,8 +41,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('audit.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('audit.html')) return;
     async function load(action='') {
       const res = await XMONEY.api('/v1/admin/audit-logs?limit=100' + (action ? '&action=' + encodeURIComponent(action) : ''));
       document.getElementById('body').innerHTML = (res.data || []).map(r => `
@@ -60,6 +60,7 @@
       t = setTimeout(() => load(e.target.value), 250);
     };
     load();
+  })();
   </script>
 </body>
 </html>

@@ -46,6 +46,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     title: Text(t['reference_code'] as String? ?? ''),
                     subtitle: Text('${t['receiver_name']} · ${t['status']}'),
                     trailing: Text('${fmt.format(t['send_amount'])} ${t['source_currency']}'),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRouter.transactionDetail,
+                      arguments: {'uuid': t['uuid']},
+                    ),
                   );
                 },
               ),

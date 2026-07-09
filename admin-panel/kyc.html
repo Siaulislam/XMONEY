@@ -34,8 +34,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('kyc.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('kyc.html')) return;
 
     async function viewDocument(uuid) {
       const res = await fetch(XMONEY.API_BASE + '/v1/admin/kyc/' + uuid + '/file', {
@@ -74,6 +74,7 @@
       });
     }
     load();
+  })();
   </script>
 </body>
 </html>

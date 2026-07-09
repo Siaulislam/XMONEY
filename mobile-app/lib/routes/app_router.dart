@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/api/api_client.dart';
 import '../core/api/session_manager.dart';
 import '../screens/splash_screen.dart';
+import '../screens/auth/register_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/otp_screen.dart';
@@ -11,6 +12,8 @@ import '../screens/wallet/wallet_screen.dart';
 import '../screens/transfer/transfer_screen.dart';
 import '../screens/transactions/transactions_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/transactions/transaction_detail_screen.dart';
+import '../screens/profile/profile_edit_screen.dart';
 import '../screens/kyc/kyc_screen.dart';
 import '../screens/beneficiaries/beneficiaries_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
@@ -29,6 +32,7 @@ class AppRouter {
   static const wallet = '/wallet';
   static const transfer = '/transfer';
   static const transactions = '/transactions';
+  static const transactionDetail = '/transactions/detail';
   static const profile = '/profile';
   static const kyc = '/kyc';
   static const beneficiaries = '/beneficiaries';
@@ -68,6 +72,14 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => MainShellScreen(router: this, initialIndex: 2));
       case profile:
         return MaterialPageRoute(builder: (_) => ProfileScreen(router: this));
+      case transactionDetail:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        return MaterialPageRoute(
+          builder: (_) => TransactionDetailScreen(
+            router: this,
+            uuid: args['uuid'] as String? ?? '',
+          ),
+        );
       case kyc:
         return MaterialPageRoute(builder: (_) => KycScreen(router: this));
       case beneficiaries:

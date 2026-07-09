@@ -40,8 +40,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('user-detail.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('user-detail.html')) return;
     const params = new URLSearchParams(location.search);
     const uuid = params.get('uuid');
     if (!uuid) location.href = 'users.html';
@@ -90,6 +90,7 @@
       };
     }
     load();
+  })();
   </script>
 </body>
 </html>

@@ -41,8 +41,8 @@
   <script src="src/assets/js/api.js"></script>
   <script src="src/assets/js/shell.js"></script>
   <script>
-    if (!XMONEY.requireAuth()) throw new Error('auth');
-    XMONEY_ADMIN_SHELL.mount('users.html');
+    (async () => {
+    if (!await XMONEY_ADMIN_SHELL.mountAsync('users.html')) return;
     async function load(q='') {
       const res = await XMONEY.api('/v1/admin/users' + (q ? '?q=' + encodeURIComponent(q) : ''));
       document.getElementById('body').innerHTML = (res.data || []).map(u => `
@@ -68,6 +68,7 @@
     }
     document.getElementById('q').oninput = (e) => load(e.target.value);
     load();
+  })();
   </script>
 </body>
 </html>
