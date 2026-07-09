@@ -25,31 +25,31 @@
   <div data-xm-shell>
     <div id="alert" hidden></div>
     <div class="xm-wallet-hero" id="hero">
-      <div class="label">Available balance</div>
+      <div class="label" data-i18n="wallet.available">Available balance</div>
       <div class="balance" id="heroBal">—</div>
       <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-        <a href="transfer.html" class="xm-btn xm-btn-primary">Send money</a>
-        <a href="wallet.html" class="xm-btn xm-btn-secondary">Top up wallet</a>
+        <a href="transfer.html" class="xm-btn xm-btn-primary" data-i18n="nav.send">Send money</a>
+        <a href="wallet.html" class="xm-btn xm-btn-secondary" data-i18n="dash.topUpWallet">Top up wallet</a>
       </div>
     </div>
     <div class="xm-stats" id="stats"></div>
     <div class="xm-grid-2">
       <div class="xm-card">
-        <h2 style="font-family:var(--xm-display);font-size:1.05rem;margin-bottom:0.75rem">Transfer volume (6 months)</h2>
+        <h2 style="font-family:var(--xm-display);font-size:1.05rem;margin-bottom:0.75rem" data-i18n="dash.volumeChart">Transfer volume (6 months)</h2>
         <div id="volumeChart"></div>
       </div>
       <div class="xm-card">
-        <h2 style="font-family:var(--xm-display);font-size:1.05rem;margin-bottom:0.75rem">Quick actions</h2>
+        <h2 style="font-family:var(--xm-display);font-size:1.05rem;margin-bottom:0.75rem" data-i18n="dash.quickActions">Quick actions</h2>
         <div style="display:grid;gap:0.5rem">
-          <a href="beneficiaries.html" class="xm-btn xm-btn-outline">Manage beneficiaries</a>
-          <a href="kyc.html" class="xm-btn xm-btn-outline">KYC verification</a>
-          <a href="notifications.html" class="xm-btn xm-btn-outline" id="notifLink">Notifications</a>
-          <a href="transactions.html" class="xm-btn xm-btn-outline">Full transaction history</a>
+          <a href="beneficiaries.html" class="xm-btn xm-btn-outline" data-i18n="dash.manageBen">Manage beneficiaries</a>
+          <a href="kyc.html" class="xm-btn xm-btn-outline" data-i18n="dash.kycVerify">KYC verification</a>
+          <a href="notifications.html" class="xm-btn xm-btn-outline" id="notifLink" data-i18n="nav.notifications">Notifications</a>
+          <a href="transactions.html" class="xm-btn xm-btn-outline" data-i18n="dash.fullHistory">Full transaction history</a>
         </div>
       </div>
     </div>
     <div class="xm-card" style="margin-top:1.25rem">
-      <h2 style="font-family:var(--xm-display);font-size:1.15rem;margin-bottom:1rem">Recent transfers</h2>
+      <h2 style="font-family:var(--xm-display);font-size:1.15rem;margin-bottom:1rem" data-i18n="dash.recentTransfers">Recent transfers</h2>
       <div class="xm-table-wrap">
         <table class="xm-table">
           <thead><tr><th>Reference</th><th>Receiver</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
@@ -63,7 +63,7 @@
   <script src="src/assets/js/shell.js"></script>
   <script>
     (async () => {
-      const profile = await XMShell.mount({ title: 'Overview', heading: 'Welcome back' });
+      const profile = await XMShell.mount({ title: 'Overview', headingKey: 'dash.welcome', heading: 'Welcome back' });
       if (!profile) return;
 
       const [analytics, txns] = await Promise.all([

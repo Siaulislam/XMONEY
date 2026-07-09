@@ -111,7 +111,7 @@
     }
 
     (async () => {
-      const profile = await XMShell.mount({ title: 'Send money', heading: 'Send money' });
+      const profile = await XMShell.mount({ title: 'Send money', headingKey: 'nav.send', heading: 'Send money' });
       if (!profile) return;
 
       if (profile.kyc_status !== 'approved') {

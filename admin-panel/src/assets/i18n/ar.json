@@ -49,5 +49,10 @@
   "ben.saved": "المستفيدون المحفوظون",
   "notif.markAll": "تعليم الكل كمقروء",
   "common.save": "حفظ",
-  "admin.signIn": "دخول الموظفين"
+  "admin.signIn": "دخول الموظفين",
+  "dash.welcome": "مرحباً بعودتك",
+  "dash.quickActions": "إجراءات سريعة",
+  "kyc.uploadBtn": "رفع للمراجعة",
+  "settings.security": "الأمان",
+  "settings.preferences": "التفضيلات"
 }

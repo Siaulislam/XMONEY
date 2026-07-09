@@ -26,26 +26,26 @@
     <div id="alert" hidden></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" class="prof-grid">
       <div class="xm-card">
-        <h2 style="font-size:1.05rem;margin-bottom:1rem">Profile</h2>
+        <h2 style="font-size:1.05rem;margin-bottom:1rem" data-i18n="profile.title">Profile</h2>
         <form id="profForm">
-          <div class="xm-field"><label>Full name</label><input name="full_name" id="full_name" required /></div>
-          <div class="xm-field"><label>Country</label><input name="country_code" id="country_code" maxlength="2" required /></div>
+          <div class="xm-field"><label data-i18n="auth.fullName">Full name</label><input name="full_name" id="full_name" required /></div>
+          <div class="xm-field"><label data-i18n="auth.country">Country</label><input name="country_code" id="country_code" maxlength="2" required /></div>
           <div class="xm-field"><label>City</label><input name="city" id="city" /></div>
           <div class="xm-field"><label>Address</label><input name="address_line1" id="address_line1" /></div>
-          <button class="xm-btn xm-btn-primary" type="submit" id="profBtn">Save profile</button>
+          <button class="xm-btn xm-btn-primary" type="submit" id="profBtn" data-i18n="profile.save">Save profile</button>
         </form>
       </div>
       <div>
         <div class="xm-card" style="margin-bottom:1.25rem">
-          <h2 style="font-size:1.05rem;margin-bottom:1rem">Change password</h2>
+          <h2 style="font-size:1.05rem;margin-bottom:1rem" data-i18n="profile.changePassword">Change password</h2>
           <form id="pwdForm">
-            <div class="xm-field"><label>Current password</label><input name="current_password" type="password" required /></div>
-            <div class="xm-field"><label>New password</label><input name="new_password" type="password" required /></div>
+            <div class="xm-field"><label data-i18n="common.password">Current password</label><input name="current_password" type="password" required /></div>
+            <div class="xm-field"><label data-i18n="common.password">New password</label><input name="new_password" type="password" required /></div>
             <button class="xm-btn xm-btn-outline" type="submit" id="pwdBtn">Update password</button>
           </form>
         </div>
         <div class="xm-card">
-          <h2 style="font-size:1.05rem;margin-bottom:1rem">Devices</h2>
+          <h2 style="font-size:1.05rem;margin-bottom:1rem" data-i18n="profile.devices">Devices</h2>
           <div id="devices">Loading…</div>
         </div>
       </div>
@@ -72,7 +72,7 @@
       });
     }
     (async () => {
-      const profile = await XMShell.mount({ title: 'Profile', heading: 'Profile & security' });
+      const profile = await XMShell.mount({ title: 'Profile', headingKey: 'nav.profile', heading: 'Profile & security' });
       if (!profile) return;
       ['full_name','country_code','city','address_line1'].forEach(k => {
         const el = document.getElementById(k);

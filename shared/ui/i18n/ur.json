@@ -49,5 +49,10 @@
   "ben.saved": "محفوظ وصول کنندگان",
   "notif.markAll": "سب کو پڑھا ہوا نشان لگائیں",
   "common.save": "محفوظ کریں",
-  "admin.signIn": "اسٹاف سائن ان"
+  "admin.signIn": "اسٹاف سائن ان",
+  "dash.welcome": "خوش آمدید",
+  "dash.quickActions": "فوری اقدامات",
+  "kyc.uploadBtn": "جائزے کے لیے اپ لوڈ کریں",
+  "settings.security": "سیکیورٹی",
+  "settings.preferences": "ترجیحات"
 }

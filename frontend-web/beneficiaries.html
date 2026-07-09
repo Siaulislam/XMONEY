@@ -132,7 +132,7 @@
       else XMONEY.toast(res.message || 'Update failed', 'error');
     };
     (async () => {
-      const profile = await XMShell.mount({ title: 'Beneficiaries', heading: 'Beneficiaries' });
+      const profile = await XMShell.mount({ title: 'Beneficiaries', headingKey: 'nav.beneficiaries', heading: 'Beneficiaries' });
       if (!profile) return;
       document.getElementById('benForm').onsubmit = async (e) => {
         e.preventDefault();

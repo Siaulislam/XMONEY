@@ -121,7 +121,7 @@
     }
 
     (async () => {
-      const profile = await XMShell.mount({ title: 'Wallet', heading: 'Wallet' });
+      const profile = await XMShell.mount({ title: 'Wallet', headingKey: 'nav.wallet', heading: 'Wallet' });
       if (!profile) return;
       await loadWallets();
       await loadHistory();

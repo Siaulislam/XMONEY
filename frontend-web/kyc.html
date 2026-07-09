@@ -25,10 +25,10 @@
   <div data-xm-shell>
     <div id="alert" hidden></div>
     <div class="xm-card" style="max-width:480px;margin-bottom:1.25rem">
-      <p style="color:var(--xm-muted);font-size:0.9rem;margin-bottom:1rem">Upload a clear photo or PDF of your identity document. Status updates after compliance review.</p>
+      <p style="color:var(--xm-muted);font-size:0.9rem;margin-bottom:1rem" data-i18n="kyc.hint">Upload a clear photo or PDF of your identity document. Status updates after compliance review.</p>
       <form id="kycForm">
         <div class="xm-field">
-          <label>Document type</label>
+          <label data-i18n="kyc.documentType">Document type</label>
           <select name="document_type">
             <option value="passport">Passport</option>
             <option value="national_id">National ID</option>
@@ -36,14 +36,14 @@
             <option value="address_proof">Address proof</option>
           </select>
         </div>
-        <div class="xm-field"><label>Document number</label><input name="document_number" /></div>
-        <div class="xm-field"><label>Country</label><input name="country_code" maxlength="2" placeholder="AE" /></div>
+        <div class="xm-field"><label data-i18n="kyc.documentNumber">Document number</label><input name="document_number" /></div>
+        <div class="xm-field"><label data-i18n="auth.country">Country</label><input name="country_code" maxlength="2" placeholder="AE" /></div>
         <div class="xm-field"><label>File (JPEG, PNG, PDF)</label><input name="document" type="file" accept=".jpg,.jpeg,.png,.pdf" required /></div>
-        <button class="xm-btn xm-btn-primary" type="submit" id="upBtn">Upload for review</button>
+        <button class="xm-btn xm-btn-primary" type="submit" id="upBtn" data-i18n="kyc.uploadBtn">Upload for review</button>
       </form>
     </div>
     <div class="xm-card">
-      <h2 style="font-size:1.05rem;margin-bottom:0.75rem">Your documents</h2>
+      <h2 style="font-size:1.05rem;margin-bottom:0.75rem" data-i18n="kyc.yourDocuments">Your documents</h2>
       <div id="docs">Loading…</div>
     </div>
   </div>
@@ -53,7 +53,11 @@
     async function load() {
       const res = await XMONEY.api('/v1/kyc');
       const el = document.getElementById('docs');
-      if (!res.success || !res.data.length) { el.innerHTML = '<div class="xm-empty">No documents uploaded.</div>'; return; }
+      if (!res.success || !res.data.length) {
+        const msg = (typeof XMI18n !== 'undefined' && XMI18n.t) ? XMI18n.t('kyc.noDocuments', 'No documents uploaded.') : 'No documents uploaded.';
+        el.innerHTML = `<div class="xm-empty">${msg}</div>`;
+        return;
+      }
       el.innerHTML = res.data.map(d => `
         <div style="padding:0.75rem 0;border-bottom:1px solid var(--xm-border)">
           <strong>${d.document_type.replace(/_/g,' ')}</strong> ${XMONEY.statusBadge(d.status)}
@@ -62,7 +66,7 @@
         </div>`).join('');
     }
     (async () => {
-      const profile = await XMShell.mount({ title: 'KYC', heading: 'KYC verification' });
+      const profile = await XMShell.mount({ title: 'KYC', headingKey: 'dash.kycVerify', heading: 'KYC verification' });
       if (!profile) return;
       XMONEY.showAlert(document.getElementById('alert'), 'Current KYC status: ' + profile.kyc_status, profile.kyc_status === 'approved' ? 'success' : 'info');
       document.getElementById('kycForm').onsubmit = async (e) => {

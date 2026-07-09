@@ -60,7 +60,7 @@
     }
 
     (async () => {
-      const profile = await XMShell.mount({ title: 'Notifications', heading: 'Notifications' });
+      const profile = await XMShell.mount({ title: 'Notifications', headingKey: 'nav.notifications', heading: 'Notifications' });
       if (!profile) return;
       document.getElementById('markAllBtn').onclick = async () => {
         await XMONEY.api('/v1/notifications/read-all', { method: 'POST', body: {} });
