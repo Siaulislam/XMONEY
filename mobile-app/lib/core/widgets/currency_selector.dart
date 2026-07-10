@@ -121,17 +121,28 @@ class CurrencySelector extends StatelessWidget {
                             _OneDecimalFormatter(),
                           ],
                           textAlign: TextAlign.right,
+                          cursorColor: XmoneyTheme.teal,
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
                             color: amountColor ?? XmoneyTheme.navyDeep,
                             letterSpacing: -0.5,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             isDense: true,
+                            filled: true,
+                            fillColor: const Color(0xFFF6F8FC),
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
                             hintText: '0',
+                            hintStyle: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.grey.shade400,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         )
                       else
