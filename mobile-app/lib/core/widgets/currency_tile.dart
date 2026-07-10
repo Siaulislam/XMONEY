@@ -39,10 +39,10 @@ class CurrencyTile extends StatelessWidget {
               ),
               Text(
                 option.currencyCode,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade600,
+                  color: XmoneyTheme.listRowText,
                 ),
               ),
               const SizedBox(width: 14),

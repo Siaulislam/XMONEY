@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/xmoney_theme.dart';
 
 class CurrencySearchField extends StatelessWidget {
   const CurrencySearchField({
@@ -17,6 +18,8 @@ class CurrencySearchField extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      style: const TextStyle(color: XmoneyTheme.listRowText, fontSize: 15, fontWeight: FontWeight.w500),
+      cursorColor: XmoneyTheme.teal,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),

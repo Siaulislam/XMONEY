@@ -80,7 +80,9 @@ class _CountryPickerState extends State<CountryPicker> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height * 0.92;
-    return Container(
+    return Theme(
+      data: XmoneyTheme.lightSheet,
+      child: Container(
       height: height,
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -121,6 +123,7 @@ class _CountryPickerState extends State<CountryPicker> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -133,7 +136,7 @@ class _CountryPickerState extends State<CountryPicker> {
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
         color: const Color(0xFFEEF2FA),
-        child: Text(t, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.grey.shade700)),
+        child: Text(t, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep)),
       );
 
   Widget _row(CountryCurrencyOption e) {
@@ -141,13 +144,16 @@ class _CountryPickerState extends State<CountryPicker> {
     return ListTile(
       onTap: () => Navigator.pop(context, e),
       leading: XmCountryFlag(countryCode: e.countryCode),
-      title: Text(e.countryName, style: const TextStyle(fontWeight: FontWeight.w600)),
+      title: Text(
+        e.countryName,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: XmoneyTheme.listRowText),
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             e.currencyCode,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: XmoneyTheme.listRowText),
           ),
           const SizedBox(width: 12),
           if (selected)

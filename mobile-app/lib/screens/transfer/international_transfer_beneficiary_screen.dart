@@ -111,7 +111,9 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return StatefulBuilder(
+        return Theme(
+          data: XmoneyTheme.lightSheet,
+          child: StatefulBuilder(
           builder: (context, setLocal) {
             return Container(
               padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.paddingOf(context).bottom),
@@ -140,6 +142,7 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
               ),
             );
           },
+        ),
         );
       },
     );

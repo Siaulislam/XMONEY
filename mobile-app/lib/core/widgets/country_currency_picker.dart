@@ -74,7 +74,9 @@ class _CountryCurrencyPickerState extends State<CountryCurrencyPicker> {
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height * 0.92;
 
-    return Container(
+    return Theme(
+      data: XmoneyTheme.lightSheet,
+      child: Container(
       height: height,
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -134,6 +136,7 @@ class _CountryCurrencyPickerState extends State<CountryCurrencyPicker> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -190,10 +193,10 @@ class _CountryCurrencyPickerState extends State<CountryCurrencyPicker> {
       color: const Color(0xFFEEF2FA),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: Colors.grey.shade700,
+          color: XmoneyTheme.navyDeep,
           letterSpacing: 0.2,
         ),
       ),

@@ -587,7 +587,9 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
             fillColor: const Color(0xFFF6F8FC),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
           ),
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(color: Color(0xFF071526)))))
+              .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);
           },

@@ -56,6 +56,8 @@ class _WalletSelectorState extends State<WalletSelector> {
         TextField(
           controller: _search,
           onChanged: (v) => setState(() => _query = v),
+          style: const TextStyle(color: XmoneyTheme.listRowText, fontSize: 15),
+          cursorColor: XmoneyTheme.teal,
           decoration: InputDecoration(
             hintText: 'Search wallets',
             hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),

@@ -55,7 +55,7 @@ class SavedBeneficiaryCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(beneficiary.displayName, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: XmoneyTheme.navyDeep)),
-                          Text(beneficiary.receiverName, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                          Text(beneficiary.receiverName, style: const TextStyle(fontSize: 12, color: XmoneyTheme.navyDeep)),
                         ],
                       ),
                     ),

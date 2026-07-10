@@ -12,6 +12,37 @@ class XmoneyTheme {
   static const surfaceDark = Color(0xFF0A0F18);
   static const cardDark = Color(0xFF121A28);
 
+  /// Primary list-row text on white pickers and sheets.
+  static const listRowText = navyDeep;
+
+  /// Light theme for white bottom sheets — keeps country/list text dark when app is in dark mode.
+  static ThemeData get lightSheet {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: teal,
+        brightness: Brightness.light,
+        primary: navy,
+        surface: Colors.white,
+        onSurface: navyDeep,
+      ),
+      listTileTheme: const ListTileThemeData(textColor: navyDeep, iconColor: navyDeep),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: navyDeep, fontSize: 16),
+        bodyMedium: TextStyle(color: navyDeep, fontSize: 14),
+        titleMedium: TextStyle(color: navyDeep, fontWeight: FontWeight.w600, fontSize: 16),
+        titleSmall: TextStyle(color: navyDeep, fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+      iconTheme: const IconThemeData(color: navyDeep),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFFF3F5F9),
+        hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+      ),
+    );
+  }
+
   static ThemeData get light => _build(
         brightness: Brightness.light,
         surface: surface,

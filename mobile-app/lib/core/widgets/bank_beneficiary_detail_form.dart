@@ -365,7 +365,9 @@ class BankBeneficiaryDetailForm extends StatelessWidget {
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _text),
                 dropdownColor: Colors.white,
                 icon: const Icon(Icons.chevron_right_rounded, color: _label),
-                items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                items: items
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(color: _text))))
+                    .toList(),
                 onChanged: (v) {
                   if (v != null) onChanged(v);
                 },

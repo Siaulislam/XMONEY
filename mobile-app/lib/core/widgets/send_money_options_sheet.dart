@@ -30,7 +30,9 @@ class SendMoneyOptionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
+    return Theme(
+      data: XmoneyTheme.lightSheet,
+      child: Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -100,6 +102,7 @@ class SendMoneyOptionsSheet extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
