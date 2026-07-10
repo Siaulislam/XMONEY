@@ -193,7 +193,7 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
                     ),
                     const SizedBox(height: 20),
                     XmSegmentedTabs(
-                      labels: const ['Saved Beneficiaries', 'New Beneficiary'],
+                      labels: const ['Sender History', 'New Beneficiary'],
                       index: _tab,
                       onChanged: (i) => setState(() => _tab = i),
                     ),

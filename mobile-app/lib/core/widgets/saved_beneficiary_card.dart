@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../beneficiaries/beneficiary.dart';
 import '../theme/xmoney_theme.dart';
-import '../transfer/transfer_delivery_type.dart';
 import 'xm_country_flag.dart';
 
 class SavedBeneficiaryCard extends StatelessWidget {
@@ -25,69 +24,79 @@ class SavedBeneficiaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('d MMM yyyy');
     final last = beneficiary.lastUsedAt != null ? dateFmt.format(beneficiary.lastUsedAt!) : 'Never';
+    final routeLabel = beneficiary.isWallet
+        ? (beneficiary.walletProviderName?.trim().isNotEmpty == true ? beneficiary.walletProviderName!.trim() : 'Wallet')
+        : (beneficiary.bankName?.trim().isNotEmpty == true ? beneficiary.bankName!.trim() : 'Bank');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFD),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTransfer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8ECF3)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 14, offset: const Offset(0, 6))],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFD),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE8ECF3)),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 14, offset: const Offset(0, 6))],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                XmCountryFlag(countryCode: beneficiary.countryCode, width: 36, height: 27),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(beneficiary.displayName, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: XmoneyTheme.navyDeep)),
-                      Text(beneficiary.receiverName, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                    ],
-                  ),
+                Row(
+                  children: [
+                    XmCountryFlag(countryCode: beneficiary.countryCode, width: 36, height: 27),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(beneficiary.displayName, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: XmoneyTheme.navyDeep)),
+                          Text(beneficiary.receiverName, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: onFavourite,
+                      icon: Icon(
+                        beneficiary.isFavourite ? Icons.star_rounded : Icons.star_outline_rounded,
+                        color: beneficiary.isFavourite ? XmoneyTheme.gold : Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: onFavourite,
-                  icon: Icon(
-                    beneficiary.isFavourite ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: beneficiary.isFavourite ? XmoneyTheme.gold : Colors.grey.shade400,
-                  ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _chip(Icons.payments_outlined, beneficiary.currencyCode),
+                    _chip(beneficiary.isWallet ? Icons.account_balance_wallet_outlined : Icons.account_balance_outlined, routeLabel),
+                    _chip(Icons.update_rounded, 'Updated: $last'),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onTransfer,
+                        icon: const Icon(Icons.send_rounded, size: 18),
+                        label: const Text('Proceed Transfer'),
+                        style: OutlinedButton.styleFrom(foregroundColor: XmoneyTheme.teal, side: const BorderSide(color: XmoneyTheme.teal)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(onPressed: onEdit, icon: const Icon(Icons.edit_outlined)),
+                    IconButton(onPressed: onDelete, icon: Icon(Icons.delete_outline, color: Colors.red.shade400)),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _chip(Icons.payments_outlined, beneficiary.currencyCode),
-                _chip(beneficiary.isWallet ? Icons.account_balance_wallet_outlined : Icons.account_balance_outlined, beneficiary.deliveryMethod.label),
-                _chip(Icons.history_rounded, 'Last: $last'),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onTransfer,
-                    icon: const Icon(Icons.send_rounded, size: 18),
-                    label: const Text('Transfer again'),
-                    style: OutlinedButton.styleFrom(foregroundColor: XmoneyTheme.teal, side: const BorderSide(color: XmoneyTheme.teal)),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(onPressed: onEdit, icon: const Icon(Icons.edit_outlined)),
-                IconButton(onPressed: onDelete, icon: Icon(Icons.delete_outline, color: Colors.red.shade400)),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
