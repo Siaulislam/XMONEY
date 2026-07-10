@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../routes/app_router.dart';
 import '../../core/theme/xmoney_theme.dart';
+import '../../core/widgets/xm_action_buttons.dart';
+import '../../core/widgets/xm_ui.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.router, this.onSend, this.onTopUp});
@@ -39,19 +41,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _open(String route) => Navigator.pushNamed(context, route);
+
   @override
   Widget build(BuildContext context) {
     final wallets = (_analytics?['wallets'] as List?) ?? [];
     final w = wallets.isNotEmpty ? wallets.first as Map<String, dynamic> : null;
     final fmt = NumberFormat.currency(symbol: '', decimalDigits: 2);
+    final balance = w != null ? '${fmt.format(w['available_balance'])} ${w['currency_code']}' : '—';
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('XMONEY'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Navigator.pushNamed(context, AppRouter.notifications),
+            onPressed: () => _open(AppRouter.notifications),
           ),
         ],
       ),
@@ -60,51 +66,138 @@ class _HomeScreenState extends State<HomeScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [XmoneyTheme.navyDeep, XmoneyTheme.blue]),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  XmWalletHeroCard(
+                    balanceLabel: 'Available balance',
+                    balanceText: balance,
+                    secondaryLabel: 'Verify account',
+                    onSecondary: () => _open(AppRouter.kyc),
+                    onAddMoney: widget.onTopUp ?? () {},
+                  ),
+                  const SizedBox(height: 20),
+                  XmPrimaryActionRow(
+                    children: [
+                      XmPrimaryActionButton(
+                        label: 'Send money',
+                        icon: Icons.near_me_outlined,
+                        accent: XmoneyTheme.blue,
+                        onTap: widget.onSend ?? () {},
+                      ),
+                      XmPrimaryActionButton(
+                        label: 'Beneficiaries',
+                        icon: Icons.people_outline,
+                        accent: XmoneyTheme.teal,
+                        onTap: () => _open(AppRouter.beneficiaries),
+                      ),
+                      XmPrimaryActionButton(
+                        label: 'History',
+                        icon: Icons.receipt_long_outlined,
+                        accent: const Color(0xFF5B6B7C),
+                        onTap: () => _open(AppRouter.transactions),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  XmPrimaryActionRow(
+                    children: [
+                      XmPrimaryActionButton(
+                        label: 'Exchange',
+                        icon: Icons.currency_exchange,
+                        accent: XmoneyTheme.gold,
+                        onTap: widget.onSend ?? () {},
+                      ),
+                      XmPrimaryActionButton(
+                        label: 'Top up',
+                        icon: Icons.add_card_outlined,
+                        accent: const Color(0xFF2E7D6B),
+                        onTap: widget.onTopUp ?? () {},
+                      ),
+                      XmPrimaryActionButton(
+                        label: 'Support',
+                        icon: Icons.headset_mic_outlined,
+                        accent: const Color(0xFF6B5B95),
+                        onTap: () => showXmSnack(context, 'Support chat coming soon'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  XmSectionCard(
+                    title: 'More with XMONEY',
+                    child: GridView.count(
+                      crossAxisCount: 4,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: 4,
+                      childAspectRatio: 0.82,
                       children: [
-                        const Text('Available balance', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                        const SizedBox(height: 4),
-                        Text(
-                          w != null ? '${fmt.format(w['available_balance'])} ${w['currency_code']}' : '—',
-                          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(child: ElevatedButton(onPressed: widget.onSend, child: const Text('Send'))),
-                            const SizedBox(width: 8),
-                            Expanded(child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white54)),
-                              onPressed: widget.onTopUp,
-                              child: const Text('Top up'),
-                            )),
-                          ],
-                        ),
+                        XmServiceTile(label: 'Profile', icon: Icons.person_outline, onTap: () => _open(AppRouter.profile)),
+                        XmServiceTile(label: 'KYC', icon: Icons.verified_user_outlined, accent: XmoneyTheme.teal, onTap: () => _open(AppRouter.kyc)),
+                        XmServiceTile(label: 'Security', icon: Icons.shield_outlined, onTap: () => _open(AppRouter.security)),
+                        XmServiceTile(label: 'Settings', icon: Icons.settings_outlined, onTap: () => _open(AppRouter.settings)),
+                        XmServiceTile(label: 'Wallet', icon: Icons.account_balance_wallet_outlined, onTap: widget.onTopUp ?? () {}),
+                        XmServiceTile(label: 'Alerts', icon: Icons.notifications_outlined, onTap: () => _open(AppRouter.notifications)),
+                        XmServiceTile(label: 'Send', icon: Icons.send_outlined, accent: XmoneyTheme.blue, onTap: widget.onSend ?? () {}),
+                        XmServiceTile(label: 'More', icon: Icons.apps_outlined, onTap: () => _open(AppRouter.settings)),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Recent transfers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  ..._recent.map((t) {
-                    final m = t as Map<String, dynamic>;
-                    return Card(
-                      child: ListTile(
-                        title: Text(m['reference_code'] as String? ?? ''),
-                        subtitle: Text(m['receiver_name'] as String? ?? ''),
-                        trailing: Text(m['status'] as String? ?? ''),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Recent transfers',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white : XmoneyTheme.navyDeep,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (_recent.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No transfers yet',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
                       ),
-                    );
-                  }),
+                    )
+                  else
+                    ..._recent.map((t) {
+                      final m = t as Map<String, dynamic>;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          leading: CircleAvatar(
+                            backgroundColor: XmoneyTheme.teal.withOpacity(0.12),
+                            child: const Icon(Icons.swap_horiz, color: XmoneyTheme.teal, size: 20),
+                          ),
+                          title: Text(
+                            m['reference_code'] as String? ?? 'Transfer',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          subtitle: Text(m['receiver_name'] as String? ?? ''),
+                          trailing: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: XmoneyTheme.teal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              m['status'] as String? ?? '',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: XmoneyTheme.teal),
+                            ),
+                          ),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRouter.transactionDetail,
+                            arguments: {'uuid': m['uuid']},
+                          ),
+                        ),
+                      );
+                    }),
                 ],
               ),
             ),
