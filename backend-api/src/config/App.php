@@ -48,10 +48,15 @@ final class App
 
     /**
      * DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
-     * OTP bypass and dev test-user seeding are allowed only outside production APP_ENV.
+     * OTP bypass and dev test-user seeding. Disabled by default.
+     * Re-enable later: DEV_AUTH_BYPASS_ENABLED=true in .env (never on APP_ENV=production).
      */
     public static function allowsOtpBypass(): bool
     {
+        if (self::env('DEV_AUTH_BYPASS_ENABLED', 'false') !== 'true') {
+            return false;
+        }
+
         if (self::env('APP_ENV', 'production') === 'production') {
             return false;
         }

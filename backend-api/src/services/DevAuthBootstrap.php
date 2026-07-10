@@ -10,7 +10,14 @@ use XMoney\Utils\Security;
 
 /**
  * DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
- * Ensures a known test customer exists when OTP bypass is enabled.
+ *
+ * Temporary dev test user + OTP bypass support. Kept in codebase for later use.
+ * Currently DISABLED by default (DEV_AUTH_BYPASS_ENABLED=false).
+ *
+ * To re-enable during development:
+ *   1. Set DEV_AUTH_BYPASS_ENABLED=true in api/.env
+ *   2. Ensure APP_ENV is staging, development, or local (not production)
+ *   3. Test user is auto-created on first API request
  */
 final class DevAuthBootstrap
 {

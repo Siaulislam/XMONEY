@@ -16,16 +16,19 @@ Every push to `main` that changes `mobile-app/` builds and deploys Flutter Web t
 
 The preview calls `https://smartdms.me/api`. Production `.env` must include `https://siaulislam.github.io` in `CORS_ALLOWED_ORIGINS` (added automatically on the next API deploy).
 
-### Dev login (OTP bypass — staging/development only)
+### Dev auth bypass (currently disabled)
 
-While `APP_ENV` is **not** `production` (deploy defaults to `staging` during active development):
+Temporary OTP bypass and test-user login are **turned off** while the app is being completed. Code is kept in the repo for later.
 
-| Field | Value |
-|-------|-------|
-| Email | `ziassp91@gmai.com` |
-| Password | `123456` |
+To re-enable during development, set in `api/.env`:
 
-No OTP required. Set GitHub secrets `XMONEY_APP_ENV=production` and `XMONEY_APP_DEBUG=false` before go-live.
+```
+DEV_AUTH_BYPASS_ENABLED=true
+APP_ENV=staging
+APP_DEBUG=true
+```
+
+Never enable when `APP_ENV=production`. See `backend-api/src/services/DevAuthBootstrap.php`.
 
 ## No Android Studio? Use GitHub Actions
 

@@ -184,10 +184,10 @@ jobs:
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
-          # Defaults: staging + debug during active development (OTP bypass enabled).
-          # Before go-live set GitHub secrets XMONEY_APP_ENV=production and XMONEY_APP_DEBUG=false.
-          APP_ENV="${XMONEY_APP_ENV:-staging}"
-          APP_DEBUG="${XMONEY_APP_DEBUG:-true}"
+          # Production defaults. Dev OTP bypass is off unless explicitly enabled.
+          APP_ENV="${XMONEY_APP_ENV:-production}"
+          APP_DEBUG="${XMONEY_APP_DEBUG:-false}"
+          DEV_AUTH_BYPASS_ENABLED=false
           # If APP_URL is https://domain/api → CORS https://domain
           CORS_ORIGIN="$(echo -n "$XMONEY_APP_URL" | sed -E 's#(https?://[^/]+).*#\1#')"
 
@@ -209,6 +209,7 @@ jobs:
           APP_NAME=XMONEY
           APP_ENV=${APP_ENV}
           APP_DEBUG=${APP_DEBUG}
+          DEV_AUTH_BYPASS_ENABLED=false
           APP_URL=${XMONEY_APP_URL}
           APP_TIMEZONE=Asia/Dubai
           DB_HOST=${XMONEY_DB_HOST}
