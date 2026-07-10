@@ -172,7 +172,10 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
         foregroundColor: XmoneyTheme.navyDeep,
         elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20), onPressed: () => Navigator.pop(context)),
-        title: const Text('International Transfer', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+        title: Text(
+          ctx.isWallet ? 'International Wallet Transfer' : 'International Bank Transfer',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
         centerTitle: true,
       ),
       body: _submitting

@@ -7,6 +7,8 @@ import '../home/home_screen.dart';
 import '../wallet/wallet_screen.dart';
 import '../transfer/transfer_screen.dart';
 import '../transfer/international_transfer_screen.dart';
+import '../transfer/local_transfer_screen.dart';
+import '../../core/transfer/international_transfer_mode.dart';
 import '../transactions/transactions_screen.dart';
 import '../more/more_screen.dart';
 import '../../core/widgets/send_money_options_sheet.dart';
@@ -34,22 +36,40 @@ class _MainShellScreenState extends State<MainShellScreen> {
     if (!mounted || channel == null) return;
 
     switch (channel) {
-      case SendMoneyChannel.scanQr:
-      case SendMoneyChannel.otherWallets:
-        showXmSnack(context, 'Coming soon');
-        return;
-      case SendMoneyChannel.international:
+      case SendMoneyChannel.internationalWallet:
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => InternationalTransferScreen(router: widget.router),
+            builder: (_) => InternationalTransferScreen(
+              router: widget.router,
+              mode: InternationalTransferMode.wallet,
+            ),
           ),
         );
         return;
-      case SendMoneyChannel.bank:
-      case SendMoneyChannel.cnic:
+      case SendMoneyChannel.internationalBank:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => InternationalTransferScreen(
+              router: widget.router,
+              mode: InternationalTransferMode.bank,
+            ),
+          ),
+        );
+        return;
       case SendMoneyChannel.local:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => LocalTransferScreen(router: widget.router),
+          ),
+        );
+        return;
+      case SendMoneyChannel.cnic:
         setState(() => _sendChannel = channel);
         _goTab(1);
+        return;
+      case SendMoneyChannel.scanQr:
+        showXmSnack(context, 'Scan QR — coming soon');
+        return;
     }
   }
 

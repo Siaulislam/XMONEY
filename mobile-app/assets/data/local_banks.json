@@ -1,0 +1,42 @@
+{
+  "countries": [
+    {
+      "countryCode": "PK",
+      "countryName": "Pakistan",
+      "banks": [
+        {"code": "hbl", "name": "Habib Bank Limited", "brandColor": "#008269"},
+        {"code": "ubl", "name": "United Bank Limited", "brandColor": "#0054A6"},
+        {"code": "mcb", "name": "MCB Bank", "brandColor": "#FFD100"},
+        {"code": "abl", "name": "Allied Bank", "brandColor": "#E31837"}
+      ]
+    },
+    {
+      "countryCode": "IN",
+      "countryName": "India",
+      "banks": [
+        {"code": "sbi", "name": "State Bank of India", "brandColor": "#22409A"},
+        {"code": "hdfc", "name": "HDFC Bank", "brandColor": "#004C8F"},
+        {"code": "icici", "name": "ICICI Bank", "brandColor": "#F58220"},
+        {"code": "axis", "name": "Axis Bank", "brandColor": "#971A1E"}
+      ]
+    },
+    {
+      "countryCode": "BD",
+      "countryName": "Bangladesh",
+      "banks": [
+        {"code": "brac", "name": "BRAC Bank", "brandColor": "#003DA5"},
+        {"code": "dbbl", "name": "Dutch-Bangla Bank", "brandColor": "#8B2A7C"},
+        {"code": "city", "name": "City Bank", "brandColor": "#E4002B"}
+      ]
+    },
+    {
+      "countryCode": "AE",
+      "countryName": "United Arab Emirates",
+      "banks": [
+        {"code": "enbd", "name": "Emirates NBD", "brandColor": "#003366"},
+        {"code": "adcb", "name": "ADCB", "brandColor": "#C8102E"},
+        {"code": "fab", "name": "First Abu Dhabi Bank", "brandColor": "#004C97"}
+      ]
+    }
+  ]
+}

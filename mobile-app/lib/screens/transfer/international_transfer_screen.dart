@@ -14,14 +14,21 @@ import '../../core/wallets/wallet_repository.dart';
 import '../../core/widgets/wallet_selector.dart';
 import '../../core/transfer/international_transfer_context.dart';
 import '../../core/transfer/transfer_delivery_type.dart';
+import '../../core/transfer/international_transfer_mode.dart';
 import 'international_transfer_beneficiary_screen.dart';
 
-enum _DeliveryMethod { bank, digitalWallet }
-
 class InternationalTransferScreen extends StatefulWidget {
-  const InternationalTransferScreen({super.key, required this.router});
+  const InternationalTransferScreen({
+    super.key,
+    required this.router,
+    required this.mode,
+  });
 
   final AppRouter router;
+  final InternationalTransferMode mode;
+
+  bool get isWallet => mode == InternationalTransferMode.wallet;
+  bool get isBank => mode == InternationalTransferMode.bank;
 
   @override
   State<InternationalTransferScreen> createState() => _InternationalTransferScreenState();
@@ -37,7 +44,6 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
   CountryCurrencyOption? _receiver;
   CountryWalletMapping? _destinationWallets;
   WalletProvider? _selectedProvider;
-  _DeliveryMethod _delivery = _DeliveryMethod.bank;
   List<Map<String, dynamic>> _wallets = [];
   String? _walletId;
   bool _booting = true;
@@ -79,7 +85,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     } finally {
       if (mounted) {
         setState(() => _booting = false);
-        _loadDestinationWallets();
+        if (widget.isWallet) _loadDestinationWallets();
         _refreshQuote();
       }
     }
@@ -94,10 +100,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     setState(() {
       _destinationWallets = mapping;
       _loadingWallets = false;
-      if (!mapping.hasWallets) {
-        _delivery = _DeliveryMethod.bank;
-        _selectedProvider = null;
-      } else if (_selectedProvider != null &&
+      if (_selectedProvider != null &&
           !mapping.providers.any((p) => p.code == _selectedProvider!.code)) {
         _selectedProvider = null;
       }
@@ -147,16 +150,14 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     );
     if (picked == null || !mounted) return;
     setState(() => _receiver = picked);
-    await _loadDestinationWallets();
+    if (widget.isWallet) await _loadDestinationWallets();
     _refreshQuote();
   }
 
   bool _canContinue(double send) {
     if (send <= 0 || _sender == null || _receiver == null) return false;
-    if (_delivery == _DeliveryMethod.digitalWallet) {
-      if (_destinationWallets?.hasWallets ?? false) {
-        return _selectedProvider != null;
-      }
+    if (widget.isWallet) {
+      return (_destinationWallets?.hasWallets ?? false) && _selectedProvider != null;
     }
     return true;
   }
@@ -172,10 +173,8 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
       sendAmount: send,
       quote: _rates.quote,
       payFromWalletId: _walletId,
-      deliveryMethod: _delivery == _DeliveryMethod.digitalWallet
-          ? TransferDeliveryType.wallet
-          : TransferDeliveryType.bank,
-      walletProvider: _selectedProvider,
+      deliveryMethod: widget.isWallet ? TransferDeliveryType.wallet : TransferDeliveryType.bank,
+      walletProvider: widget.isWallet ? _selectedProvider : null,
     );
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -214,9 +213,9 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'International Transfer',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: XmoneyTheme.navyDeep),
+        title: Text(
+          widget.mode.screenTitle,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: XmoneyTheme.navyDeep),
         ),
         centerTitle: true,
         actions: [
@@ -266,32 +265,30 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                         onCurrencyTap: _pickReceiver,
                       ),
                     const SizedBox(height: 20),
-                    _DeliveryMethodSection(
-                      hasDigitalWallets: _destinationWallets?.hasWallets ?? false,
-                      loading: _loadingWallets,
-                      method: _delivery,
-                      onMethodChanged: (m) => setState(() {
-                        _delivery = m;
-                        if (m == _DeliveryMethod.bank) _selectedProvider = null;
-                      }),
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutCubic,
-                      child: _delivery == _DeliveryMethod.digitalWallet &&
-                              (_destinationWallets?.hasWallets ?? false)
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: WalletSelector(
-                                mapping: _destinationWallets!,
-                                repository: _walletRepo,
-                                selected: _selectedProvider,
-                                onSelected: (p) => setState(() => _selectedProvider = p),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    const SizedBox(height: 16),
+                    if (widget.isWallet) ...[
+                      if (_loadingWallets)
+                        const LinearProgressIndicator(minHeight: 2, color: XmoneyTheme.teal)
+                      else if (_destinationWallets?.hasWallets ?? false)
+                        WalletSelector(
+                          mapping: _destinationWallets!,
+                          repository: _walletRepo,
+                          selected: _selectedProvider,
+                          onSelected: (p) => setState(() => _selectedProvider = p),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF6F8FC),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            'No wallet providers available for ${_receiver?.countryName ?? 'this country'}.',
+                            style: TextStyle(color: Colors.grey.shade700),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                    ],
                     _WalletPicker(
                       wallets: _wallets,
                       selectedId: _walletId,
@@ -420,115 +417,6 @@ class _WalletPicker extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _DeliveryMethodSection extends StatelessWidget {
-  const _DeliveryMethodSection({
-    required this.hasDigitalWallets,
-    required this.loading,
-    required this.method,
-    required this.onMethodChanged,
-  });
-
-  final bool hasDigitalWallets;
-  final bool loading;
-  final _DeliveryMethod method;
-  final ValueChanged<_DeliveryMethod> onMethodChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('How they receive', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
-        const SizedBox(height: 10),
-        if (loading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: LinearProgressIndicator(minHeight: 2, color: XmoneyTheme.teal),
-          )
-        else if (!hasDigitalWallets)
-          _MethodTile(
-            title: 'Bank transfer',
-            subtitle: 'Local bank account delivery',
-            icon: Icons.account_balance_rounded,
-            selected: true,
-            onTap: () {},
-          )
-        else
-          Row(
-            children: [
-              Expanded(
-                child: _MethodTile(
-                  title: 'Bank transfer',
-                  subtitle: 'Account deposit',
-                  icon: Icons.account_balance_rounded,
-                  selected: method == _DeliveryMethod.bank,
-                  onTap: () => onMethodChanged(_DeliveryMethod.bank),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MethodTile(
-                  title: 'Digital wallets',
-                  subtitle: 'Mobile money',
-                  icon: Icons.account_balance_wallet_rounded,
-                  selected: method == _DeliveryMethod.digitalWallet,
-                  onTap: () => onMethodChanged(_DeliveryMethod.digitalWallet),
-                ),
-              ),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-class _MethodTile extends StatelessWidget {
-  const _MethodTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F8FC),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: selected ? XmoneyTheme.teal : const Color(0xFFE8ECF3), width: selected ? 1.6 : 1),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: selected ? XmoneyTheme.teal : Colors.grey.shade600, size: 22),
-                const SizedBox(height: 8),
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: XmoneyTheme.navyDeep)),
-                Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

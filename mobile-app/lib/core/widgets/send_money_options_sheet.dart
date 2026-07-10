@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme/xmoney_theme.dart';
 
-/// How the user chose to send money (Send Money To sheet).
+/// Send Money To — five distinct transfer modules (no duplicates).
 enum SendMoneyChannel {
-  international,
-  bank,
-  cnic,
+  internationalWallet,
+  internationalBank,
   local,
-  otherWallets,
+  cnic,
   scanQr,
 }
 
-/// Botim-style "Send Money To" picker with XMONEY branding on International transfer.
 class SendMoneyOptionsSheet extends StatelessWidget {
   const SendMoneyOptionsSheet({super.key, required this.onSelected});
 
@@ -44,52 +42,32 @@ class SendMoneyOptionsSheet extends StatelessWidget {
           Container(
             width: 40,
             height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(4),
-            ),
+            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(4)),
           ),
           const SizedBox(height: 20),
           const Text(
             'Send Money To',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: XmoneyTheme.navyDeep,
-              letterSpacing: -0.3,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep, letterSpacing: -0.3),
           ),
           const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: _SendOptionTile(
-                  label: 'International\nTransfer',
+                  label: 'International\nWallet Transfer',
                   child: const _XmTransferLogo(),
-                  onTap: () => onSelected(SendMoneyChannel.international),
+                  onTap: () => onSelected(SendMoneyChannel.internationalWallet),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: _SendOptionTile(
-                  label: 'Bank\nTransfer',
+                  label: 'International\nBank Transfer',
                   child: const _BankTransferIcon(),
-                  onTap: () => onSelected(SendMoneyChannel.bank),
+                  onTap: () => onSelected(SendMoneyChannel.internationalBank),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _SendOptionTile(
-                  label: 'CNIC\nTransfer',
-                  child: const _CnicTransferIcon(),
-                  onTap: () => onSelected(SendMoneyChannel.cnic),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
+              const SizedBox(width: 10),
               Expanded(
                 child: _SendOptionTile(
                   label: 'Local\nTransfer',
@@ -97,15 +75,19 @@ class SendMoneyOptionsSheet extends StatelessWidget {
                   onTap: () => onSelected(SendMoneyChannel.local),
                 ),
               ),
-              const SizedBox(width: 12),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
               Expanded(
                 child: _SendOptionTile(
-                  label: 'Other\nWallets',
-                  child: const _OtherWalletsIcon(),
-                  onTap: () => onSelected(SendMoneyChannel.otherWallets),
+                  label: 'CNIC\nTransfer',
+                  child: const _CnicTransferIcon(),
+                  onTap: () => onSelected(SendMoneyChannel.cnic),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: _SendOptionTile(
                   label: 'Scan QR',
@@ -113,6 +95,7 @@ class SendMoneyOptionsSheet extends StatelessWidget {
                   onTap: () => onSelected(SendMoneyChannel.scanQr),
                 ),
               ),
+              const Expanded(child: SizedBox()),
             ],
           ),
         ],
@@ -122,11 +105,7 @@ class SendMoneyOptionsSheet extends StatelessWidget {
 }
 
 class _SendOptionTile extends StatelessWidget {
-  const _SendOptionTile({
-    required this.label,
-    required this.child,
-    required this.onTap,
-  });
+  const _SendOptionTile({required this.label, required this.child, required this.onTap});
 
   final String label;
   final Widget child;
@@ -146,20 +125,15 @@ class _SendOptionTile extends StatelessWidget {
             border: Border.all(color: const Color(0xFFE5E9F0)),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 18, 8, 14),
+            padding: const EdgeInsets.fromLTRB(6, 16, 6, 12),
             child: Column(
               children: [
-                SizedBox(height: 52, child: Center(child: child)),
-                const SizedBox(height: 12),
+                SizedBox(height: 48, child: Center(child: child)),
+                const SizedBox(height: 10),
                 Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
-                    color: XmoneyTheme.navyDeep,
-                  ),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, height: 1.2, color: XmoneyTheme.navyDeep),
                 ),
               ],
             ),
@@ -170,7 +144,6 @@ class _SendOptionTile extends StatelessWidget {
   }
 }
 
-/// XM monogram — gold X, black M (matches brand transfer tile).
 class _XmTransferLogo extends StatelessWidget {
   const _XmTransferLogo();
 
@@ -178,51 +151,9 @@ class _XmTransferLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/branding/xmoney-monogram.png',
-      height: 44,
+      height: 40,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const _XmTransferLogoFallback(),
-    );
-  }
-}
-
-class _XmTransferLogoFallback extends StatelessWidget {
-  const _XmTransferLogoFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          'X',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.w900,
-            color: XmoneyTheme.gold,
-            height: 1,
-          ),
-        ),
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const Text(
-              'M',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: Colors.black,
-                height: 1,
-              ),
-            ),
-            Positioned(
-              right: -6,
-              top: -4,
-              child: Icon(Icons.north_east, size: 14, color: XmoneyTheme.gold),
-            ),
-          ],
-        ),
-      ],
+      errorBuilder: (_, __, ___) => const Text('XM', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
     );
   }
 }
@@ -231,38 +162,24 @@ class _BankTransferIcon extends StatelessWidget {
   const _BankTransferIcon();
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(48, 44),
-      painter: _BankIconPainter(),
-    );
-  }
+  Widget build(BuildContext context) => CustomPaint(size: const Size(48, 44), painter: _BankIconPainter());
 }
 
 class _BankIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final green = XmoneyTheme.teal;
-    const black = Colors.black;
     final w = size.width;
     final h = size.height;
-
     final roof = Path()
       ..moveTo(w * 0.08, h * 0.28)
       ..lineTo(w * 0.5, h * 0.05)
       ..lineTo(w * 0.92, h * 0.28)
       ..close();
-    canvas.drawPath(roof, Paint()..color = black);
-
-    final base = Rect.fromLTWH(w * 0.06, h * 0.82, w * 0.88, h * 0.1);
-    canvas.drawRect(base, Paint()..color = black);
-
+    canvas.drawPath(roof, Paint()..color = Colors.black);
+    canvas.drawRect(Rect.fromLTWH(w * 0.06, h * 0.82, w * 0.88, h * 0.1), Paint()..color = Colors.black);
     for (var i = 0; i < 3; i++) {
-      final x = w * (0.22 + i * 0.22);
-      canvas.drawRect(
-        Rect.fromLTWH(x, h * 0.32, w * 0.1, h * 0.48),
-        Paint()..color = green,
-      );
+      canvas.drawRect(Rect.fromLTWH(w * (0.22 + i * 0.22), h * 0.32, w * 0.1, h * 0.48), Paint()..color = green);
     }
   }
 
@@ -278,19 +195,13 @@ class _CnicTransferIcon extends StatelessWidget {
     return Container(
       width: 52,
       height: 36,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2), borderRadius: BorderRadius.circular(4)),
       child: Row(
         children: [
           Container(
             width: 18,
             margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: XmoneyTheme.teal.withOpacity(0.25),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: XmoneyTheme.teal.withOpacity(0.25), shape: BoxShape.circle),
             child: Icon(Icons.person, size: 14, color: XmoneyTheme.teal),
           ),
           Expanded(
@@ -300,8 +211,6 @@ class _CnicTransferIcon extends StatelessWidget {
                 Container(height: 2, width: 22, color: Colors.black),
                 const SizedBox(height: 3),
                 Container(height: 2, width: 18, color: Colors.black),
-                const SizedBox(height: 3),
-                Container(height: 2, width: 20, color: Colors.black),
               ],
             ),
           ),
@@ -324,48 +233,13 @@ class _LocalTransferIcon extends StatelessWidget {
         children: [
           Positioned(
             left: 2,
-            child: CircleAvatar(
-              radius: 14,
-              backgroundColor: Colors.black,
-              child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.9)),
-            ),
+            child: CircleAvatar(radius: 14, backgroundColor: Colors.black, child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.9))),
           ),
           Positioned(
             right: 2,
-            child: CircleAvatar(
-              radius: 14,
-              backgroundColor: XmoneyTheme.teal,
-              child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.95)),
-            ),
+            child: CircleAvatar(radius: 14, backgroundColor: XmoneyTheme.teal, child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.95))),
           ),
           Icon(Icons.swap_horiz, size: 22, color: Colors.black.withOpacity(0.75)),
-        ],
-      ),
-    );
-  }
-}
-
-class _OtherWalletsIcon extends StatelessWidget {
-  const _OtherWalletsIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 40,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(Icons.account_balance_wallet_outlined, size: 40, color: Colors.black.withOpacity(0.85)),
-          Positioned(
-            right: 0,
-            bottom: 2,
-            child: Container(
-              width: 14,
-              height: 14,
-              decoration: const BoxDecoration(color: XmoneyTheme.teal, shape: BoxShape.circle),
-            ),
-          ),
         ],
       ),
     );
@@ -380,43 +254,8 @@ class _ScanQrIcon extends StatelessWidget {
     return Container(
       width: 44,
       height: 44,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: CustomPaint(
-        painter: _QrPainter(),
-      ),
+      decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 2), borderRadius: BorderRadius.circular(6)),
+      child: const Icon(Icons.qr_code_scanner_rounded, size: 28),
     );
   }
-}
-
-class _QrPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    const black = Colors.black;
-    final green = XmoneyTheme.teal;
-    final cell = size.width / 5;
-
-    void cellRect(int row, int col, Color c) {
-      canvas.drawRect(
-        Rect.fromLTWH(col * cell + 1, row * cell + 1, cell - 2, cell - 2),
-        Paint()..color = c,
-      );
-    }
-
-    cellRect(0, 0, black);
-    cellRect(0, 1, green);
-    cellRect(1, 0, green);
-    cellRect(1, 1, black);
-    cellRect(2, 2, black);
-    cellRect(2, 3, green);
-    cellRect(3, 2, green);
-    cellRect(3, 4, black);
-    cellRect(4, 3, black);
-    cellRect(4, 4, green);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

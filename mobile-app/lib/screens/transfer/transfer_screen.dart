@@ -188,16 +188,14 @@ class _TransferScreenState extends State<TransferScreen> {
 
   String? _channelTitle(SendMoneyChannel? ch) {
     switch (ch) {
-      case SendMoneyChannel.international:
-        return 'International Transfer';
-      case SendMoneyChannel.bank:
-        return 'Bank Transfer';
+      case SendMoneyChannel.internationalWallet:
+        return 'International Wallet Transfer';
+      case SendMoneyChannel.internationalBank:
+        return 'International Bank Transfer';
       case SendMoneyChannel.cnic:
         return 'CNIC Transfer';
       case SendMoneyChannel.local:
         return 'Local Transfer';
-      case SendMoneyChannel.otherWallets:
-        return 'Other Wallets';
       case SendMoneyChannel.scanQr:
         return 'Scan QR';
       case null:
