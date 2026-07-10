@@ -21,7 +21,7 @@ class PayFromWalletPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pay from wallet', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+        Text('Pay from wallet', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -34,14 +34,14 @@ class PayFromWalletPicker extends StatelessWidget {
             child: DropdownButton<String>(
               isExpanded: true,
               value: wallets.any((w) => (w['uuid'] ?? w['id']) == selectedId) ? selectedId : null,
-              hint: Text('Select wallet', style: TextStyle(color: Colors.grey.shade600)),
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: XmoneyTheme.navyDeep),
+              hint: const Text('Select wallet', style: TextStyle(color: Color(0xFF9CA3AF))),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF071526)),
               dropdownColor: Colors.white,
               items: wallets.map((w) {
                 final id = w['uuid'] as String? ?? w['id']?.toString() ?? '';
                 final label = w['label'] as String? ?? w['name'] as String? ?? 'Wallet';
                 final cur = w['currency_code'] as String? ?? '';
-                return DropdownMenuItem(value: id, child: Text('$label · $cur'));
+                return DropdownMenuItem(value: id, child: Text('$label · $cur', style: const TextStyle(color: Color(0xFF071526))));
               }).toList(),
               onChanged: wallets.isEmpty ? null : (v) {
                 if (v != null) onChanged(v);

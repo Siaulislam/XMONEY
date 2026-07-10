@@ -9,6 +9,8 @@ import '../wallets/wallet_provider.dart';
 import '../wallets/wallet_repository.dart';
 import 'country_picker.dart';
 import 'xm_country_flag.dart';
+import 'bank_beneficiary_detail_form.dart';
+import 'bank_transfer_review_panel.dart';
 import 'pay_from_wallet_picker.dart';
 import 'wallet_selector.dart';
 import '../wallets/country_wallet_mapping.dart';
@@ -103,6 +105,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
   }
 
   bool get _isWallet => widget.deliveryMethod == TransferDeliveryType.wallet;
+  bool get _isBank => widget.deliveryMethod == TransferDeliveryType.bank;
   bool get _needsSwift => !['PK', 'IN', 'BD', 'AE', 'SA'].contains(_country.countryCode);
 
   @override
@@ -159,6 +162,14 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
     }
 
     if (_step == 1) {
+      if (_isBank && !_agreed) {
+        setState(() => _errors = {'terms': 'Please confirm Key Facts Statement'});
+        return;
+      }
+      final acct = _account.text.trim();
+      if (_isBank && acct.isNotEmpty && _iban.text.trim().isEmpty && acct.length >= 15) {
+        _iban.text = acct;
+      }
       final result = BeneficiaryValidator.validate(
         method: widget.deliveryMethod,
         receiverName: _name.text,
@@ -191,13 +202,20 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
       return;
     }
 
-    if (_payFromWalletId == null || _payFromWalletId!.isEmpty) {
-      setState(() => _errors = {'pay_from_wallet': 'Select the wallet to pay from'});
-      return;
-    }
-    if (!_agreed) {
-      setState(() => _errors = {'terms': 'Please confirm Key Facts Statement'});
-      return;
+    if (_isBank) {
+      if (_payFromWalletId == null || _payFromWalletId!.isEmpty) {
+        setState(() => _errors = {'pay_from_wallet': 'Select the wallet to pay from'});
+        return;
+      }
+    } else {
+      if (!_agreed) {
+        setState(() => _errors = {'terms': 'Please confirm Key Facts Statement'});
+        return;
+      }
+      if (_payFromWalletId == null || _payFromWalletId!.isEmpty) {
+        setState(() => _errors = {'pay_from_wallet': 'Select the wallet to pay from'});
+        return;
+      }
     }
     final result = BeneficiaryValidator.validate(
       method: widget.deliveryMethod,
@@ -253,13 +271,22 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Theme(
+      data: ThemeData.light().copyWith(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Color(0xFFF6F8FC),
+        ),
+      ),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _StepIndicator(step: _step, labels: const ['Receiver', 'Details', 'Review']),
         const SizedBox(height: 16),
         SizedBox(
-          height: 520,
+          height: _isBank ? 560 : 520,
           child: PageView(
             controller: _page,
             physics: const NeverScrollableScrollPhysics(),
@@ -293,16 +320,35 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
               child: FilledButton(
                 onPressed: _validateAndNext,
                 style: FilledButton.styleFrom(backgroundColor: XmoneyTheme.blue, minimumSize: const Size(0, 52)),
-                child: Text(_step == 2 ? 'Confirm & pay' : 'Next'),
+                child: Text(_step == 2 ? (_isBank ? 'Continue' : 'Confirm & pay') : 'Next'),
               ),
             ),
           ],
         ),
       ],
+    ),
     );
   }
 
-  Widget _stepReceiver() => ListView(
+  Widget _stepReceiver() {
+    if (_isBank) {
+      return ListView(
+        children: [
+          _fieldTile(
+            'Receiver country',
+            '${_country.countryName} · ${_country.currencyCode}',
+            onTap: _pickCountry,
+            leadingWidget: XmCountryFlag(countryCode: _country.countryCode),
+          ),
+          _infoRow('Currency', _currency, icon: Icons.payments_outlined),
+          _infoRow('Transfer Method', 'Bank', icon: Icons.swap_horiz_rounded),
+          if (_bank.text.trim().isNotEmpty)
+            _infoRow('Beneficiary bank', _bank.text.trim(), icon: Icons.account_balance_outlined),
+          if (_errors['bank_name'] != null) _err(_errors['bank_name']!),
+        ],
+      );
+    }
+    return ListView(
         children: [
           _fieldTile(
             'Receiver country',
@@ -334,8 +380,41 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           ],
         ],
       );
+  }
 
-  Widget _stepDetails() => ListView(
+  Widget _stepDetails() {
+    if (_isBank) {
+      return BankBeneficiaryDetailForm(
+        transferMethodLabel: 'Bank',
+        currencyCode: _currency,
+        nameController: _name,
+        mobileController: _mobile,
+        emailController: _email,
+        bankController: _bank,
+        branchController: _branch,
+        accountController: _account,
+        ibanController: _iban,
+        swiftController: _swift,
+        addressController: _address,
+        cityController: _city,
+        stateController: _state,
+        postalController: _postal,
+        purposes: _purposes,
+        purpose: _purpose,
+        onPurposeChanged: (v) => setState(() => _purpose = v),
+        relationships: _relationships,
+        relationship: _relationship,
+        onRelationshipChanged: (v) => setState(() => _relationship = v),
+        saveBeneficiary: _saveBeneficiary,
+        onSaveBeneficiaryChanged: (v) => setState(() => _saveBeneficiary = v),
+        agreed: _agreed,
+        onAgreedChanged: (v) => setState(() => _agreed = v),
+        bankReadOnly: widget.initialBankName?.trim().isNotEmpty == true,
+        showSwift: _needsSwift,
+        errors: _errors,
+      );
+    }
+    return ListView(
         children: [
           _tf('Full name', '', controller: _name, error: _errors['receiver_name']),
           _tf('Nickname (optional)', '', controller: _nickname),
@@ -357,8 +436,26 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           _dropdown('Relationship', _relationships, _relationship, (v) => setState(() => _relationship = v), error: _errors['relationship']),
         ],
       );
+  }
 
-  Widget _stepReview() => ListView(
+  Widget _stepReview() {
+    if (_isBank) {
+      return BankTransferReviewPanel(
+        receiverName: _name.text,
+        countryName: _country.countryName,
+        currencyCode: _currency,
+        transferMethod: 'Bank',
+        bankName: _bank.text,
+        mobile: _mobile.text,
+        account: _account.text.isNotEmpty ? _account.text : _iban.text,
+        purpose: _purpose,
+        senderWallets: widget.senderWallets,
+        selectedWalletId: _payFromWalletId,
+        onWalletChanged: (id) => setState(() => _payFromWalletId = id),
+        walletError: _errors['pay_from_wallet'],
+      );
+    }
+    return ListView(
         children: [
           _reviewRow('Receiver', _name.text.isEmpty ? '—' : _name.text),
           _reviewRow('Country', _country.countryName),
@@ -377,16 +474,43 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           SwitchListTile(
             value: _saveBeneficiary,
             onChanged: (v) => setState(() => _saveBeneficiary = v),
-            title: const Text('Save this beneficiary', style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Quick access for future transfers'),
+            title: const Text('Save this beneficiary', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF071526))),
+            subtitle: const Text('Quick access for future transfers', style: TextStyle(color: Color(0xFF4B5563))),
           ),
           CheckboxListTile(
             value: _agreed,
             onChanged: (v) => setState(() => _agreed = v ?? false),
-            title: const Text('I have read & understood Key Facts Statement'),
+            title: const Text('I have read & understood Key Facts Statement', style: TextStyle(color: Color(0xFF071526))),
             controlAffinity: ListTileControlAffinity.leading,
           ),
         ],
+      );
+  }
+
+  Widget _infoRow(String label, String value, {required IconData icon}) => Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF6F8FC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE8ECF3)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: XmoneyTheme.teal),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
+                  const SizedBox(height: 4),
+                  Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF071526))),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
 
   Widget _fieldTile(String label, String value, {VoidCallback? onTap, Widget? leadingWidget}) => Padding(
@@ -406,8 +530,8 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF4B5563))),
+                        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF071526))),
                       ],
                     ),
                   ),
@@ -426,13 +550,16 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           controller: controller ?? TextEditingController(text: hint),
           readOnly: readOnly,
           keyboardType: keyboard,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
-            fontWeight: readOnly ? FontWeight.w600 : FontWeight.w500,
-            color: readOnly ? XmoneyTheme.navyDeep : XmoneyTheme.navyDeep,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF071526),
           ),
+          cursorColor: XmoneyTheme.teal,
           decoration: InputDecoration(
             labelText: label,
+            labelStyle: const TextStyle(color: Color(0xFF4B5563)),
+            hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
             errorText: error,
             filled: true,
             fillColor: const Color(0xFFF6F8FC),
@@ -450,8 +577,11 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
         padding: const EdgeInsets.only(bottom: 12),
         child: DropdownButtonFormField<String>(
           value: value.isEmpty ? null : value,
+          style: const TextStyle(color: Color(0xFF071526), fontWeight: FontWeight.w600),
+          dropdownColor: Colors.white,
           decoration: InputDecoration(
             labelText: label,
+            labelStyle: const TextStyle(color: Color(0xFF4B5563)),
             errorText: error,
             filled: true,
             fillColor: const Color(0xFFF6F8FC),
@@ -468,8 +598,8 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
-            Expanded(child: Text(k, style: TextStyle(color: Colors.grey.shade600))),
-            Text(v, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Expanded(child: Text(k, style: const TextStyle(color: Color(0xFF4B5563), fontWeight: FontWeight.w600))),
+            Text(v, style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF071526))),
           ],
         ),
       );
