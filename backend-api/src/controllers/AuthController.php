@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace XMoney\Controllers;
 
 use XMoney\Config\Database;
+use XMoney\Config\App;
 use XMoney\Services\AuditService;
 use XMoney\Services\AuthService;
 use XMoney\Services\DeviceService;
@@ -63,20 +64,29 @@ final class AuthController
         }
 
         $uuid = Security::uuid();
+        // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+        $devBypass = App::allowsOtpBypass();
+        $initialStatus = $devBypass ? 'active' : 'pending';
         $pdo->beginTransaction();
         try {
             $pdo->prepare(
                 'INSERT INTO users (uuid, email, mobile_country, mobile_number, password_hash, status, role_id)
-                 VALUES (:uuid, :email, :mc, :mn, :pwd, \'pending\', :role)'
+                 VALUES (:uuid, :email, :mc, :mn, :pwd, :status, :role)'
             )->execute([
                 'uuid' => $uuid,
                 'email' => $email,
                 'mc' => $body['mobile_country'],
                 'mn' => $body['mobile_number'],
                 'pwd' => Security::hashPassword($body['password']),
+                'status' => $initialStatus,
                 'role' => $roleId,
             ]);
             $userId = (int) $pdo->lastInsertId();
+
+            if ($devBypass) {
+                $pdo->prepare('UPDATE users SET email_verified_at = NOW(3) WHERE id = :id')
+                    ->execute(['id' => $userId]);
+            }
 
             $pdo->prepare(
                 'INSERT INTO profiles (user_id, full_name, country_code, city, address_line1)
@@ -97,7 +107,10 @@ final class AuthController
             throw $e;
         }
 
-        $otpPayload = $this->otp->issue($userId, 'email', $email, 'registration', $locale);
+        $otpPayload = null;
+        if (!$devBypass) {
+            $otpPayload = $this->otp->issue($userId, 'email', $email, 'registration', $locale);
+        }
 
         Response::success([
             'user_uuid' => $uuid,
@@ -119,7 +132,8 @@ final class AuthController
         }
 
         $email = strtolower(trim($body['email']));
-        if (!$this->otp->verify($email, $body['purpose'], $body['otp'])) {
+        // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+        if (!App::allowsOtpBypass() && !$this->otp->verify($email, $body['purpose'], $body['otp'])) {
             Response::error(Response::text('response.otp_invalid', [], $request, $locale), 400);
         }
 
@@ -202,9 +216,17 @@ final class AuthController
         }
 
         if ($user['status'] === 'pending') {
-            Response::error(Response::text('response.email_unverified', [], $request, $locale), 403, [
-                'code' => 'email_unverified',
-            ]);
+            // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+            if (App::allowsOtpBypass()) {
+                $pdo->prepare(
+                    'UPDATE users SET status = \'active\', email_verified_at = NOW(3) WHERE id = :id'
+                )->execute(['id' => $user['id']]);
+                $user['status'] = 'active';
+            } else {
+                Response::error(Response::text('response.email_unverified', [], $request, $locale), 403, [
+                    'code' => 'email_unverified',
+                ]);
+            }
         }
 
         if (in_array($user['status'], ['blocked', 'suspended', 'closed'], true)) {
@@ -359,7 +381,8 @@ final class AuthController
         }
 
         $email = strtolower(trim($body['email']));
-        if (!$this->otp->verify($email, 'password_reset', $body['otp'])) {
+        // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+        if (!App::allowsOtpBypass() && !$this->otp->verify($email, 'password_reset', $body['otp'])) {
             Response::error(Response::text('response.otp_invalid', [], $request, $locale), 400);
         }
 

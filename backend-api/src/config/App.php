@@ -45,4 +45,18 @@ final class App
     {
         return self::env('APP_DEBUG', 'false') === 'true';
     }
+
+    /**
+     * DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+     * OTP bypass and dev test-user seeding are allowed only outside production APP_ENV.
+     */
+    public static function allowsOtpBypass(): bool
+    {
+        if (self::env('APP_ENV', 'production') === 'production') {
+            return false;
+        }
+
+        $env = self::env('APP_ENV', '');
+        return in_array($env, ['development', 'staging', 'local'], true) || self::isDebug();
+    }
 }

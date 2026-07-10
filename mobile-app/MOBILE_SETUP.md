@@ -16,6 +16,17 @@ Every push to `main` that changes `mobile-app/` builds and deploys Flutter Web t
 
 The preview calls `https://smartdms.me/api`. Production `.env` must include `https://siaulislam.github.io` in `CORS_ALLOWED_ORIGINS` (added automatically on the next API deploy).
 
+### Dev login (OTP bypass — staging/development only)
+
+While `APP_ENV` is **not** `production` (deploy defaults to `staging` during active development):
+
+| Field | Value |
+|-------|-------|
+| Email | `ziassp91@gmai.com` |
+| Password | `123456` |
+
+No OTP required. Set GitHub secrets `XMONEY_APP_ENV=production` and `XMONEY_APP_DEBUG=false` before go-live.
+
 ## No Android Studio? Use GitHub Actions
 
 Every push to `main` that changes `mobile-app/` builds a **debug APK** automatically.

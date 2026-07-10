@@ -32,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 try {
     Database::connection();
+    // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+    \XMoney\Services\DevAuthBootstrap::ensureTestUser();
     $router = require dirname(__DIR__) . '/src/routes/api.php';
     /** @var Router $router */
     $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] ?? '/');
