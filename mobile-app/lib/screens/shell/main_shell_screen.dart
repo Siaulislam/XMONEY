@@ -6,6 +6,7 @@ import '../../core/theme/xmoney_theme.dart';
 import '../home/home_screen.dart';
 import '../wallet/wallet_screen.dart';
 import '../transfer/transfer_screen.dart';
+import '../transfer/international_transfer_screen.dart';
 import '../transactions/transactions_screen.dart';
 import '../more/more_screen.dart';
 import '../../core/widgets/send_money_options_sheet.dart';
@@ -38,6 +39,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
         showXmSnack(context, 'Coming soon');
         return;
       case SendMoneyChannel.international:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => InternationalTransferScreen(router: widget.router),
+          ),
+        );
+        return;
       case SendMoneyChannel.bank:
       case SendMoneyChannel.cnic:
       case SendMoneyChannel.local:
