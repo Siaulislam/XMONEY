@@ -28,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _load() async {
-    // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION — demo data for web UI preview
     if (widget.router.api.previewBypassAuth) {
       if (!mounted) return;
       setState(() {
@@ -38,18 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         };
         _recent = [
-          {
-            'uuid': 'preview-1',
-            'reference_code': 'XM-2026-001',
-            'receiver_name': 'Ahmed Khan',
-            'status': 'completed',
-          },
-          {
-            'uuid': 'preview-2',
-            'reference_code': 'XM-2026-002',
-            'receiver_name': 'Fatima Ali',
-            'status': 'processing',
-          },
+          {'uuid': 'preview-1', 'reference_code': 'XM-2026-001', 'receiver_name': 'Ahmed Khan', 'status': 'completed'},
+          {'uuid': 'preview-2', 'reference_code': 'XM-2026-002', 'receiver_name': 'Fatima Ali', 'status': 'processing'},
         ];
         _loading = false;
       });
@@ -71,6 +60,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _open(String route) => Navigator.pushNamed(context, route);
 
+  void _soon(String label) => showXmSnack(context, '$label — coming soon');
+
+  List<_ServiceItem> get _moreServices => [
+        _ServiceItem('Intl transfer', Icons.public, XmoneyTheme.blue, widget.onSend ?? () {}),
+        _ServiceItem('Gold & silver', Icons.trending_up, const Color(0xFFD4A017), () => _soon('Gold & silver')),
+        _ServiceItem('Instant loan', Icons.campaign_outlined, XmoneyTheme.blue, () => _soon('Instant loan')),
+        _ServiceItem('My cards', Icons.credit_card_outlined, XmoneyTheme.blue, widget.onTopUp ?? () {}),
+        _ServiceItem('Bill & recharge', Icons.receipt_long_outlined, const Color(0xFF2E7D6B), () => _soon('Bill & recharge')),
+        _ServiceItem('Salary card', Icons.badge_outlined, XmoneyTheme.blue, () => _soon('Salary card')),
+        _ServiceItem('Remittance', Icons.currency_exchange, const Color(0xFF2E7D6B), widget.onSend ?? () {}),
+        _ServiceItem('Insurance', Icons.health_and_safety_outlined, XmoneyTheme.teal, () => _soon('Insurance')),
+        _ServiceItem('Credit score', Icons.speed_outlined, const Color(0xFF6B5B95), () => _soon('Credit score')),
+        _ServiceItem('More', Icons.apps, XmoneyTheme.navyDeep, _showAllServices),
+      ];
+
+  void _showAllServices() {
+    final extra = [
+      _ServiceItem('Beneficiaries', Icons.people_outline, XmoneyTheme.teal, () => _open(AppRouter.beneficiaries)),
+      _ServiceItem('View statement', Icons.description_outlined, const Color(0xFF5B6B7C), () => _open(AppRouter.transactions)),
+      _ServiceItem('Mobile packages', Icons.sim_card_outlined, const Color(0xFF7C5CBF), () => _soon('Mobile packages')),
+      _ServiceItem('Scan & pay', Icons.qr_code_scanner, XmoneyTheme.blue, () => _soon('Scan & pay')),
+      _ServiceItem('Profile', Icons.person_outline, XmoneyTheme.navyDeep, () => _open(AppRouter.profile)),
+      _ServiceItem('KYC', Icons.verified_user_outlined, XmoneyTheme.teal, () => _open(AppRouter.kyc)),
+      _ServiceItem('Security', Icons.shield_outlined, XmoneyTheme.blue, () => _open(AppRouter.security)),
+      _ServiceItem('Support', Icons.headset_mic_outlined, const Color(0xFF6B5B95), () => _soon('Support')),
+      _ServiceItem('Settings', Icons.settings_outlined, const Color(0xFF5B6B7C), () => _open(AppRouter.settings)),
+      _ServiceItem('Notifications', Icons.notifications_outlined, XmoneyTheme.gold, () => _open(AppRouter.notifications)),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.55,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (_, scroll) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Column(
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 16),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('All services', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: GridView.builder(
+                  controller: scroll,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 0.82,
+                  ),
+                  itemCount: [..._moreServices, ...extra].length,
+                  itemBuilder: (_, i) {
+                    final item = [..._moreServices, ...extra][i];
+                    return XmServiceTile(
+                      label: item.label,
+                      icon: item.icon,
+                      accent: item.accent,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        item.onTap();
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final wallets = (_analytics?['wallets'] as List?) ?? [];
@@ -79,16 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final balance = w != null ? '${fmt.format(w['available_balance'])} ${w['currency_code']}' : '—';
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('XMONEY'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => _open(AppRouter.notifications),
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFF4F6FA),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -96,79 +156,80 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
+                  XmHomeHeader(
+                    onProfile: () => _open(AppRouter.profile),
+                    onSearch: () => _soon('Search'),
+                    onNotifications: () => _open(AppRouter.notifications),
+                  ),
                   XmWalletHeroCard(
                     balanceLabel: 'Available balance',
                     balanceText: balance,
-                    secondaryLabel: 'Verify account',
+                    secondaryLabel: 'Upgrade account',
                     onSecondary: () => _open(AppRouter.kyc),
+                    onRewards: () => _soon('Rewards'),
                     onAddMoney: widget.onTopUp ?? () {},
                   ),
-                  const SizedBox(height: 20),
-                  XmPrimaryActionRow(
-                    children: [
+                  const SizedBox(height: 16),
+                  XmQuickActionStrip(
+                    actions: [
                       XmPrimaryActionButton(
+                        compact: true,
                         label: 'Send money',
                         icon: Icons.near_me_outlined,
                         accent: XmoneyTheme.blue,
                         onTap: widget.onSend ?? () {},
                       ),
                       XmPrimaryActionButton(
-                        label: 'Beneficiaries',
-                        icon: Icons.people_outline,
-                        accent: XmoneyTheme.teal,
-                        onTap: () => _open(AppRouter.beneficiaries),
-                      ),
-                      XmPrimaryActionButton(
-                        label: 'History',
-                        icon: Icons.receipt_long_outlined,
-                        accent: const Color(0xFF5B6B7C),
-                        onTap: () => _open(AppRouter.transactions),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  XmPrimaryActionRow(
-                    children: [
-                      XmPrimaryActionButton(
-                        label: 'Exchange',
-                        icon: Icons.currency_exchange,
-                        accent: XmoneyTheme.gold,
-                        onTap: widget.onSend ?? () {},
-                      ),
-                      XmPrimaryActionButton(
-                        label: 'Top up',
-                        icon: Icons.add_card_outlined,
+                        compact: true,
+                        label: 'Bill payment',
+                        icon: Icons.receipt_outlined,
                         accent: const Color(0xFF2E7D6B),
+                        onTap: () => _soon('Bill payment'),
+                      ),
+                      XmPrimaryActionButton(
+                        compact: true,
+                        label: 'Mobile packages',
+                        icon: Icons.sim_card_outlined,
+                        accent: const Color(0xFF7C5CBF),
+                        onTap: () => _soon('Mobile packages'),
+                      ),
+                      XmPrimaryActionButton(
+                        compact: true,
+                        label: 'Top up',
+                        icon: Icons.add_circle_outline,
+                        accent: const Color(0xFFE67E22),
                         onTap: widget.onTopUp ?? () {},
                       ),
                       XmPrimaryActionButton(
-                        label: 'Support',
-                        icon: Icons.headset_mic_outlined,
-                        accent: const Color(0xFF6B5B95),
-                        onTap: () => showXmSnack(context, 'Support chat coming soon'),
+                        compact: true,
+                        label: 'Scan & pay',
+                        icon: Icons.qr_code_scanner,
+                        accent: XmoneyTheme.blue,
+                        onTap: () => _soon('Scan & pay'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
                   XmSectionCard(
                     title: 'More with XMONEY',
+                    onViewAll: _showAllServices,
                     child: GridView.count(
-                      crossAxisCount: 4,
+                      crossAxisCount: 5,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
-                      childAspectRatio: 0.82,
-                      children: [
-                        XmServiceTile(label: 'Profile', icon: Icons.person_outline, onTap: () => _open(AppRouter.profile)),
-                        XmServiceTile(label: 'KYC', icon: Icons.verified_user_outlined, accent: XmoneyTheme.teal, onTap: () => _open(AppRouter.kyc)),
-                        XmServiceTile(label: 'Security', icon: Icons.shield_outlined, onTap: () => _open(AppRouter.security)),
-                        XmServiceTile(label: 'Settings', icon: Icons.settings_outlined, onTap: () => _open(AppRouter.settings)),
-                        XmServiceTile(label: 'Wallet', icon: Icons.account_balance_wallet_outlined, onTap: widget.onTopUp ?? () {}),
-                        XmServiceTile(label: 'Alerts', icon: Icons.notifications_outlined, onTap: () => _open(AppRouter.notifications)),
-                        XmServiceTile(label: 'Send', icon: Icons.send_outlined, accent: XmoneyTheme.blue, onTap: widget.onSend ?? () {}),
-                        XmServiceTile(label: 'More', icon: Icons.apps_outlined, onTap: () => _open(AppRouter.settings)),
-                      ],
+                      mainAxisSpacing: 2,
+                      crossAxisSpacing: 2,
+                      childAspectRatio: 0.72,
+                      children: _moreServices
+                          .map(
+                            (s) => XmServiceTile(
+                              label: s.label,
+                              icon: s.icon,
+                              accent: s.accent,
+                              onTap: s.onTap,
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -184,12 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (_recent.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Center(
-                        child: Text(
-                          'No transfers yet',
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      ),
+                      child: Center(child: Text('No transfers yet', style: TextStyle(color: Colors.grey.shade600))),
                     )
                   else
                     ..._recent.map((t) {
@@ -231,4 +287,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
     );
   }
+}
+
+class _ServiceItem {
+  const _ServiceItem(this.label, this.icon, this.accent, this.onTap);
+  final String label;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
 }

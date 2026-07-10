@@ -1,7 +1,106 @@
 import 'package:flutter/material.dart';
 import '../theme/xmoney_theme.dart';
 
-/// Premium wallet hero card — cleaner than consumer fintech apps; XMONEY navy palette.
+/// Botim-style home header — profile, brand, search, alerts.
+class XmHomeHeader extends StatelessWidget {
+  const XmHomeHeader({
+    super.key,
+    required this.onProfile,
+    required this.onSearch,
+    required this.onNotifications,
+    this.onLogout,
+  });
+
+  final VoidCallback onProfile;
+  final VoidCallback onSearch;
+  final VoidCallback onNotifications;
+  final VoidCallback? onLogout;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+      child: Row(
+        children: [
+          Material(
+            color: isDark ? XmoneyTheme.cardDark : Colors.white,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onProfile,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Icon(Icons.person_outline, color: isDark ? Colors.white70 : XmoneyTheme.navyDeep),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'XMONEY',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  color: isDark ? Colors.white : XmoneyTheme.blue,
+                ),
+              ),
+            ),
+          ),
+          _HeaderIcon(icon: Icons.search, onTap: onSearch),
+          _HeaderIcon(icon: Icons.notifications_outlined, onTap: onNotifications, showDot: true),
+          if (onLogout != null) _HeaderIcon(icon: Icons.logout, onTap: onLogout!),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderIcon extends StatelessWidget {
+  const _HeaderIcon({required this.icon, required this.onTap, this.showDot = false});
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool showDot;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, size: 22, color: isDark ? Colors.white70 : XmoneyTheme.navyDeep),
+                if (showDot)
+                  Positioned(
+                    right: -1,
+                    top: -1,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Premium wallet hero card — Botim layout, XMONEY enterprise styling.
 class XmWalletHeroCard extends StatefulWidget {
   const XmWalletHeroCard({
     super.key,
@@ -9,7 +108,8 @@ class XmWalletHeroCard extends StatefulWidget {
     required this.balanceText,
     required this.onAddMoney,
     this.onSecondary,
-    this.secondaryLabel = 'Verify account',
+    this.secondaryLabel = 'Upgrade account',
+    this.onRewards,
   });
 
   final String balanceLabel;
@@ -17,13 +117,14 @@ class XmWalletHeroCard extends StatefulWidget {
   final VoidCallback onAddMoney;
   final VoidCallback? onSecondary;
   final String secondaryLabel;
+  final VoidCallback? onRewards;
 
   @override
   State<XmWalletHeroCard> createState() => _XmWalletHeroCardState();
 }
 
 class _XmWalletHeroCardState extends State<XmWalletHeroCard> {
-  bool _visible = true;
+  bool _visible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,84 +134,119 @@ class _XmWalletHeroCardState extends State<XmWalletHeroCard> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0A1628), XmoneyTheme.navyDeep, XmoneyTheme.blue],
+          colors: [Color(0xFF1E4FD6), Color(0xFF2563EB), XmoneyTheme.blue],
         ),
         boxShadow: [
           BoxShadow(
-            color: XmoneyTheme.navyDeep.withOpacity(0.28),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: XmoneyTheme.blue.withOpacity(0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              children: [
+                Icon(Icons.account_balance_wallet_outlined, color: Colors.white.withOpacity(0.9), size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  'XMONEY Wallet',
+                  style: TextStyle(color: Colors.white.withOpacity(0.95), fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                const Spacer(),
+                if (widget.onRewards != null)
+                  InkWell(
+                    onTap: widget.onRewards,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.monetization_on_outlined, color: XmoneyTheme.gold, size: 18),
+                          const SizedBox(width: 4),
+                          Text(
+                            'My Rewards',
+                            style: TextStyle(color: Colors.white.withOpacity(0.95), fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _visible = !_visible),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.balanceLabel,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                _visible ? widget.balanceText : '•••••',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              _visible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              color: Colors.white.withOpacity(0.85),
+                              size: 18,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Tap to view balance',
+                          style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 132,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.balanceLabel,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.72),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.2,
+                      if (widget.onSecondary != null)
+                        XmWalletOutlineButton(
+                          label: widget.secondaryLabel,
+                          onPressed: widget.onSecondary!,
+                          compact: true,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _visible ? widget.balanceText : '••••••',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.w700,
-                          height: 1.1,
-                          letterSpacing: -0.5,
-                        ),
+                      if (widget.onSecondary != null) const SizedBox(height: 8),
+                      XmWalletFilledButton(
+                        label: 'Add money',
+                        onPressed: widget.onAddMoney,
+                        compact: true,
                       ),
                     ],
-                  ),
-                ),
-                Material(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: () => setState(() => _visible = !_visible),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Icon(
-                        _visible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: Colors.white.withOpacity(0.9),
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            Row(
-              children: [
-                if (widget.onSecondary != null)
-                  Expanded(
-                    child: XmWalletOutlineButton(
-                      label: widget.secondaryLabel,
-                      onPressed: widget.onSecondary!,
-                    ),
-                  ),
-                if (widget.onSecondary != null) const SizedBox(width: 10),
-                Expanded(
-                  child: XmWalletFilledButton(
-                    label: 'Add money',
-                    onPressed: widget.onAddMoney,
                   ),
                 ),
               ],
@@ -123,10 +259,11 @@ class _XmWalletHeroCardState extends State<XmWalletHeroCard> {
 }
 
 class XmWalletOutlineButton extends StatelessWidget {
-  const XmWalletOutlineButton({super.key, required this.label, required this.onPressed});
+  const XmWalletOutlineButton({super.key, required this.label, required this.onPressed, this.compact = false});
 
   final String label;
   final VoidCallback onPressed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -134,21 +271,24 @@ class XmWalletOutlineButton extends StatelessWidget {
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.white,
-        side: BorderSide(color: Colors.white.withOpacity(0.45), width: 1.2),
-        padding: const EdgeInsets.symmetric(vertical: 13),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.1),
+        side: BorderSide(color: Colors.white.withOpacity(0.55), width: 1.2),
+        padding: EdgeInsets.symmetric(vertical: compact ? 10 : 13),
+        minimumSize: Size(compact ? 0 : 44, compact ? 36 : 44),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: TextStyle(fontSize: compact ? 11.5 : 14, fontWeight: FontWeight.w600),
       ),
-      child: Text(label),
+      child: Text(label, textAlign: TextAlign.center, maxLines: 2),
     );
   }
 }
 
 class XmWalletFilledButton extends StatelessWidget {
-  const XmWalletFilledButton({super.key, required this.label, required this.onPressed});
+  const XmWalletFilledButton({super.key, required this.label, required this.onPressed, this.compact = false});
 
   final String label;
   final VoidCallback onPressed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -156,18 +296,19 @@ class XmWalletFilledButton extends StatelessWidget {
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: Colors.white,
-        foregroundColor: XmoneyTheme.navyDeep,
-        padding: const EdgeInsets.symmetric(vertical: 13),
+        foregroundColor: XmoneyTheme.blue,
+        padding: EdgeInsets.symmetric(vertical: compact ? 10 : 13),
+        minimumSize: Size(compact ? 0 : 44, compact ? 36 : 44),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: TextStyle(fontSize: compact ? 11.5 : 14, fontWeight: FontWeight.w700),
       ),
-      child: Text(label),
+      child: Text(label, textAlign: TextAlign.center),
     );
   }
 }
 
-/// Primary home action — refined card button (Botim-inspired layout, enterprise styling).
 class XmPrimaryActionButton extends StatelessWidget {
   const XmPrimaryActionButton({
     super.key,
@@ -175,75 +316,78 @@ class XmPrimaryActionButton extends StatelessWidget {
     required this.icon,
     required this.accent,
     required this.onTap,
+    this.compact = false,
   });
 
   final String label;
   final IconData icon;
   final Color accent;
   final VoidCallback onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? XmoneyTheme.cardDark : Colors.white;
     final border = isDark ? const Color(0xFF2A3548) : const Color(0xFFE8ECF2);
+    final iconSize = compact ? 40.0 : 48.0;
+    final iconGlyph = compact ? 22.0 : 24.0;
 
     return Material(
       color: cardBg,
       elevation: 0,
-      shadowColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(compact ? 14 : 16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(compact ? 14 : 16),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(compact ? 14 : 16),
             border: Border.all(color: border),
+            color: accent.withOpacity(isDark ? 0.06 : 0.04),
             boxShadow: isDark
                 ? null
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 16, 10, 14),
+            padding: EdgeInsets.fromLTRB(compact ? 6 : 10, compact ? 12 : 16, compact ? 6 : 10, compact ? 10 : 14),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: iconSize,
+                  height: iconSize,
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(isDark ? 0.18 : 0.1),
-                    borderRadius: BorderRadius.circular(14),
+                    color: accent.withOpacity(isDark ? 0.2 : 0.12),
+                    borderRadius: BorderRadius.circular(compact ? 12 : 14),
                   ),
-                  child: Icon(icon, color: accent, size: 24),
+                  child: Icon(icon, color: accent, size: iconGlyph),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: compact ? 8 : 10),
                 Text(
                   label,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: compact ? 10.5 : 12.5,
                     fontWeight: FontWeight.w600,
-                    height: 1.2,
+                    height: 1.15,
                     color: isDark ? Colors.white : XmoneyTheme.navyDeep,
-                    letterSpacing: 0.1,
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: compact ? 8 : 10),
                 Container(
-                  width: 28,
+                  width: compact ? 22 : 28,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.85),
+                    color: accent.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -252,6 +396,42 @@ class XmPrimaryActionButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Five quick actions in one row (Botim-style); scrolls on very narrow screens.
+class XmQuickActionStrip extends StatelessWidget {
+  const XmQuickActionStrip({super.key, required this.actions});
+
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useScroll = constraints.maxWidth < 380;
+        if (useScroll) {
+          return SizedBox(
+            height: 118,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: actions.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) => SizedBox(width: 72, child: actions[i]),
+            ),
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < actions.length; i++) ...[
+              if (i > 0) const SizedBox(width: 8),
+              Expanded(child: actions[i]),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -338,10 +518,16 @@ class XmServiceTile extends StatelessWidget {
 }
 
 class XmSectionCard extends StatelessWidget {
-  const XmSectionCard({super.key, required this.title, required this.child});
+  const XmSectionCard({
+    super.key,
+    required this.title,
+    required this.child,
+    this.onViewAll,
+  });
 
   final String title;
   final Widget child;
+  final VoidCallback? onViewAll;
 
   @override
   Widget build(BuildContext context) {
@@ -357,14 +543,32 @@ class XmSectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : XmoneyTheme.navyDeep,
-              letterSpacing: 0.1,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : XmoneyTheme.navyDeep,
+                  ),
+                ),
+              ),
+              if (onViewAll != null)
+                TextButton(
+                  onPressed: onViewAll,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'View all',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: XmoneyTheme.blue),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           child,
