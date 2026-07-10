@@ -53,27 +53,35 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
   }
 
   Future<void> _boot() async {
-    await _repo.ensureLoaded();
-    _sender = _repo.defaultForCountry('AE') ??
-        _repo.tryFindById('AE_AED') ??
-        (_repo.all.isNotEmpty ? _repo.all.first : null);
-    _receiver = _repo.defaultForCountry('PK') ??
-        _repo.tryFindById('PK_PKR');
+    try {
+      await _repo.ensureLoaded();
+      _sender = _repo.defaultForCountry('AE') ??
+          _repo.tryFindById('AE_AED') ??
+          (_repo.all.isNotEmpty ? _repo.all.first : null);
+      _receiver = _repo.defaultForCountry('PK') ??
+          _repo.tryFindById('PK_PKR');
 
-    final res = await widget.router.api.get('/v1/wallets');
-    final data = (res['data'] as List?) ?? [];
-    _wallets = data.cast<Map<String, dynamic>>();
-    if (_wallets.isEmpty && widget.router.api.previewBypassAuth) {
-      _wallets = _previewWallets();
-    }
-    if (_wallets.isNotEmpty) {
-      _walletId = _wallets.first['uuid'] as String? ?? _wallets.first['id']?.toString();
-    }
-
-    if (mounted) {
-      setState(() => _booting = false);
-      await _loadDestinationWallets();
-      _refreshQuote();
+      if (widget.router.api.previewBypassAuth) {
+        _wallets = _previewWallets();
+      } else {
+        final res = await widget.router.api.get('/v1/wallets');
+        final data = (res['data'] as List?) ?? [];
+        _wallets = data.cast<Map<String, dynamic>>();
+      }
+      if (_wallets.isNotEmpty) {
+        _walletId = _wallets.first['uuid'] as String? ?? _wallets.first['id']?.toString();
+      }
+    } catch (_) {
+      if (widget.router.api.previewBypassAuth) {
+        _wallets = _previewWallets();
+        _walletId = _wallets.first['uuid'] as String?;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _booting = false);
+        _loadDestinationWallets();
+        _refreshQuote();
+      }
     }
   }
 

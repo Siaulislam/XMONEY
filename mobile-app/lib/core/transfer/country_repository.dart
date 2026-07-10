@@ -29,16 +29,29 @@ class CountryRepository {
 
   Future<void> ensureLoaded() async {
     if (_all != null) return;
-    final raw = await rootBundle.loadString('assets/data/country_currencies.json');
-    final json = jsonDecode(raw) as Map<String, dynamic>;
-    _popularCodes = ((json['popularCountryCodes'] as List?) ?? [])
-        .map((e) => e.toString())
-        .toSet();
-    _all = ((json['entries'] as List?) ?? [])
-        .map((e) => CountryCurrencyOption.tryParse(e as Map<String, dynamic>))
-        .whereType<CountryCurrencyOption>()
-        .toList();
+    try {
+      final raw = await rootBundle.loadString('assets/data/country_currencies.json');
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      _popularCodes = ((json['popularCountryCodes'] as List?) ?? [])
+          .map((e) => e.toString())
+          .toSet();
+      _all = ((json['entries'] as List?) ?? [])
+          .map((e) => CountryCurrencyOption.tryParse(e as Map<String, dynamic>))
+          .whereType<CountryCurrencyOption>()
+          .toList();
+    } catch (_) {
+      _popularCodes = {};
+      _all = _fallbackEntries();
+    }
   }
+
+  List<CountryCurrencyOption> _fallbackEntries() => const [
+        CountryCurrencyOption(countryCode: 'AE', countryName: 'United Arab Emirates', currencyCode: 'AED', currencyName: 'UAE Dirham'),
+        CountryCurrencyOption(countryCode: 'PK', countryName: 'Pakistan', currencyCode: 'PKR', currencyName: 'Pakistani Rupee'),
+        CountryCurrencyOption(countryCode: 'IN', countryName: 'India', currencyCode: 'INR', currencyName: 'Indian Rupee'),
+        CountryCurrencyOption(countryCode: 'GB', countryName: 'United Kingdom', currencyCode: 'GBP', currencyName: 'British Pound'),
+        CountryCurrencyOption(countryCode: 'US', countryName: 'United States', currencyCode: 'USD', currencyName: 'US Dollar'),
+      ];
 
   List<CountryCurrencyOption> get all => _all ?? [];
 

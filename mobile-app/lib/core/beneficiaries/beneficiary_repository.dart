@@ -188,7 +188,6 @@ class BeneficiaryRepository {
           createdAt: DateTime.now().subtract(const Duration(days: 60)),
         ),
       ];
-    _savePreview(seed); // fire-and-forget seed for preview mode
     return seed;
   }
 }

@@ -23,10 +23,11 @@ class WalletRepository {
       return;
     }
 
-    final apiOk = await _loadFromApi();
-    if (!apiOk) {
-      await _loadFromBundle();
+    if (!api.previewBypassAuth) {
+      final apiOk = await _loadFromApi();
+      if (apiOk) return;
     }
+    await _loadFromBundle();
   }
 
   Future<bool> _loadFromApi() async {

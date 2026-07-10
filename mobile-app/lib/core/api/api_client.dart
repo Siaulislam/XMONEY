@@ -56,6 +56,8 @@ class ApiClient {
 
   Future<Map<String, dynamic>> delete(String path) => _request('DELETE', path);
 
+  static const _timeout = Duration(seconds: 10);
+
   Future<Map<String, dynamic>> _request(
     String method,
     String path, {
@@ -65,18 +67,22 @@ class ApiClient {
     final headers = await _authHeaders();
     http.Response res;
     final uri = _uri(path);
-    switch (method) {
-      case 'GET':
-        res = await http.get(uri, headers: headers);
-        break;
-      case 'PUT':
-        res = await http.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null);
-        break;
-      case 'DELETE':
-        res = await http.delete(uri, headers: headers);
-        break;
-      default:
-        res = await http.post(uri, headers: headers, body: body != null ? jsonEncode(body) : null);
+    try {
+      switch (method) {
+        case 'GET':
+          res = await http.get(uri, headers: headers).timeout(_timeout);
+          break;
+        case 'PUT':
+          res = await http.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(_timeout);
+          break;
+        case 'DELETE':
+          res = await http.delete(uri, headers: headers).timeout(_timeout);
+          break;
+        default:
+          res = await http.post(uri, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(_timeout);
+      }
+    } catch (_) {
+      return {'success': false, 'message': 'Network unavailable'};
     }
 
     Map<String, dynamic> payload;
@@ -86,7 +92,7 @@ class ApiClient {
       return {'success': false, 'message': 'Invalid server response'};
     }
 
-    if (res.statusCode == 401 && retry && !path.contains('/auth/')) {
+    if (res.statusCode == 401 && retry && !path.contains('/auth/') && !previewBypassAuth) {
       final ok = await _refresh();
       if (ok) return _request(method, path, body: body, retry: false);
     }
