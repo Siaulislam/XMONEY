@@ -28,6 +28,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _load() async {
+    // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION — demo data for web UI preview
+    if (widget.router.api.previewBypassAuth) {
+      if (!mounted) return;
+      setState(() {
+        _analytics = {
+          'wallets': [
+            {'available_balance': 12450.75, 'currency_code': 'AED'},
+          ],
+        };
+        _recent = [
+          {
+            'uuid': 'preview-1',
+            'reference_code': 'XM-2026-001',
+            'receiver_name': 'Ahmed Khan',
+            'status': 'completed',
+          },
+          {
+            'uuid': 'preview-2',
+            'reference_code': 'XM-2026-002',
+            'receiver_name': 'Fatima Ali',
+            'status': 'processing',
+          },
+        ];
+        _loading = false;
+      });
+      return;
+    }
+
     final results = await Future.wait([
       widget.router.api.get('/v1/analytics/summary'),
       widget.router.api.get('/v1/transfers?limit=5'),

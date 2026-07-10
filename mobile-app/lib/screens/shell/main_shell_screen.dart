@@ -36,7 +36,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
     ];
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
+      body: Column(
+        children: [
+          if (widget.router.api.previewBypassAuth) const _PreviewBanner(),
+          Expanded(child: IndexedStack(index: _index, children: pages)),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         backgroundColor: XmoneyTheme.navyDeep,
@@ -50,6 +55,36 @@ class _MainShellScreenState extends State<MainShellScreen> {
           NavigationDestination(icon: const Icon(Icons.more_horiz), selectedIcon: const Icon(Icons.more_horiz), label: _s.t('nav.more', 'More')),
         ],
         onDestinationSelected: _goTab,
+      ),
+    );
+  }
+}
+
+/// DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+class _PreviewBanner extends StatelessWidget {
+  const _PreviewBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: XmoneyTheme.gold.withOpacity(0.15),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.visibility_outlined, size: 18, color: XmoneyTheme.navyDeep),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'UI preview — login temporarily skipped',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: XmoneyTheme.navyDeep.withOpacity(0.9)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -13,11 +13,16 @@ class ApiClient {
   String _baseUrl = 'http://localhost:8080';
   final _deviceId = const Uuid().v4();
 
+  /// DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+  /// When true (web preview build), app skips login/onboarding for UI review.
+  bool previewBypassAuth = false;
+
   Future<void> loadConfig() async {
     try {
       final raw = await rootBundle.loadString('assets/config.json');
       final json = jsonDecode(raw) as Map<String, dynamic>;
       _baseUrl = (json['apiBaseUrl'] as String).replaceAll(RegExp(r'/$'), '');
+      previewBypassAuth = json['previewBypassAuth'] == true;
     } catch (_) {}
   }
 

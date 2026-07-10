@@ -44,6 +44,18 @@ jobs:
       - name: Prepare project (platforms, assets, analyze)
         run: bash scripts/ci-prepare.sh
 
+      # DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+      - name: Enable web preview login bypass
+        run: |
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('assets/config.json')
+          cfg = json.loads(p.read_text(encoding='utf-8'))
+          cfg['previewBypassAuth'] = True
+          p.write_text(json.dumps(cfg, indent=2) + '\n', encoding='utf-8')
+          PY
+
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/XMONEY/"
 

@@ -10,6 +10,8 @@ Every push to `main` that changes `mobile-app/` builds and deploys Flutter Web t
 
 **Preview URL:** [https://siaulislam.github.io/XMONEY/](https://siaulislam.github.io/XMONEY/)
 
+The web preview **skips login temporarily** so you can review UI (demo data shown). Login remains required for APK/production builds.
+
 1. GitHub → **Actions** → **Mobile Web Preview** → latest green run
 2. Open the job summary — the **Preview URL** is listed at the top
 3. First-time setup: repo **Settings → Pages → Build and deployment → GitHub Actions**

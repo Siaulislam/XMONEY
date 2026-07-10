@@ -25,9 +25,20 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (!onboarding.isComplete) {
-      Navigator.pushReplacementNamed(context, AppRouter.onboarding);
+      if (widget.router.api.previewBypassAuth) {
+        await onboarding.markComplete();
+      } else {
+        Navigator.pushReplacementNamed(context, AppRouter.onboarding);
+        return;
+      }
+    }
+
+    // DEVELOPMENT ONLY - REMOVE BEFORE PRODUCTION
+    if (widget.router.api.previewBypassAuth) {
+      Navigator.pushReplacementNamed(context, AppRouter.home);
       return;
     }
+
     Navigator.pushReplacementNamed(context, loggedIn ? AppRouter.home : AppRouter.login);
   }
 
