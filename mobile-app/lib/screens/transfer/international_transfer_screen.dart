@@ -6,6 +6,7 @@ import '../../core/transfer/country_repository.dart';
 import '../../core/transfer/exchange_rate_controller.dart';
 import '../../core/theme/xmoney_theme.dart';
 import '../../core/widgets/currency_selector.dart';
+import '../../core/responsive/xm_layout.dart';
 import '../../core/widgets/xm_ui.dart';
 import '../../core/wallets/country_wallet_mapping.dart';
 import '../../core/wallets/wallet_provider.dart';
@@ -660,22 +661,5 @@ class _TrustRow extends StatelessWidget {
         item(Icons.support_agent_rounded, '24/7 Support', "We're here"),
       ],
     );
-  }
-}
-
-/// Responsive layout helpers for transfer screen.
-class XmLayout {
-  static double maxContentWidth(BuildContext context) {
-    final w = MediaQuery.sizeOf(context).width;
-    if (w >= 1200) return 560;
-    if (w >= 800) return 520;
-    return double.infinity;
-  }
-
-  static double horizontalPad(BuildContext context) {
-    final w = MediaQuery.sizeOf(context).width;
-    if (w >= 800) return 32;
-    if (w >= 600) return 24;
-    return 18;
   }
 }

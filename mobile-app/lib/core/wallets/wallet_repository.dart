@@ -82,7 +82,13 @@ class WalletRepository {
   Future<CountryWalletMapping> forCountry(String countryCode) async {
     await ensureLoaded();
     final cc = countryCode.toUpperCase();
-    final hit = _mappings?.where((m) => m.countryCode == cc).firstOrNull;
+    CountryWalletMapping? hit;
+    for (final m in _mappings ?? []) {
+      if (m.countryCode == cc) {
+        hit = m;
+        break;
+      }
+    }
     if (hit != null) return hit;
 
     // Live lookup when cache has no mapping row (API may return country-specific list).
@@ -111,13 +117,5 @@ class WalletRepository {
           p.description.toLowerCase().contains(q) ||
           p.code.toLowerCase().contains(q);
     }).toList();
-  }
-}
-
-extension _FirstOrNull<E> on Iterable<E> {
-  E? get firstOrNull {
-    final it = iterator;
-    if (!it.moveNext()) return null;
-    return it.current;
   }
 }

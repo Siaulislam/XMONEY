@@ -80,7 +80,7 @@ class _WalletSelectorState extends State<WalletSelector> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, index) => const SizedBox(height: 8),
                   itemBuilder: (_, i) {
                     final p = list[i];
                     final selected = widget.selected?.code == p.code;

@@ -4,8 +4,8 @@ import '../../routes/app_router.dart';
 import '../transfer/country_currency_option.dart';
 import '../theme/xmoney_theme.dart';
 import '../wallets/wallet_provider.dart';
+import '../responsive/xm_layout.dart';
 import '../widgets/xm_ui.dart';
-import 'international_transfer_screen.dart';
 
 enum WalletDeliveryField { mobile, accountId, upiId }
 
