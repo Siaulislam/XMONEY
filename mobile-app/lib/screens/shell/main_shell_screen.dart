@@ -40,7 +40,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         backgroundColor: XmoneyTheme.navyDeep,
-        indicatorColor: XmoneyTheme.gold.withValues(alpha: 0.25),
+        indicatorColor: XmoneyTheme.gold.withOpacity(0.25),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
           NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: _s.t('nav.home', 'Home')),

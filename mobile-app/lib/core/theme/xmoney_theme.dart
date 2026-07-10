@@ -55,7 +55,7 @@ class XmoneyTheme {
         elevation: 0,
         centerTitle: false,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: card,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -77,7 +77,7 @@ class XmoneyTheme {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
-      focusColor: gold.withValues(alpha: 0.35),
+      focusColor: gold.withOpacity(0.35),
     );
   }
 }

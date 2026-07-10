@@ -92,7 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                              colors: [slide.accent.withValues(alpha: 0.25), slide.accent.withValues(alpha: 0.08)],
+                              colors: [slide.accent.withOpacity(0.25), slide.accent.withOpacity(0.08)],
                             ),
                           ),
                           child: Icon(slide.icon, size: 56, color: slide.accent),
