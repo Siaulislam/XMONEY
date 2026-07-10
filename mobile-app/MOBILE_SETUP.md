@@ -18,17 +18,11 @@ The preview calls `https://smartdms.me/api`. Production `.env` must include `htt
 
 ### Dev auth bypass (currently disabled)
 
-Temporary OTP bypass and test-user login are **turned off** while the app is being completed. Code is kept in the repo for later.
+Temporary OTP bypass is **off**. Credentials are **not stored in source code** — only in private `.env` / GitHub secrets when you re-enable later.
 
-To re-enable during development, set in `api/.env`:
+See `backend-api/config/dev-auth.example.env` for how to turn it back on during development.
 
-```
-DEV_AUTH_BYPASS_ENABLED=true
-APP_ENV=staging
-APP_DEBUG=true
-```
-
-Never enable when `APP_ENV=production`. See `backend-api/src/services/DevAuthBootstrap.php`.
+**To block an existing dev account on the server:** add GitHub secret `XMONEY_DEV_TEST_EMAIL` (email only). The API will suspend that account on startup while bypass is off.
 
 ## No Android Studio? Use GitHub Actions
 

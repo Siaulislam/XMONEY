@@ -181,6 +181,7 @@ jobs:
           XMONEY_MAIL_FROM_NAME: ${{ secrets.XMONEY_MAIL_FROM_NAME }}
           XMONEY_APP_ENV: ${{ secrets.XMONEY_APP_ENV }}
           XMONEY_APP_DEBUG: ${{ secrets.XMONEY_APP_DEBUG }}
+          XMONEY_DEV_TEST_EMAIL: ${{ secrets.XMONEY_DEV_TEST_EMAIL }}
         run: |
           set -euo pipefail
           PKG="deploy/cpanel/dist/xmoney-cpanel-package"
@@ -188,6 +189,7 @@ jobs:
           APP_ENV="${XMONEY_APP_ENV:-production}"
           APP_DEBUG="${XMONEY_APP_DEBUG:-false}"
           DEV_AUTH_BYPASS_ENABLED=false
+          DEV_TEST_EMAIL="${XMONEY_DEV_TEST_EMAIL:-}"
           # If APP_URL is https://domain/api → CORS https://domain
           CORS_ORIGIN="$(echo -n "$XMONEY_APP_URL" | sed -E 's#(https?://[^/]+).*#\1#')"
 
@@ -210,6 +212,7 @@ jobs:
           APP_ENV=${APP_ENV}
           APP_DEBUG=${APP_DEBUG}
           DEV_AUTH_BYPASS_ENABLED=false
+          DEV_TEST_EMAIL=${DEV_TEST_EMAIL}
           APP_URL=${XMONEY_APP_URL}
           APP_TIMEZONE=Asia/Dubai
           DB_HOST=${XMONEY_DB_HOST}
