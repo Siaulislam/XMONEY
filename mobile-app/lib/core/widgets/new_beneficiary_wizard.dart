@@ -3,7 +3,6 @@ import '../api/api_client.dart';
 import '../beneficiaries/beneficiary_validator.dart';
 import '../transfer/country_currency_option.dart';
 import '../theme/xmoney_theme.dart';
-import '../transfer/country_currency_option.dart';
 import '../transfer/currency_repository.dart';
 import '../transfer/transfer_delivery_type.dart';
 import '../wallets/wallet_provider.dart';

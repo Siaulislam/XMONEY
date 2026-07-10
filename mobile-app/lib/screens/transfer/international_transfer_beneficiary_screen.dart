@@ -12,6 +12,7 @@ import '../../core/widgets/new_beneficiary_wizard.dart';
 import '../../core/widgets/saved_beneficiary_card.dart';
 import '../../core/widgets/xm_segmented_tabs.dart';
 import '../../core/widgets/pay_from_wallet_picker.dart';
+import '../../core/widgets/xm_ui.dart';
 
 /// Beneficiary selection / creation step for international transfers.
 class InternationalTransferBeneficiaryScreen extends StatefulWidget {
