@@ -1,4 +1,5 @@
 import '../transfer/country_currency_option.dart';
+import '../transfer/local_transfer_repository.dart';
 import '../transfer/transfer_delivery_type.dart';
 import '../wallets/wallet_provider.dart';
 
@@ -12,6 +13,7 @@ class InternationalTransferContext {
     this.payFromWalletId,
     required this.deliveryMethod,
     this.walletProvider,
+    this.selectedBank,
   });
 
   final CountryCurrencyOption sender;
@@ -21,6 +23,8 @@ class InternationalTransferContext {
   final String? payFromWalletId;
   final TransferDeliveryType deliveryMethod;
   final WalletProvider? walletProvider;
+  final LocalBank? selectedBank;
 
   bool get isWallet => deliveryMethod == TransferDeliveryType.wallet;
+  bool get isBank => deliveryMethod == TransferDeliveryType.bank;
 }

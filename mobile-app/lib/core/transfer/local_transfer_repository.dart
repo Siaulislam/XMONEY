@@ -2,11 +2,19 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class LocalBank {
-  const LocalBank({required this.code, required this.name, required this.brandColor});
+  const LocalBank({
+    required this.code,
+    required this.name,
+    required this.brandColor,
+    this.logoUrl,
+    this.logoAsset,
+  });
 
   final String code;
   final String name;
   final String brandColor;
+  final String? logoUrl;
+  final String? logoAsset;
 
   static LocalBank? fromJson(Map<String, dynamic> json) {
     final code = json['code'] as String?;
@@ -16,24 +24,31 @@ class LocalBank {
       code: code,
       name: name,
       brandColor: json['brandColor'] as String? ?? '#1A4B8C',
+      logoUrl: json['logoUrl'] as String?,
+      logoAsset: json['logoAsset'] as String?,
     );
   }
 }
 
-/// Local banks available in the customer's registered country.
-class LocalTransferRepository {
-  LocalTransferRepository._();
-  static final LocalTransferRepository instance = LocalTransferRepository._();
+/// Country banks dataset (local + international beneficiary corridors).
+class CountryBankRepository {
+  CountryBankRepository._();
+  static final CountryBankRepository instance = CountryBankRepository._();
 
   List<Map<String, dynamic>>? _countries;
 
   Future<void> ensureLoaded() async {
     if (_countries != null) return;
     try {
-      final raw = await rootBundle.loadString('assets/data/local_banks.json');
+      final raw = await rootBundle.loadString('assets/data/country_banks.json');
       _countries = ((jsonDecode(raw) as Map)['countries'] as List).cast<Map<String, dynamic>>();
     } catch (_) {
-      _countries = [];
+      try {
+        final raw = await rootBundle.loadString('assets/data/local_banks.json');
+        _countries = ((jsonDecode(raw) as Map)['countries'] as List).cast<Map<String, dynamic>>();
+      } catch (_) {
+        _countries = [];
+      }
     }
   }
 
@@ -57,4 +72,15 @@ class LocalTransferRepository {
     }
     return null;
   }
+}
+
+/// Back-compat accessor used by local transfer screens.
+class LocalTransferRepository {
+  LocalTransferRepository._();
+  static final LocalTransferRepository instance = LocalTransferRepository._();
+  final _repo = CountryBankRepository.instance;
+
+  Future<void> ensureLoaded() => _repo.ensureLoaded();
+  List<LocalBank> banksForCountry(String countryCode) => _repo.banksForCountry(countryCode);
+  String? countryName(String countryCode) => _repo.countryName(countryCode);
 }

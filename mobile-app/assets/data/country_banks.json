@@ -1,0 +1,144 @@
+{
+  "countries": [
+    {
+      "countryCode": "PK",
+      "countryName": "Pakistan",
+      "banks": [
+        {"code": "hbl", "name": "Habib Bank Limited", "brandColor": "#008269", "logoUrl": "https://logo.clearbit.com/hbl.com"},
+        {"code": "ubl", "name": "United Bank Limited", "brandColor": "#0054A6", "logoUrl": "https://logo.clearbit.com/ubldigital.com"},
+        {"code": "mcb", "name": "MCB Bank", "brandColor": "#FFD100", "logoUrl": "https://logo.clearbit.com/mcb.com.pk"},
+        {"code": "abl", "name": "Allied Bank", "brandColor": "#E31837", "logoUrl": "https://logo.clearbit.com/abl.com"},
+        {"code": "meezan", "name": "Meezan Bank", "brandColor": "#7A003C", "logoUrl": "https://logo.clearbit.com/meezanbank.com"},
+        {"code": "bop", "name": "Bank of Punjab", "brandColor": "#00529B", "logoUrl": "https://logo.clearbit.com/bop.com.pk"}
+      ]
+    },
+    {
+      "countryCode": "IN",
+      "countryName": "India",
+      "banks": [
+        {"code": "sbi", "name": "State Bank of India", "brandColor": "#22409A", "logoUrl": "https://logo.clearbit.com/sbi.co.in"},
+        {"code": "hdfc", "name": "HDFC Bank", "brandColor": "#004C8F", "logoUrl": "https://logo.clearbit.com/hdfcbank.com"},
+        {"code": "icici", "name": "ICICI Bank", "brandColor": "#F58220", "logoUrl": "https://logo.clearbit.com/icicibank.com"},
+        {"code": "axis", "name": "Axis Bank", "brandColor": "#971A1E", "logoUrl": "https://logo.clearbit.com/axisbank.com"},
+        {"code": "pnb", "name": "Punjab National Bank", "brandColor": "#A20A3A", "logoUrl": "https://logo.clearbit.com/pnbindia.in"}
+      ]
+    },
+    {
+      "countryCode": "BD",
+      "countryName": "Bangladesh",
+      "banks": [
+        {"code": "brac", "name": "BRAC Bank", "brandColor": "#003DA5", "logoUrl": "https://logo.clearbit.com/bracbank.com"},
+        {"code": "dbbl", "name": "Dutch-Bangla Bank", "brandColor": "#8B2A7C", "logoUrl": "https://logo.clearbit.com/dutchbanglabank.com"},
+        {"code": "city", "name": "City Bank", "brandColor": "#E4002B", "logoUrl": "https://logo.clearbit.com/thecitybank.com"},
+        {"code": "islami", "name": "Islami Bank Bangladesh", "brandColor": "#006633", "logoUrl": "https://logo.clearbit.com/islamibankbd.com"}
+      ]
+    },
+    {
+      "countryCode": "AE",
+      "countryName": "United Arab Emirates",
+      "banks": [
+        {"code": "enbd", "name": "Emirates NBD", "brandColor": "#003366", "logoUrl": "https://logo.clearbit.com/emiratesnbd.com"},
+        {"code": "adcb", "name": "ADCB", "brandColor": "#C8102E", "logoUrl": "https://logo.clearbit.com/adcb.com"},
+        {"code": "fab", "name": "First Abu Dhabi Bank", "brandColor": "#004C97", "logoUrl": "https://logo.clearbit.com/bankfab.com"},
+        {"code": "mashreq", "name": "Mashreq Bank", "brandColor": "#FF6600", "logoUrl": "https://logo.clearbit.com/mashreqbank.com"}
+      ]
+    },
+    {
+      "countryCode": "SA",
+      "countryName": "Saudi Arabia",
+      "banks": [
+        {"code": "alrajhi", "name": "Al Rajhi Bank", "brandColor": "#004F2D", "logoUrl": "https://logo.clearbit.com/alrajhibank.com.sa"},
+        {"code": "snb", "name": "Saudi National Bank", "brandColor": "#1F4E79", "logoUrl": "https://logo.clearbit.com/alahli.com"},
+        {"code": "riyad", "name": "Riyad Bank", "brandColor": "#6E2C6B", "logoUrl": "https://logo.clearbit.com/riyadbank.com"}
+      ]
+    },
+    {
+      "countryCode": "EG",
+      "countryName": "Egypt",
+      "banks": [
+        {"code": "nbe", "name": "National Bank of Egypt", "brandColor": "#006341", "logoUrl": "https://logo.clearbit.com/nbe.com.eg"},
+        {"code": "cib", "name": "Commercial International Bank", "brandColor": "#0054A6", "logoUrl": "https://logo.clearbit.com/cibeg.com"},
+        {"code": "qnb", "name": "QNB Alahli", "brandColor": "#7B0046", "logoUrl": "https://logo.clearbit.com/qnbalahli.com"}
+      ]
+    },
+    {
+      "countryCode": "PH",
+      "countryName": "Philippines",
+      "banks": [
+        {"code": "bdo", "name": "BDO Unibank", "brandColor": "#003DA5", "logoUrl": "https://logo.clearbit.com/bdo.com.ph"},
+        {"code": "bpi", "name": "Bank of the Philippine Islands", "brandColor": "#C8102E", "logoUrl": "https://logo.clearbit.com/bpi.com.ph"},
+        {"code": "metrobank", "name": "Metrobank", "brandColor": "#005BAC", "logoUrl": "https://logo.clearbit.com/metrobank.com.ph"}
+      ]
+    },
+    {
+      "countryCode": "NP",
+      "countryName": "Nepal",
+      "banks": [
+        {"code": "nibl", "name": "Nabil Bank", "brandColor": "#00529B", "logoUrl": "https://logo.clearbit.com/nabilbank.com"},
+        {"code": "nic", "name": "NIC Asia Bank", "brandColor": "#C8102E", "logoUrl": "https://logo.clearbit.com/nicasiabank.com"},
+        {"code": "global", "name": "Global IME Bank", "brandColor": "#006633", "logoUrl": "https://logo.clearbit.com/globalimebank.com"}
+      ]
+    },
+    {
+      "countryCode": "LK",
+      "countryName": "Sri Lanka",
+      "banks": [
+        {"code": "boc", "name": "Bank of Ceylon", "brandColor": "#FFD100", "logoUrl": "https://logo.clearbit.com/boc.lk"},
+        {"code": "commercial", "name": "Commercial Bank of Ceylon", "brandColor": "#00529B", "logoUrl": "https://logo.clearbit.com/combank.lk"},
+        {"code": "hnb", "name": "Hatton National Bank", "brandColor": "#003DA5", "logoUrl": "https://logo.clearbit.com/hnb.lk"}
+      ]
+    },
+    {
+      "countryCode": "GB",
+      "countryName": "United Kingdom",
+      "banks": [
+        {"code": "barclays", "name": "Barclays", "brandColor": "#00AEEF", "logoUrl": "https://logo.clearbit.com/barclays.co.uk"},
+        {"code": "hsbc", "name": "HSBC UK", "brandColor": "#DB0011", "logoUrl": "https://logo.clearbit.com/hsbc.co.uk"},
+        {"code": "lloyds", "name": "Lloyds Bank", "brandColor": "#006A4D", "logoUrl": "https://logo.clearbit.com/lloydsbank.com"}
+      ]
+    },
+    {
+      "countryCode": "US",
+      "countryName": "United States",
+      "banks": [
+        {"code": "chase", "name": "Chase", "brandColor": "#117ACA", "logoUrl": "https://logo.clearbit.com/chase.com"},
+        {"code": "bofa", "name": "Bank of America", "brandColor": "#E31837", "logoUrl": "https://logo.clearbit.com/bankofamerica.com"},
+        {"code": "wells", "name": "Wells Fargo", "brandColor": "#D71E28", "logoUrl": "https://logo.clearbit.com/wellsfargo.com"}
+      ]
+    },
+    {
+      "countryCode": "CA",
+      "countryName": "Canada",
+      "banks": [
+        {"code": "rbc", "name": "RBC Royal Bank", "brandColor": "#0051A5", "logoUrl": "https://logo.clearbit.com/rbc.com"},
+        {"code": "td", "name": "TD Canada Trust", "brandColor": "#34A853", "logoUrl": "https://logo.clearbit.com/td.com"},
+        {"code": "scotiabank", "name": "Scotiabank", "brandColor": "#EC111A", "logoUrl": "https://logo.clearbit.com/scotiabank.com"}
+      ]
+    },
+    {
+      "countryCode": "AU",
+      "countryName": "Australia",
+      "banks": [
+        {"code": "cba", "name": "Commonwealth Bank", "brandColor": "#FFCC00", "logoUrl": "https://logo.clearbit.com/commbank.com.au"},
+        {"code": "anz", "name": "ANZ", "brandColor": "#007DBA", "logoUrl": "https://logo.clearbit.com/anz.com"},
+        {"code": "westpac", "name": "Westpac", "brandColor": "#D5002B", "logoUrl": "https://logo.clearbit.com/westpac.com.au"}
+      ]
+    },
+    {
+      "countryCode": "QA",
+      "countryName": "Qatar",
+      "banks": [
+        {"code": "qnb", "name": "QNB", "brandColor": "#7B0046", "logoUrl": "https://logo.clearbit.com/qnb.com"},
+        {"code": "cbq", "name": "Commercial Bank of Qatar", "brandColor": "#00529B", "logoUrl": "https://logo.clearbit.com/cbq.qa"}
+      ]
+    },
+    {
+      "countryCode": "KW",
+      "countryName": "Kuwait",
+      "banks": [
+        {"code": "nbk", "name": "National Bank of Kuwait", "brandColor": "#004F9F", "logoUrl": "https://logo.clearbit.com/nbk.com"},
+        {"code": "gulf", "name": "Gulf Bank", "brandColor": "#E31837", "logoUrl": "https://logo.clearbit.com/e-gulfbank.com"}
+      ]
+    }
+  ]
+}

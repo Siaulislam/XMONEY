@@ -24,6 +24,7 @@ class NewBeneficiaryWizard extends StatefulWidget {
     required this.initialCurrency,
     required this.deliveryMethod,
     this.walletProvider,
+    this.initialBankName,
     required this.onSubmit,
   });
 
@@ -32,6 +33,7 @@ class NewBeneficiaryWizard extends StatefulWidget {
   final String initialCurrency;
   final TransferDeliveryType deliveryMethod;
   final WalletProvider? walletProvider;
+  final String? initialBankName;
   final NewBeneficiarySubmit onSubmit;
 
   @override
@@ -79,6 +81,9 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
     _country = widget.initialCountry;
     _currency = widget.initialCurrency;
     _walletProvider = widget.walletProvider;
+    if (widget.initialBankName?.trim().isNotEmpty == true) {
+      _bank.text = widget.initialBankName!.trim();
+    }
     _walletRepo = WalletRepository(widget.api);
     _loadWallets();
   }

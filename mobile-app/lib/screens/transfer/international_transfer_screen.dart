@@ -12,6 +12,8 @@ import '../../core/wallets/country_wallet_mapping.dart';
 import '../../core/wallets/wallet_provider.dart';
 import '../../core/wallets/wallet_repository.dart';
 import '../../core/widgets/wallet_selector.dart';
+import '../../core/transfer/local_transfer_repository.dart';
+import '../../core/widgets/bank_selector.dart';
 import '../../core/transfer/international_transfer_context.dart';
 import '../../core/transfer/transfer_delivery_type.dart';
 import '../../core/transfer/international_transfer_mode.dart';
@@ -44,10 +46,13 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
   CountryCurrencyOption? _receiver;
   CountryWalletMapping? _destinationWallets;
   WalletProvider? _selectedProvider;
+  List<LocalBank> _destinationBanks = [];
+  LocalBank? _selectedBank;
   List<Map<String, dynamic>> _wallets = [];
   String? _walletId;
   bool _booting = true;
   bool _loadingWallets = false;
+  bool _loadingBanks = false;
 
   @override
   void initState() {
@@ -85,7 +90,11 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     } finally {
       if (mounted) {
         setState(() => _booting = false);
-        if (widget.isWallet) _loadDestinationWallets();
+        if (widget.isWallet) {
+          _loadDestinationWallets();
+        } else {
+          _loadDestinationBanks();
+        }
         _refreshQuote();
       }
     }
@@ -103,6 +112,22 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
       if (_selectedProvider != null &&
           !mapping.providers.any((p) => p.code == _selectedProvider!.code)) {
         _selectedProvider = null;
+      }
+    });
+  }
+
+  Future<void> _loadDestinationBanks() async {
+    final receiver = _receiver;
+    if (receiver == null) return;
+    setState(() => _loadingBanks = true);
+    await CountryBankRepository.instance.ensureLoaded();
+    final banks = CountryBankRepository.instance.banksForCountry(receiver.countryCode);
+    if (!mounted) return;
+    setState(() {
+      _destinationBanks = banks;
+      _loadingBanks = false;
+      if (_selectedBank != null && !banks.any((b) => b.code == _selectedBank!.code)) {
+        _selectedBank = null;
       }
     });
   }
@@ -150,7 +175,11 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     );
     if (picked == null || !mounted) return;
     setState(() => _receiver = picked);
-    if (widget.isWallet) await _loadDestinationWallets();
+    if (widget.isWallet) {
+      await _loadDestinationWallets();
+    } else {
+      await _loadDestinationBanks();
+    }
     _refreshQuote();
   }
 
@@ -159,7 +188,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     if (widget.isWallet) {
       return (_destinationWallets?.hasWallets ?? false) && _selectedProvider != null;
     }
-    return true;
+    return _destinationBanks.isNotEmpty && _selectedBank != null;
   }
 
   Future<void> _openBeneficiaryFlow() async {
@@ -175,6 +204,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
       payFromWalletId: _walletId,
       deliveryMethod: widget.isWallet ? TransferDeliveryType.wallet : TransferDeliveryType.bank,
       walletProvider: widget.isWallet ? _selectedProvider : null,
+      selectedBank: widget.isBank ? _selectedBank : null,
     );
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -289,12 +319,23 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                         ),
                       const SizedBox(height: 16),
                     ],
-                    _WalletPicker(
-                      wallets: _wallets,
-                      selectedId: _walletId,
-                      onChanged: (id) => setState(() => _walletId = id),
-                    ),
-                    const SizedBox(height: 16),
+                    if (widget.isBank) ...[
+                      BankSelector(
+                        countryName: _receiver?.countryName ?? 'destination country',
+                        banks: _destinationBanks,
+                        selected: _selectedBank,
+                        loading: _loadingBanks,
+                        onSelected: (b) => setState(() => _selectedBank = b),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (widget.isWallet)
+                      _WalletPicker(
+                        wallets: _wallets,
+                        selectedId: _walletId,
+                        onChanged: (id) => setState(() => _walletId = id),
+                      ),
+                    if (widget.isWallet) const SizedBox(height: 16),
                     _SecureBanner(),
                     if (_rates.error != null) ...[
                       const SizedBox(height: 12),

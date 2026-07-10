@@ -38,4 +38,5 @@ flutter:
     - assets/data/country_currencies.json
     - assets/data/country_wallet_providers.json
     - assets/data/local_banks.json
+    - assets/data/country_banks.json
     - assets/flags/

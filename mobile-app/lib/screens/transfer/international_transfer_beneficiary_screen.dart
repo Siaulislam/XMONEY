@@ -189,7 +189,9 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
                     _SummaryStrip(
                       send: '${ctx.sender.currencyCode} ${fmt.format(ctx.sendAmount)}',
                       receive: '${ctx.receiver.currencyCode} ${fmt.format(receive)}',
-                      method: ctx.isWallet ? 'Wallet · ${ctx.walletProvider?.name ?? ''}' : 'Bank transfer',
+                      method: ctx.isWallet
+                          ? 'Wallet · ${ctx.walletProvider?.name ?? ''}'
+                          : 'Bank · ${ctx.selectedBank?.name ?? 'Transfer'}',
                     ),
                     const SizedBox(height: 20),
                     XmSegmentedTabs(
@@ -269,6 +271,7 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
       initialCurrency: ctx.receiver.currencyCode,
       deliveryMethod: ctx.isWallet ? TransferDeliveryType.wallet : TransferDeliveryType.bank,
       walletProvider: ctx.walletProvider,
+      initialBankName: ctx.selectedBank?.name,
       onSubmit: _onNewBeneficiary,
     );
   }
