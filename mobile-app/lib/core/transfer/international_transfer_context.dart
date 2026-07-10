@@ -11,6 +11,7 @@ class InternationalTransferContext {
     required this.sendAmount,
     required this.quote,
     this.payFromWalletId,
+    this.senderWallets = const [],
     required this.deliveryMethod,
     this.walletProvider,
     this.selectedBank,
@@ -21,6 +22,7 @@ class InternationalTransferContext {
   final double sendAmount;
   final Map<String, dynamic>? quote;
   final String? payFromWalletId;
+  final List<Map<String, dynamic>> senderWallets;
   final TransferDeliveryType deliveryMethod;
   final WalletProvider? walletProvider;
   final LocalBank? selectedBank;

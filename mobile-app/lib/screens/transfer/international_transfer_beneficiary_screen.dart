@@ -11,7 +11,7 @@ import '../../core/transfer/transfer_repository.dart';
 import '../../core/widgets/new_beneficiary_wizard.dart';
 import '../../core/widgets/saved_beneficiary_card.dart';
 import '../../core/widgets/xm_segmented_tabs.dart';
-import '../../core/widgets/xm_ui.dart';
+import '../../core/widgets/pay_from_wallet_picker.dart';
 
 /// Beneficiary selection / creation step for international transfers.
 class InternationalTransferBeneficiaryScreen extends StatefulWidget {
@@ -78,9 +78,12 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
   List<Beneficiary> get _recent => _filtered.where((b) => !b.isFavourite).take(8).toList();
 
   Future<void> _transferWith(Beneficiary b) async {
+    final walletId = await _pickPayFromWallet();
+    if (!mounted || walletId == null) return;
+
     setState(() => _submitting = true);
     await _benRepo.touchLastUsed(b.uuid);
-    final ok = await _executeTransfer(b.uuid);
+    final ok = await _executeTransfer(b.uuid, payFromWalletId: walletId);
     if (!mounted) return;
     setState(() => _submitting = false);
     if (ok) {
@@ -94,7 +97,54 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
     }
   }
 
-  Future<bool> _executeTransfer(String beneficiaryUuid) async {
+  Future<String?> _pickPayFromWallet() async {
+    final wallets = widget.transferContext.senderWallets;
+    if (wallets.isEmpty) return widget.transferContext.payFromWalletId;
+
+    var selected = widget.transferContext.payFromWalletId ??
+        wallets.first['uuid'] as String? ??
+        wallets.first['id']?.toString();
+
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setLocal) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.paddingOf(context).bottom),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('Confirm transfer', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep)),
+                  const SizedBox(height: 16),
+                  PayFromWalletPicker(
+                    wallets: wallets,
+                    selectedId: selected,
+                    onChanged: (id) => setLocal(() => selected = id),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: selected == null ? null : () => Navigator.pop(ctx, selected),
+                    style: FilledButton.styleFrom(backgroundColor: XmoneyTheme.blue, minimumSize: const Size(double.infinity, 52)),
+                    child: const Text('Confirm & pay from wallet', style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<bool> _executeTransfer(String beneficiaryUuid, {String? payFromWalletId}) async {
     final ctx = widget.transferContext;
     final uuid = await _transferRepo.createTransfer(
       beneficiaryUuid: beneficiaryUuid,
@@ -272,6 +322,8 @@ class _InternationalTransferBeneficiaryScreenState extends State<InternationalTr
       deliveryMethod: ctx.isWallet ? TransferDeliveryType.wallet : TransferDeliveryType.bank,
       walletProvider: ctx.walletProvider,
       initialBankName: ctx.selectedBank?.name,
+      senderWallets: ctx.senderWallets,
+      initialPayFromWalletId: ctx.payFromWalletId,
       onSubmit: _onNewBeneficiary,
     );
   }

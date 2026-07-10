@@ -10,6 +10,7 @@ import '../wallets/wallet_provider.dart';
 import '../wallets/wallet_repository.dart';
 import 'country_picker.dart';
 import 'xm_country_flag.dart';
+import 'pay_from_wallet_picker.dart';
 import 'wallet_selector.dart';
 import '../wallets/country_wallet_mapping.dart';
 
@@ -25,6 +26,8 @@ class NewBeneficiaryWizard extends StatefulWidget {
     required this.deliveryMethod,
     this.walletProvider,
     this.initialBankName,
+    this.senderWallets = const [],
+    this.initialPayFromWalletId,
     required this.onSubmit,
   });
 
@@ -34,6 +37,8 @@ class NewBeneficiaryWizard extends StatefulWidget {
   final TransferDeliveryType deliveryMethod;
   final WalletProvider? walletProvider;
   final String? initialBankName;
+  final List<Map<String, dynamic>> senderWallets;
+  final String? initialPayFromWalletId;
   final NewBeneficiarySubmit onSubmit;
 
   @override
@@ -49,6 +54,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
   late CountryCurrencyOption _country;
   late String _currency;
   WalletProvider? _walletProvider;
+  String? _payFromWalletId;
 
   final _name = TextEditingController();
   final _nickname = TextEditingController();
@@ -84,6 +90,10 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
     if (widget.initialBankName?.trim().isNotEmpty == true) {
       _bank.text = widget.initialBankName!.trim();
     }
+    _payFromWalletId = widget.initialPayFromWalletId ??
+        (widget.senderWallets.isNotEmpty
+            ? widget.senderWallets.first['uuid'] as String? ?? widget.senderWallets.first['id']?.toString()
+            : null);
     _walletRepo = WalletRepository(widget.api);
     _loadWallets();
   }
@@ -129,11 +139,65 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
   }
 
   void _validateAndNext() {
-    if (_step < 2) {
+    if (_step == 0) {
+      final result = BeneficiaryValidator.validateReceiverStep(
+        method: widget.deliveryMethod,
+        countryCode: _country.countryCode,
+        currencyCode: _currency,
+        bankName: _bank.text,
+        walletProviderCode: _walletProvider?.code,
+      );
+      if (!result.isValid) {
+        setState(() => _errors = result.fieldErrors);
+        return;
+      }
       setState(() {
+        _errors = {};
         _step++;
-        _page.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
       });
+      _page.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+      return;
+    }
+
+    if (_step == 1) {
+      final result = BeneficiaryValidator.validate(
+        method: widget.deliveryMethod,
+        receiverName: _name.text,
+        countryCode: _country.countryCode,
+        currencyCode: _currency,
+        mobileNumber: _mobile.text,
+        email: _email.text,
+        bankName: _bank.text,
+        branchName: _branch.text,
+        accountNumber: _account.text,
+        iban: _iban.text,
+        swiftBic: _swift.text,
+        walletNumber: _walletNumber.text,
+        walletProviderCode: _walletProvider?.code,
+        addressLine: _address.text,
+        receiverCity: _city.text,
+        purpose: _purpose,
+        relationship: _relationship,
+        requireSwift: _needsSwift,
+      );
+      if (!result.isValid) {
+        setState(() => _errors = result.fieldErrors);
+        return;
+      }
+      setState(() {
+        _errors = {};
+        _step++;
+      });
+      _page.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+      return;
+    }
+
+    if (_payFromWalletId == null || _payFromWalletId!.isEmpty) {
+      setState(() => _errors = {'pay_from_wallet': 'Select the wallet to pay from'});
+      return;
+    }
+    if (!_agreed) {
+      setState(() => _errors = {'terms': 'Please confirm Key Facts Statement'});
       return;
     }
     final result = BeneficiaryValidator.validate(
@@ -160,10 +224,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
       setState(() => _errors = result.fieldErrors);
       return;
     }
-    if (!_agreed) {
-      setState(() => _errors = {'terms': 'Please confirm Key Facts Statement'});
-      return;
-    }
+    setState(() => _errors = {});
     widget.onSubmit({
       'receiver_name': _name.text.trim(),
       'nickname': _nickname.text.trim(),
@@ -187,6 +248,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
       'purpose_of_transfer': _purpose,
       'relationship': _relationship,
       'wallet_number': _walletNumber.text.trim(),
+      'pay_from_wallet_id': _payFromWalletId,
     }, _saveBeneficiary);
   }
 
@@ -232,7 +294,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
               child: FilledButton(
                 onPressed: _validateAndNext,
                 style: FilledButton.styleFrom(backgroundColor: XmoneyTheme.blue, minimumSize: const Size(0, 52)),
-                child: Text(_step == 2 ? 'Continue' : 'Next'),
+                child: Text(_step == 2 ? 'Confirm & pay' : 'Next'),
               ),
             ),
           ],
@@ -251,6 +313,15 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           ),
           _tf('Currency', _currency, readOnly: true),
           _tf('Transfer method', widget.deliveryMethod.label, readOnly: true),
+          if (!_isWallet) ...[
+            _tf(
+              'Beneficiary bank',
+              '',
+              controller: _bank,
+              readOnly: widget.initialBankName?.trim().isNotEmpty == true,
+              error: _errors['bank_name'],
+            ),
+          ],
           if (_isWallet && _walletMapping != null) ...[
             const SizedBox(height: 8),
             WalletSelector(
@@ -272,7 +343,6 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           _tf('Mobile number', '', controller: _mobile, keyboard: TextInputType.phone, error: _errors['mobile_number']),
           _tf('Email (optional)', '', controller: _email, error: _errors['email']),
           if (!_isWallet) ...[
-            _tf('Bank name', '', controller: _bank, error: _errors['bank_name']),
             _tf('Branch', '', controller: _branch),
             _tf('IBAN', '', controller: _iban, error: _errors['iban']),
             _tf('Account number', '', controller: _account, error: _errors['account_number']),
@@ -291,12 +361,20 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
 
   Widget _stepReview() => ListView(
         children: [
-          _reviewRow('Receiver', _name.text),
+          _reviewRow('Receiver', _name.text.isEmpty ? '—' : _name.text),
           _reviewRow('Country', _country.countryName),
           _reviewRow('Currency', _currency),
           _reviewRow('Method', widget.deliveryMethod.label),
           if (_isWallet) _reviewRow('Wallet', _walletProvider?.name ?? '—'),
-          if (!_isWallet) _reviewRow('Bank', _bank.text),
+          if (!_isWallet) _reviewRow('Bank', _bank.text.isEmpty ? '—' : _bank.text),
+          const SizedBox(height: 12),
+          PayFromWalletPicker(
+            wallets: widget.senderWallets,
+            selectedId: _payFromWalletId,
+            onChanged: (id) => setState(() => _payFromWalletId = id),
+            errorText: _errors['pay_from_wallet'],
+          ),
+          const SizedBox(height: 8),
           SwitchListTile(
             value: _saveBeneficiary,
             onChanged: (v) => setState(() => _saveBeneficiary = v),
@@ -349,12 +427,22 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
           controller: controller ?? TextEditingController(text: hint),
           readOnly: readOnly,
           keyboardType: keyboard,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: readOnly ? FontWeight.w600 : FontWeight.w500,
+            color: readOnly ? XmoneyTheme.navyDeep : XmoneyTheme.navyDeep,
+          ),
           decoration: InputDecoration(
             labelText: label,
             errorText: error,
             filled: true,
             fillColor: const Color(0xFFF6F8FC),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: XmoneyTheme.teal, width: 1.2),
+            ),
           ),
         ),
       );
@@ -399,19 +487,20 @@ class _StepIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: List.generate(labels.length, (i) {
-        final active = i <= step;
+        final active = i == step;
+        final done = i < step;
         return Expanded(
           child: Column(
             children: [
               Row(
                 children: [
-                  if (i > 0) Expanded(child: Container(height: 2, color: active ? XmoneyTheme.teal : Colors.grey.shade300)),
+                  if (i > 0) Expanded(child: Container(height: 2, color: done || active ? XmoneyTheme.teal : Colors.grey.shade300)),
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: active ? XmoneyTheme.teal : Colors.grey.shade300,
-                    child: Text('${i + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: active ? Colors.white : Colors.grey.shade700)),
+                    backgroundColor: active || done ? XmoneyTheme.teal : Colors.grey.shade300,
+                    child: Text('${i + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: active || done ? Colors.white : Colors.grey.shade700)),
                   ),
-                  if (i < labels.length - 1) Expanded(child: Container(height: 2, color: i < step ? XmoneyTheme.teal : Colors.grey.shade300)),
+                  if (i < labels.length - 1) Expanded(child: Container(height: 2, color: done ? XmoneyTheme.teal : Colors.grey.shade300)),
                 ],
               ),
               const SizedBox(height: 6),

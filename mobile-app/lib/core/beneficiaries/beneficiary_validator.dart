@@ -9,6 +9,32 @@ class BeneficiaryValidationResult {
 }
 
 class BeneficiaryValidator {
+  static BeneficiaryValidationResult validateReceiverStep({
+    required TransferDeliveryType method,
+    required String countryCode,
+    required String currencyCode,
+    String? bankName,
+    String? walletProviderCode,
+  }) {
+    final errors = <String, String>{};
+    if (countryCode.length != 2) {
+      errors['country_code'] = 'Select a valid country';
+    }
+    if (currencyCode.length != 3) {
+      errors['currency_code'] = 'Select a valid currency';
+    }
+    if (method == TransferDeliveryType.wallet) {
+      if (walletProviderCode == null || walletProviderCode.isEmpty) {
+        errors['wallet_provider'] = 'Select a wallet provider';
+      }
+    } else if (method == TransferDeliveryType.bank || method == TransferDeliveryType.international) {
+      if ((bankName ?? '').trim().isEmpty) {
+        errors['bank_name'] = 'Select or enter the beneficiary bank';
+      }
+    }
+    return BeneficiaryValidationResult(fieldErrors: errors);
+  }
+
   static BeneficiaryValidationResult validate({
     required TransferDeliveryType method,
     required String receiverName,

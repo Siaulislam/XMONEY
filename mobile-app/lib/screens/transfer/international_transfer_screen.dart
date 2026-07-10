@@ -202,6 +202,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
       sendAmount: send,
       quote: _rates.quote,
       payFromWalletId: _walletId,
+      senderWallets: _wallets,
       deliveryMethod: widget.isWallet ? TransferDeliveryType.wallet : TransferDeliveryType.bank,
       walletProvider: widget.isWallet ? _selectedProvider : null,
       selectedBank: widget.isBank ? _selectedBank : null,
@@ -329,13 +330,6 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                       ),
                       const SizedBox(height: 16),
                     ],
-                    if (widget.isWallet)
-                      _WalletPicker(
-                        wallets: _wallets,
-                        selectedId: _walletId,
-                        onChanged: (id) => setState(() => _walletId = id),
-                      ),
-                    if (widget.isWallet) const SizedBox(height: 16),
                     _SecureBanner(),
                     if (_rates.error != null) ...[
                       const SizedBox(height: 12),
@@ -415,49 +409,6 @@ class _ExchangeRateBand extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _WalletPicker extends StatelessWidget {
-  const _WalletPicker({required this.wallets, required this.selectedId, required this.onChanged});
-
-  final List<Map<String, dynamic>> wallets;
-  final String? selectedId;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Pay from wallet', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF6F8FC),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE8ECF3)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: wallets.any((w) => (w['uuid'] ?? w['id']) == selectedId) ? selectedId : null,
-              hint: const Text('Select wallet'),
-              items: wallets.map((w) {
-                final id = w['uuid'] as String? ?? w['id']?.toString() ?? '';
-                final label = w['label'] as String? ?? w['name'] as String? ?? 'Wallet';
-                final cur = w['currency_code'] as String? ?? '';
-                return DropdownMenuItem(value: id, child: Text('$label · $cur'));
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
