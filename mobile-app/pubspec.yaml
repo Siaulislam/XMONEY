@@ -36,3 +36,4 @@ flutter:
     - assets/i18n/ar.json
     - assets/i18n/ur.json
     - assets/data/country_currencies.json
+    - assets/data/country_wallet_providers.json

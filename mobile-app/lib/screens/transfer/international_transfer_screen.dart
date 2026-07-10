@@ -7,6 +7,13 @@ import '../../core/transfer/exchange_rate_controller.dart';
 import '../../core/theme/xmoney_theme.dart';
 import '../../core/widgets/currency_selector.dart';
 import '../../core/widgets/xm_ui.dart';
+import '../../core/wallets/country_wallet_mapping.dart';
+import '../../core/wallets/wallet_provider.dart';
+import '../../core/wallets/wallet_repository.dart';
+import '../../core/widgets/wallet_selector.dart';
+import 'wallet_transfer_screen.dart';
+
+enum _DeliveryMethod { bank, digitalWallet }
 
 class InternationalTransferScreen extends StatefulWidget {
   const InternationalTransferScreen({super.key, required this.router});
@@ -19,19 +26,25 @@ class InternationalTransferScreen extends StatefulWidget {
 
 class _InternationalTransferScreenState extends State<InternationalTransferScreen> {
   final _repo = CountryRepository.instance;
+  late final WalletRepository _walletRepo;
   late final ExchangeRateController _rates;
   final _sendAmount = TextEditingController(text: '100');
 
   CountryCurrencyOption? _sender;
   CountryCurrencyOption? _receiver;
+  CountryWalletMapping? _destinationWallets;
+  WalletProvider? _selectedProvider;
+  _DeliveryMethod _delivery = _DeliveryMethod.bank;
   List<Map<String, dynamic>> _wallets = [];
   String? _walletId;
   bool _booting = true;
+  bool _loadingWallets = false;
 
   @override
   void initState() {
     super.initState();
     _rates = ExchangeRateController(widget.router.api)..addListener(_onRates);
+    _walletRepo = WalletRepository(widget.router.api);
     _boot();
     _sendAmount.addListener(_onAmountChanged);
   }
@@ -56,8 +69,28 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
 
     if (mounted) {
       setState(() => _booting = false);
+      await _loadDestinationWallets();
       _refreshQuote();
     }
+  }
+
+  Future<void> _loadDestinationWallets() async {
+    final receiver = _receiver;
+    if (receiver == null) return;
+    setState(() => _loadingWallets = true);
+    final mapping = await _walletRepo.forCountry(receiver.countryCode);
+    if (!mounted) return;
+    setState(() {
+      _destinationWallets = mapping;
+      _loadingWallets = false;
+      if (!mapping.hasWallets) {
+        _delivery = _DeliveryMethod.bank;
+        _selectedProvider = null;
+      } else if (_selectedProvider != null &&
+          !mapping.providers.any((p) => p.code == _selectedProvider!.code)) {
+        _selectedProvider = null;
+      }
+    });
   }
 
   List<Map<String, dynamic>> _previewWallets() => [
@@ -103,7 +136,28 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     );
     if (picked == null || !mounted) return;
     setState(() => _receiver = picked);
+    await _loadDestinationWallets();
     _refreshQuote();
+  }
+
+  Future<void> _openWalletTransfer() async {
+    final provider = _selectedProvider;
+    final receiver = _receiver;
+    if (provider == null || receiver == null) return;
+    final send = double.tryParse(_sendAmount.text.replaceAll(',', '')) ?? 0;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WalletTransferScreen(
+          router: widget.router,
+          provider: provider,
+          receiver: receiver,
+          senderCurrency: _sender?.currencyCode ?? 'AED',
+          sendAmount: send,
+          quote: _rates.quote,
+          payFromWalletId: _walletId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -213,8 +267,54 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                       selectedId: _walletId,
                       onChanged: (id) => setState(() => _walletId = id),
                     ),
+                    const SizedBox(height: 20),
+                    _DeliveryMethodSection(
+                      hasDigitalWallets: _destinationWallets?.hasWallets ?? false,
+                      loading: _loadingWallets,
+                      method: _delivery,
+                      onMethodChanged: (m) => setState(() {
+                        _delivery = m;
+                        if (m == _DeliveryMethod.bank) _selectedProvider = null;
+                      }),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      child: _delivery == _DeliveryMethod.digitalWallet &&
+                              (_destinationWallets?.hasWallets ?? false)
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: WalletSelector(
+                                mapping: _destinationWallets!,
+                                repository: _walletRepo,
+                                selected: _selectedProvider,
+                                onSelected: (p) => setState(() => _selectedProvider = p),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                     const SizedBox(height: 16),
-                    _ReceiverCard(onTap: () => showXmSnack(context, 'Select receiver — coming next')),
+                    if (_delivery == _DeliveryMethod.bank)
+                      _ReceiverCard(
+                        onTap: () => showXmSnack(context, 'Bank beneficiary selection — coming next'),
+                        title: 'Bank transfer',
+                        subtitle: 'Send to a local bank account',
+                        icon: Icons.account_balance_rounded,
+                      )
+                    else if (_selectedProvider != null)
+                      _ReceiverCard(
+                        onTap: _openWalletTransfer,
+                        title: _selectedProvider!.name,
+                        subtitle: 'Enter ${_selectedProvider!.name} account details',
+                        icon: Icons.account_balance_wallet_rounded,
+                      )
+                    else if (_destinationWallets?.hasWallets ?? false)
+                      _ReceiverCard(
+                        onTap: () => showXmSnack(context, 'Select a digital wallet above'),
+                        title: 'Select wallet provider',
+                        subtitle: 'Choose how your recipient receives funds',
+                        icon: Icons.account_balance_wallet_outlined,
+                      ),
                     const SizedBox(height: 16),
                     _SecureBanner(),
                     if (_rates.error != null) ...[
@@ -342,9 +442,126 @@ class _WalletPicker extends StatelessWidget {
   }
 }
 
-class _ReceiverCard extends StatelessWidget {
-  const _ReceiverCard({required this.onTap});
+class _DeliveryMethodSection extends StatelessWidget {
+  const _DeliveryMethodSection({
+    required this.hasDigitalWallets,
+    required this.loading,
+    required this.method,
+    required this.onMethodChanged,
+  });
+
+  final bool hasDigitalWallets;
+  final bool loading;
+  final _DeliveryMethod method;
+  final ValueChanged<_DeliveryMethod> onMethodChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('How they receive', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+        const SizedBox(height: 10),
+        if (loading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: LinearProgressIndicator(minHeight: 2, color: XmoneyTheme.teal),
+          )
+        else if (!hasDigitalWallets)
+          _MethodTile(
+            title: 'Bank transfer',
+            subtitle: 'Local bank account delivery',
+            icon: Icons.account_balance_rounded,
+            selected: true,
+            onTap: () {},
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: _MethodTile(
+                  title: 'Bank transfer',
+                  subtitle: 'Account deposit',
+                  icon: Icons.account_balance_rounded,
+                  selected: method == _DeliveryMethod.bank,
+                  onTap: () => onMethodChanged(_DeliveryMethod.bank),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MethodTile(
+                  title: 'Digital wallets',
+                  subtitle: 'Mobile money',
+                  icon: Icons.account_balance_wallet_rounded,
+                  selected: method == _DeliveryMethod.digitalWallet,
+                  onTap: () => onMethodChanged(_DeliveryMethod.digitalWallet),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _MethodTile extends StatelessWidget {
+  const _MethodTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
   final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F8FC),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: selected ? XmoneyTheme.teal : const Color(0xFFE8ECF3), width: selected ? 1.6 : 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: selected ? XmoneyTheme.teal : Colors.grey.shade600, size: 22),
+                const SizedBox(height: 8),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: XmoneyTheme.navyDeep)),
+                Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReceiverCard extends StatelessWidget {
+  const _ReceiverCard({
+    required this.onTap,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+  final VoidCallback onTap;
+  final String title;
+  final String subtitle;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -370,16 +587,16 @@ class _ReceiverCard extends StatelessWidget {
                   color: XmoneyTheme.teal.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.account_balance_rounded, color: XmoneyTheme.teal),
+                child: Icon(icon, color: XmoneyTheme.teal),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Select receiver', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep)),
-                    SizedBox(height: 2),
-                    Text('Bank, account or mobile wallet', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep)),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
               ),

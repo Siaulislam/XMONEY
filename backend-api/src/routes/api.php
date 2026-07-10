@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use XMoney\Controllers\DigitalWalletController;
 use XMoney\Controllers\AnalyticsController;
 use XMoney\Controllers\AdminController;
 use XMoney\Controllers\AuthController;
@@ -34,6 +35,7 @@ $settings = new SettingsController();
 $payments = new PaymentController();
 $webhooks = new WebhookController();
 $analytics = new AnalyticsController();
+$digitalWallets = new DigitalWalletController();
 
 $customerAuth = [AuthMiddleware::customer()];
 $adminOps = [AuthMiddleware::admin(['super_admin', 'admin', 'support_staff', 'compliance_officer'])];
@@ -87,6 +89,7 @@ $router->post('/v1/beneficiaries/{uuid}/verify', [$ben, 'verify'], $customerAuth
 // Transfers & FX
 $router->get('/v1/currencies', [$transfer, 'currencies']);
 $router->get('/v1/rates', [$transfer, 'rates']);
+$router->get('/v1/digital-wallets', [$digitalWallets, 'index']);
 $router->post('/v1/transfers/quote', [$transfer, 'quote'], $customerAuth);
 $router->get('/v1/transfers', [$transfer, 'index'], $customerAuth);
 $router->post('/v1/transfers', [$transfer, 'create'], $customerAuth);

@@ -1,0 +1,53 @@
+{
+  "providers": [
+    {"code": "easypaisa", "name": "Easypaisa", "description": "Send instantly to any Easypaisa mobile account", "brandColor": "#00A651"},
+    {"code": "jazzcash", "name": "JazzCash", "description": "Fast transfers to JazzCash wallets nationwide", "brandColor": "#E4002B"},
+    {"code": "nayapay", "name": "NayaPay", "description": "Digital wallet transfers across Pakistan", "brandColor": "#6C2BD9"},
+    {"code": "sadapay", "name": "SadaPay", "description": "Send to SadaPay users in seconds", "brandColor": "#FF6B35"},
+    {"code": "upaisa", "name": "UPaisa", "description": "Ufone mobile wallet delivery", "brandColor": "#00AEEF"},
+
+    {"code": "bkash", "name": "bKash", "description": "Bangladesh's leading mobile financial service", "brandColor": "#E2136E"},
+    {"code": "nagad", "name": "Nagad", "description": "Government-backed digital wallet in Bangladesh", "brandColor": "#F6921E"},
+    {"code": "rocket", "name": "Rocket", "description": "Dutch-Bangla mobile banking wallet", "brandColor": "#8B2A7C"},
+    {"code": "upay_bd", "name": "Upay", "description": "UCB-backed mobile wallet transfers", "brandColor": "#1E3A8A"},
+
+    {"code": "paytm", "name": "Paytm", "description": "Send to Paytm wallet or linked UPI ID", "brandColor": "#00BAF2"},
+    {"code": "phonepe", "name": "PhonePe", "description": "UPI wallet transfers across India", "brandColor": "#5F259F"},
+    {"code": "google_pay", "name": "Google Pay (UPI)", "description": "UPI transfers via Google Pay", "brandColor": "#4285F4"},
+    {"code": "amazon_pay", "name": "Amazon Pay", "description": "Send to Amazon Pay balance in India", "brandColor": "#FF9900"},
+    {"code": "bhim_upi", "name": "BHIM UPI", "description": "Direct UPI payments to any VPA", "brandColor": "#00897B"},
+
+    {"code": "botim_wallet", "name": "Botim Wallet", "description": "UAE digital wallet via Botim", "brandColor": "#00C853"},
+    {"code": "eand_money", "name": "e& money", "description": "Etisalat mobile wallet in the UAE", "brandColor": "#E00800"},
+    {"code": "careem_pay", "name": "Careem Pay", "description": "Careem Pay wallet top-up and transfer", "brandColor": "#00B140"},
+
+    {"code": "stc_pay", "name": "STC Pay", "description": "Saudi digital wallet by stc", "brandColor": "#4F008C"},
+    {"code": "urpay", "name": "UrPay", "description": "Al Rajhi digital wallet in KSA", "brandColor": "#004F9F"},
+
+    {"code": "gcash", "name": "GCash", "description": "Philippines' most popular mobile wallet", "brandColor": "#007CFF"},
+    {"code": "maya", "name": "Maya", "description": "Send to Maya wallet accounts", "brandColor": "#00D632"},
+
+    {"code": "esewa", "name": "eSewa", "description": "Nepal's leading digital wallet", "brandColor": "#60BB46"},
+    {"code": "khalti", "name": "Khalti", "description": "Fast wallet transfers in Nepal", "brandColor": "#5C2D91"},
+
+    {"code": "ezcash", "name": "eZ Cash", "description": "Dialog mobile wallet in Sri Lanka", "brandColor": "#ED1C24"},
+    {"code": "mcash", "name": "mCash", "description": "Mobitel wallet transfers in Sri Lanka", "brandColor": "#FF6600"},
+
+    {"code": "vodafone_cash", "name": "Vodafone Cash", "description": "Vodafone mobile money in Egypt", "brandColor": "#E60000"},
+    {"code": "orange_cash", "name": "Orange Cash", "description": "Orange mobile wallet in Egypt", "brandColor": "#FF7900"},
+
+    {"code": "mpesa", "name": "M-Pesa", "description": "Kenya's mobile money network", "brandColor": "#4CAF50"}
+  ],
+  "mappings": [
+    {"countryCode": "PK", "providerCodes": ["easypaisa", "jazzcash", "nayapay", "sadapay", "upaisa"]},
+    {"countryCode": "BD", "providerCodes": ["bkash", "nagad", "rocket", "upay_bd"]},
+    {"countryCode": "IN", "providerCodes": ["paytm", "phonepe", "google_pay", "amazon_pay", "bhim_upi"]},
+    {"countryCode": "AE", "providerCodes": ["botim_wallet", "eand_money", "careem_pay"]},
+    {"countryCode": "SA", "providerCodes": ["stc_pay", "urpay"]},
+    {"countryCode": "PH", "providerCodes": ["gcash", "maya"]},
+    {"countryCode": "NP", "providerCodes": ["esewa", "khalti"]},
+    {"countryCode": "LK", "providerCodes": ["ezcash", "mcash"]},
+    {"countryCode": "EG", "providerCodes": ["vodafone_cash", "orange_cash"]},
+    {"countryCode": "KE", "providerCodes": ["mpesa"]}
+  ]
+}
