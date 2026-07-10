@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/xmoney_theme.dart';
 
-/// Send Money To — five distinct transfer modules (no duplicates).
+/// Send Money To — six distinct transfer modules (no duplicates).
 enum SendMoneyChannel {
   internationalWallet,
   internationalBank,
-  local,
+  localWallet,
+  localBank,
   cnic,
   scanQr,
 }
@@ -72,9 +73,9 @@ class SendMoneyOptionsSheet extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _SendOptionTile(
-                  label: 'Local\nTransfer',
-                  child: const _LocalTransferIcon(),
-                  onTap: () => onSelected(SendMoneyChannel.local),
+                  label: 'Local\nWallet Transfer',
+                  child: const _LocalWalletIcon(),
+                  onTap: () => onSelected(SendMoneyChannel.localWallet),
                 ),
               ),
             ],
@@ -82,6 +83,14 @@ class SendMoneyOptionsSheet extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
+              Expanded(
+                child: _SendOptionTile(
+                  label: 'Local\nBank Transfer',
+                  child: const _BankTransferIcon(),
+                  onTap: () => onSelected(SendMoneyChannel.localBank),
+                ),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: _SendOptionTile(
                   label: 'CNIC\nTransfer',
@@ -97,7 +106,6 @@ class SendMoneyOptionsSheet extends StatelessWidget {
                   onTap: () => onSelected(SendMoneyChannel.scanQr),
                 ),
               ),
-              const Expanded(child: SizedBox()),
             ],
           ),
         ],
@@ -223,8 +231,8 @@ class _CnicTransferIcon extends StatelessWidget {
   }
 }
 
-class _LocalTransferIcon extends StatelessWidget {
-  const _LocalTransferIcon();
+class _LocalWalletIcon extends StatelessWidget {
+  const _LocalWalletIcon();
 
   @override
   Widget build(BuildContext context) {
@@ -236,11 +244,19 @@ class _LocalTransferIcon extends StatelessWidget {
         children: [
           Positioned(
             left: 2,
-            child: CircleAvatar(radius: 14, backgroundColor: Colors.black, child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.9))),
+            child: CircleAvatar(
+              radius: 14,
+              backgroundColor: Colors.black,
+              child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.9)),
+            ),
           ),
           Positioned(
             right: 2,
-            child: CircleAvatar(radius: 14, backgroundColor: XmoneyTheme.teal, child: Icon(Icons.person, size: 16, color: Colors.white.withOpacity(0.95))),
+            child: CircleAvatar(
+              radius: 14,
+              backgroundColor: XmoneyTheme.teal,
+              child: Icon(Icons.account_balance_wallet_outlined, size: 14, color: Colors.white.withOpacity(0.95)),
+            ),
           ),
           Icon(Icons.swap_horiz, size: 22, color: Colors.black.withOpacity(0.75)),
         ],

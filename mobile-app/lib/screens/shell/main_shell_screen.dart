@@ -7,7 +7,8 @@ import '../home/home_screen.dart';
 import '../wallet/wallet_screen.dart';
 import '../transfer/transfer_screen.dart';
 import '../transfer/international_transfer_screen.dart';
-import '../transfer/local_transfer_screen.dart';
+import '../transfer/local_wallet_transfer_screen.dart';
+import '../transfer/local_bank_transfer_screen.dart';
 import '../../core/transfer/international_transfer_mode.dart';
 import '../transactions/transactions_screen.dart';
 import '../more/more_screen.dart';
@@ -56,10 +57,17 @@ class _MainShellScreenState extends State<MainShellScreen> {
           ),
         );
         return;
-      case SendMoneyChannel.local:
+      case SendMoneyChannel.localWallet:
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => LocalTransferScreen(router: widget.router),
+            builder: (_) => LocalWalletTransferScreen(router: widget.router),
+          ),
+        );
+        return;
+      case SendMoneyChannel.localBank:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => LocalBankTransferScreen(router: widget.router),
           ),
         );
         return;

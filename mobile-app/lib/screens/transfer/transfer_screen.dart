@@ -194,8 +194,10 @@ class _TransferScreenState extends State<TransferScreen> {
         return 'International Bank Transfer';
       case SendMoneyChannel.cnic:
         return 'CNIC Transfer';
-      case SendMoneyChannel.local:
-        return 'Local Transfer';
+      case SendMoneyChannel.localWallet:
+        return 'Local Wallet Transfer';
+      case SendMoneyChannel.localBank:
+        return 'Local Bank Transfer';
       case SendMoneyChannel.scanQr:
         return 'Scan QR';
       case null:
