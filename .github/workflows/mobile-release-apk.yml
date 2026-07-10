@@ -1,0 +1,49 @@
+# Release APK — manual only (not for Play Store yet).
+name: Mobile Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: read
+
+jobs:
+  build-release-apk:
+    name: Flutter release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    defaults:
+      run:
+        working-directory: mobile-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.5'
+          cache: true
+
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Prepare project
+        run: bash scripts/ci-prepare.sh
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload XMONEY-Release-APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: XMONEY-Release-APK
+          path: mobile-app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error

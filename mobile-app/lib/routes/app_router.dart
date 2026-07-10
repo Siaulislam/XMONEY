@@ -18,12 +18,16 @@ import '../screens/kyc/kyc_screen.dart';
 import '../screens/beneficiaries/beneficiaries_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/onboarding/onboarding_screen.dart';
+import '../screens/auth/reset_password_screen.dart';
+import '../screens/security/security_screen.dart';
 import '../core/theme/theme_controller.dart';
 
 class AppRouter {
   AppRouter({required this.session, this.themeController}) : api = ApiClient(session);
 
   static const splash = '/';
+  static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
@@ -38,6 +42,8 @@ class AppRouter {
   static const beneficiaries = '/beneficiaries';
   static const notifications = '/notifications';
   static const settings = '/settings';
+  static const security = '/security';
+  static const resetPassword = '/reset-password';
 
   final SessionManager session;
   final ThemeController? themeController;
@@ -47,6 +53,8 @@ class AppRouter {
     switch (settings.name) {
       case splash:
         return MaterialPageRoute(builder: (_) => SplashScreen(router: this));
+      case onboarding:
+        return MaterialPageRoute(builder: (_) => OnboardingScreen(router: this));
       case login:
         return MaterialPageRoute(builder: (_) => LoginScreen(router: this));
       case register:
@@ -88,6 +96,17 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => NotificationsScreen(router: this));
       case settings:
         return MaterialPageRoute(builder: (_) => SettingsScreen(router: this, themeController: themeController));
+      case security:
+        return MaterialPageRoute(builder: (_) => SecurityScreen(router: this));
+      case resetPassword:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        return MaterialPageRoute(
+          builder: (_) => ResetPasswordScreen(
+            router: this,
+            email: args['email'] as String? ?? '',
+            otp: args['otp'] as String? ?? '',
+          ),
+        );
       default:
         return MaterialPageRoute(builder: (_) => SplashScreen(router: this));
     }

@@ -1,0 +1,50 @@
+# Build Flutter Debug APK on every push to main (mobile-app changes).
+# Artifact: XMONEY-Debug-APK
+name: Mobile Debug APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile-app/**'
+      - '.github/workflows/mobile-debug-apk.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build-debug-apk:
+    name: Flutter debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        working-directory: mobile-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.5'
+          cache: true
+
+      - name: Install ImageMagick (branding placeholders)
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Prepare project (platforms, assets, analyze)
+        run: bash scripts/ci-prepare.sh
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload XMONEY-Debug-APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: XMONEY-Debug-APK
+          path: mobile-app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14
+          if-no-files-found: error

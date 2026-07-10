@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
+import '../../core/l10n/xm_strings.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key, required this.router});
@@ -7,22 +8,28 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = XmStrings.instance;
     final items = [
-      _Item('Profile', Icons.person_outline, AppRouter.profile),
-      _Item('KYC verification', Icons.verified_user_outlined, AppRouter.kyc),
-      _Item('Beneficiaries', Icons.people_outline, AppRouter.beneficiaries),
-      _Item('Notifications', Icons.notifications_outlined, AppRouter.notifications),
-      _Item('Settings', Icons.settings_outlined, AppRouter.settings),
+      _Item(s.t('nav.profile', 'Profile'), Icons.person_outline, AppRouter.profile),
+      _Item(s.t('nav.kyc', 'KYC'), Icons.verified_user_outlined, AppRouter.kyc),
+      _Item(s.t('nav.beneficiaries', 'Beneficiaries'), Icons.people_outline, AppRouter.beneficiaries),
+      _Item(s.t('nav.notifications', 'Notifications'), Icons.notifications_outlined, AppRouter.notifications),
+      _Item(s.t('security.title', 'Security'), Icons.shield_outlined, AppRouter.security),
+      _Item(s.t('nav.settings', 'Settings'), Icons.settings_outlined, AppRouter.settings),
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('More')),
+      appBar: AppBar(title: Text(s.t('nav.more', 'More'))),
       body: ListView(
-        children: items.map((item) => ListTile(
-          leading: Icon(item.icon),
-          title: Text(item.label),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.pushNamed(context, item.route),
-        )).toList(),
+        children: items
+            .map(
+              (item) => ListTile(
+                leading: Icon(item.icon),
+                title: Text(item.label),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pushNamed(context, item.route),
+              ),
+            )
+            .toList(),
       ),
     );
   }

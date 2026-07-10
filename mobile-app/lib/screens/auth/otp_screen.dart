@@ -50,10 +50,25 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   Future<void> _verify() async {
+    final code = _otp.text.trim();
+    if (code.length != 6) {
+      setState(() => _error = _s.t('otp.invalid', 'Invalid OTP'));
+      return;
+    }
+
+    if (widget.purpose == 'password_reset') {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRouter.resetPassword,
+        arguments: {'email': widget.email, 'otp': code},
+      );
+      return;
+    }
+
     setState(() { _loading = true; _error = null; });
     final res = await widget.router.api.verifyOtp(
       email: widget.email,
-      otp: _otp.text.trim(),
+      otp: code,
       purpose: widget.purpose,
     );
     if (!mounted) return;
