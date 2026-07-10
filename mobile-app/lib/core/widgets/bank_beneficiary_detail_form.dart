@@ -413,8 +413,6 @@ class BankBeneficiaryDetailForm extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: XmoneyTheme.teal.withOpacity(0.45),
-            activeThumbColor: Colors.white,
           ),
         ],
       ),
@@ -443,11 +441,11 @@ class BankBeneficiaryDetailForm extends StatelessWidget {
                 child: RichText(
                   text: TextSpan(
                     style: const TextStyle(fontSize: 13, color: _text, height: 1.4),
-                    children: const [
-                      TextSpan(text: 'I have read & understood '),
-                      TextSpan(
+                    children: [
+                      const TextSpan(text: 'I have read & understood '),
+                      const TextSpan(
                         text: 'Key Facts Statements',
-                        style: TextStyle(color: XmoneyTheme.teal, fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
+                        style: const TextStyle(color: XmoneyTheme.teal, fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
                       ),
                     ],
                   ),
