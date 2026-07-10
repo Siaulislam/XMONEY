@@ -12,7 +12,9 @@ import '../../core/wallets/country_wallet_mapping.dart';
 import '../../core/wallets/wallet_provider.dart';
 import '../../core/wallets/wallet_repository.dart';
 import '../../core/widgets/wallet_selector.dart';
-import 'wallet_transfer_screen.dart';
+import '../../core/transfer/international_transfer_context.dart';
+import '../../core/transfer/transfer_delivery_type.dart';
+import 'international_transfer_beneficiary_screen.dart';
 
 enum _DeliveryMethod { bank, digitalWallet }
 
@@ -141,22 +143,35 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
     _refreshQuote();
   }
 
-  Future<void> _openWalletTransfer() async {
-    final provider = _selectedProvider;
+  bool _canContinue(double send) {
+    if (send <= 0 || _sender == null || _receiver == null) return false;
+    if (_delivery == _DeliveryMethod.digitalWallet) {
+      if (_destinationWallets?.hasWallets ?? false) {
+        return _selectedProvider != null;
+      }
+    }
+    return true;
+  }
+
+  Future<void> _openBeneficiaryFlow() async {
+    final sender = _sender;
     final receiver = _receiver;
-    if (provider == null || receiver == null) return;
+    if (sender == null || receiver == null) return;
     final send = double.tryParse(_sendAmount.text.replaceAll(',', '')) ?? 0;
+    final ctx = InternationalTransferContext(
+      sender: sender,
+      receiver: receiver,
+      sendAmount: send,
+      quote: _rates.quote,
+      payFromWalletId: _walletId,
+      deliveryMethod: _delivery == _DeliveryMethod.digitalWallet
+          ? TransferDeliveryType.wallet
+          : TransferDeliveryType.bank,
+      walletProvider: _selectedProvider,
+    );
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => WalletTransferScreen(
-          router: widget.router,
-          provider: provider,
-          receiver: receiver,
-          senderCurrency: _sender?.currencyCode ?? 'AED',
-          sendAmount: send,
-          quote: _rates.quote,
-          payFromWalletId: _walletId,
-        ),
+        builder: (_) => InternationalTransferBeneficiaryScreen(router: widget.router, transferContext: ctx),
       ),
     );
   }
@@ -242,33 +257,6 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                         onTap: _pickReceiver,
                       ),
                     const SizedBox(height: 20),
-                    Text(
-                      'Amount to send',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _sendAmount,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-                      decoration: InputDecoration(
-                        prefixText: '${_sender?.currencyCode ?? ''} ',
-                        prefixStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F8FC),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _WalletPicker(
-                      wallets: _wallets,
-                      selectedId: _walletId,
-                      onChanged: (id) => setState(() => _walletId = id),
-                    ),
-                    const SizedBox(height: 20),
                     _DeliveryMethodSection(
                       hasDigitalWallets: _destinationWallets?.hasWallets ?? false,
                       loading: _loadingWallets,
@@ -295,27 +283,32 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                           : const SizedBox.shrink(),
                     ),
                     const SizedBox(height: 16),
-                    if (_delivery == _DeliveryMethod.bank)
-                      _ReceiverCard(
-                        onTap: () => showXmSnack(context, 'Bank beneficiary selection — coming next'),
-                        title: 'Bank transfer',
-                        subtitle: 'Send to a local bank account',
-                        icon: Icons.account_balance_rounded,
-                      )
-                    else if (_selectedProvider != null)
-                      _ReceiverCard(
-                        onTap: _openWalletTransfer,
-                        title: _selectedProvider!.name,
-                        subtitle: 'Enter ${_selectedProvider!.name} account details',
-                        icon: Icons.account_balance_wallet_rounded,
-                      )
-                    else if (_destinationWallets?.hasWallets ?? false)
-                      _ReceiverCard(
-                        onTap: () => showXmSnack(context, 'Select a digital wallet above'),
-                        title: 'Select wallet provider',
-                        subtitle: 'Choose how your recipient receives funds',
-                        icon: Icons.account_balance_wallet_outlined,
+                    Text(
+                      'Amount to send',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _sendAmount,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                      decoration: InputDecoration(
+                        prefixText: '${_sender?.currencyCode ?? ''} ',
+                        prefixStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                        filled: true,
+                        fillColor: const Color(0xFFF6F8FC),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    _WalletPicker(
+                      wallets: _wallets,
+                      selectedId: _walletId,
+                      onChanged: (id) => setState(() => _walletId = id),
+                    ),
                     const SizedBox(height: 16),
                     _SecureBanner(),
                     if (_rates.error != null) ...[
@@ -327,8 +320,8 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                       width: double.infinity,
                       height: 54,
                       child: FilledButton(
-                        onPressed: send > 0 && _receiver != null
-                            ? () => showXmSnack(context, 'Total debit: ${_sender?.currencyCode} ${fmt.format(total)}')
+                        onPressed: _canContinue(send)
+                            ? _openBeneficiaryFlow
                             : null,
                         style: FilledButton.styleFrom(
                           backgroundColor: XmoneyTheme.blue,
@@ -545,64 +538,6 @@ class _MethodTile extends StatelessWidget {
                 Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ReceiverCard extends StatelessWidget {
-  const _ReceiverCard({
-    required this.onTap,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-  final VoidCallback onTap;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE8ECF3)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 4))],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: XmoneyTheme.teal.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: XmoneyTheme.teal),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: XmoneyTheme.navyDeep)),
-                    const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: Colors.grey.shade500),
-            ],
           ),
         ),
       ),
