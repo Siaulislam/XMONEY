@@ -243,10 +243,11 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                       CurrencySelector(
                         label: 'You send',
                         option: _sender!,
-                        amountText: fmt.format(send),
+                        amountController: _sendAmount,
+                        onAmountChanged: (_) => _refreshQuote(),
                         feeLabel: _sender != null ? 'Fee: ${_sender!.currencyCode} ${fmt.format(fee)}' : null,
                         showFeeBadge: fee > 0,
-                        onTap: _pickSender,
+                        onCurrencyTap: _pickSender,
                       ),
                     const SizedBox(height: 8),
                     _ExchangeRateBand(
@@ -262,7 +263,7 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                         option: _receiver!,
                         amountText: fmt.format(receive),
                         amountColor: const Color(0xFF0D9488),
-                        onTap: _pickReceiver,
+                        onCurrencyTap: _pickReceiver,
                       ),
                     const SizedBox(height: 20),
                     _DeliveryMethodSection(
@@ -291,27 +292,6 @@ class _InternationalTransferScreenState extends State<InternationalTransferScree
                           : const SizedBox.shrink(),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      'Amount to send',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _sendAmount,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-                      decoration: InputDecoration(
-                        prefixText: '${_sender?.currencyCode ?? ''} ',
-                        prefixStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-                        filled: true,
-                        fillColor: const Color(0xFFF6F8FC),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     _WalletPicker(
                       wallets: _wallets,
                       selectedId: _walletId,
