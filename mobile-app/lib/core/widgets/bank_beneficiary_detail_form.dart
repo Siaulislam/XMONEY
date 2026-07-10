@@ -431,16 +431,19 @@ class BankBeneficiaryDetailForm extends StatelessWidget {
             Checkbox(
               value: value,
               onChanged: (v) => onChanged(v ?? false),
-              activeColor: XmoneyTheme.teal,
+              fillColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) return XmoneyTheme.teal;
+                return Colors.transparent;
+              }),
               side: const BorderSide(color: _label, width: 1.5),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: RichText(
-                  text: const TextSpan(
-                    style: TextStyle(fontSize: 13, color: _text, height: 1.4),
-                    children: [
+                  text: TextSpan(
+                    style: const TextStyle(fontSize: 13, color: _text, height: 1.4),
+                    children: const [
                       TextSpan(text: 'I have read & understood '),
                       TextSpan(
                         text: 'Key Facts Statements',

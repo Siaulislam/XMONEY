@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/xmoney_theme.dart';
 import 'pay_from_wallet_picker.dart';
 
 /// Review summary for International Bank Transfer (step 3).
