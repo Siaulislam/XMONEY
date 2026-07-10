@@ -8,19 +8,18 @@ const NAMES = { AF:'Afghanistan',AL:'Albania',DZ:'Algeria',AS:'American Samoa',A
 
 const CN = { AED:'UAE Dirham',AFN:'Afghan Afghani',ALL:'Albanian Lek',AMD:'Armenian Dram',ANG:'Netherlands Antillean Guilder',AOA:'Angolan Kwanza',ARS:'Argentine Peso',AUD:'Australian Dollar',AWG:'Aruban Florin',AZN:'Azerbaijani Manat',BAM:'Bosnia Mark',BBD:'Barbados Dollar',BDT:'Bangladeshi Taka',BGN:'Bulgarian Lev',BHD:'Bahraini Dinar',BIF:'Burundian Franc',BMD:'Bermudian Dollar',BND:'Brunei Dollar',BOB:'Bolivian Boliviano',BRL:'Brazilian Real',BSD:'Bahamian Dollar',BWP:'Botswana Pula',BYN:'Belarusian Ruble',BZD:'Belize Dollar',CAD:'Canadian Dollar',CDF:'Congolese Franc',CHF:'Swiss Franc',CLP:'Chilean Peso',CNY:'Chinese Yuan',COP:'Colombian Peso',CRC:'Costa Rican Colón',CUP:'Cuban Peso',CVE:'Cape Verdean Escudo',CZK:'Czech Koruna',DJF:'Djiboutian Franc',DKK:'Danish Krone',DOP:'Dominican Peso',DZD:'Algerian Dinar',EGP:'Egyptian Pound',ERN:'Eritrean Nakfa',ETB:'Ethiopian Birr',EUR:'Euro',FJD:'Fijian Dollar',GBP:'British Pound',GEL:'Georgian Lari',GHS:'Ghanaian Cedi',GIP:'Gibraltar Pound',GMD:'Gambian Dalasi',GNF:'Guinean Franc',GTQ:'Guatemalan Quetzal',GYD:'Guyanese Dollar',HKD:'Hong Kong Dollar',HNL:'Honduran Lempira',HTG:'Haitian Gourde',HUF:'Hungarian Forint',IDR:'Indonesian Rupiah',ILS:'Israeli Shekel',INR:'Indian Rupee',IQD:'Iraqi Dinar',IRR:'Iranian Rial',ISK:'Icelandic Króna',JMD:'Jamaican Dollar',JOD:'Jordanian Dinar',JPY:'Japanese Yen',KES:'Kenyan Shilling',KGS:'Kyrgyzstani Som',KHR:'Cambodian Riel',KMF:'Comorian Franc',KPW:'North Korean Won',KRW:'South Korean Won',KWD:'Kuwaiti Dinar',KYD:'Cayman Islands Dollar',KZT:'Kazakhstani Tenge',LAK:'Lao Kip',LBP:'Lebanese Pound',LKR:'Sri Lankan Rupee',LRD:'Liberian Dollar',LSL:'Lesotho Loti',LYD:'Libyan Dinar',MAD:'Moroccan Dirham',MDL:'Moldovan Leu',MGA:'Malagasy Ariary',MKD:'Macedonian Denar',MMK:'Myanmar Kyat',MNT:'Mongolian Tögrög',MOP:'Macanese Pataca',MRU:'Mauritanian Ouguiya',MUR:'Mauritian Rupee',MVR:'Maldivian Rufiyaa',MWK:'Malawian Kwacha',MXN:'Mexican Peso',MYR:'Malaysian Ringgit',MZN:'Mozambican Metical',NAD:'Namibian Dollar',NGN:'Nigerian Naira',NIO:'Nicaraguan Córdoba',NOK:'Norwegian Krone',NPR:'Nepalese Rupee',NZD:'New Zealand Dollar',OMR:'Omani Rial',PAB:'Panamanian Balboa',PEN:'Peruvian Sol',PGK:'Papua New Guinean Kina',PHP:'Philippine Peso',PKR:'Pakistani Rupee',PLN:'Polish Złoty',PYG:'Paraguayan Guaraní',QAR:'Qatari Riyal',RON:'Romanian Leu',RSD:'Serbian Dinar',RUB:'Russian Ruble',RWF:'Rwandan Franc',SAR:'Saudi Riyal',SBD:'Solomon Islands Dollar',SCR:'Seychellois Rupee',SDG:'Sudanese Pound',SEK:'Swedish Krona',SGD:'Singapore Dollar',SLE:'Sierra Leonean Leone',SOS:'Somali Shilling',SRD:'Surinamese Dollar',SSP:'South Sudanese Pound',STN:'São Tomé Dobra',SYP:'Syrian Pound',SZL:'Swazi Lilangeni',THB:'Thai Baht',TJS:'Tajikistani Somoni',TMT:'Turkmenistani Manat',TND:'Tunisian Dinar',TOP:'Tongan Paʻanga',TRY:'Turkish Lira',TTD:'Trinidad Dollar',TWD:'New Taiwan Dollar',TZS:'Tanzanian Shilling',UAH:'Ukrainian Hryvnia',UGX:'Ugandan Shilling',USD:'US Dollar',UYU:'Uruguayan Peso',UZS:'Uzbekistani Som',VES:'Venezuelan Bolívar',VND:'Vietnamese Đồng',VUV:'Vanuatu Vatu',WST:'Samoan Tala',XAF:'Central African CFA',XCD:'East Caribbean Dollar',XOF:'West African CFA',YER:'Yemeni Rial',ZAR:'South African Rand',ZMW:'Zambian Kwacha',ZWD:'Zimbabwean Dollar' };
 
-const EXTRA = { AR:['USD'],AM:['EUR','USD'],BS:['USD'],BH:['USD'],BZ:['USD'],BJ:['EUR'],BO:['USD'],BA:['EUR','USD'],BG:['USD','EUR'],KH:['USD'],CM:['EUR'],CA:['USD'],KY:['USD'],TD:['EUR'],CL:['USD'],CO:['USD'],CG:['EUR'],CR:['USD'],HR:['USD'],CY:['USD'],CZ:['EUR'],DK:['EUR'],DO:['USD'],EG:['EUR','USD'],SV:['EUR'],GQ:['EUR'],EE:['USD'],FJ:['USD'],GE:['EUR','USD'],GH:['USD'],GT:['USD'],HN:['USD'],HK:['USD'],HU:['EUR'],IS:['EUR'],IN:['USD'],ID:['USD'],IE:['USD'],IL:['USD'],IT:['USD'],JM:['USD'],JP:['USD'],JO:['USD'],KZ:['EUR','USD'],KE:['USD'],KW:['USD'],LV:['USD'],LB:['USD'],LT:['USD'],LU:['USD'],MY:['USD'],MT:['USD'],MU:['USD'],MX:['USD'],MD:['EUR','USD'],MA:['EUR'],MZ:['USD'],NA:['USD'],NP:['USD'],NL:['USD'],NZ:['USD'],NG:['USD'],MK:['EUR'],NO:['EUR'],OM:['USD'],PK:['USD'],PA:['USD'],PY:['USD'],PE:['USD'],PH:['USD'],PL:['EUR'],PT:['USD'],QA:['USD'],RO:['EUR'],RU:['EUR'],SA:['USD'],RS:['EUR'],SG:['USD'],SK:['EUR'],SI:['EUR'],ZA:['USD'],ES:['USD'],LK:['USD'],SE:['EUR'],CH:['EUR'],TH:['USD'],TN:['EUR'],TR:['EUR'],AE:['USD'],GB:['EUR','USD'],US:['EUR'],UY:['USD'],VN:['USD'] };
-
 const POPULAR = ['AE','PK','IN','BD','SA','GB','US','CA','AU','CN','PH','NP','LK','EG'];
 
+// One row per ISO 3166 country — primary official ISO 4217 currency only.
 const entries = [];
 for (const cc of Object.keys(PRIMARY).sort((a, b) => (NAMES[a] || a).localeCompare(NAMES[b] || b))) {
-  const cname = NAMES[cc] || cc;
-  const seen = new Set();
-  for (const code of [PRIMARY[cc], ...(EXTRA[cc] || [])]) {
-    if (seen.has(code)) continue;
-    seen.add(code);
-    entries.push({ countryCode: cc, countryName: cname, currencyCode: code, currencyName: CN[code] || code });
-  }
+  const code = PRIMARY[cc];
+  entries.push({
+    countryCode: cc,
+    countryName: NAMES[cc] || cc,
+    currencyCode: code,
+    currencyName: CN[code] || code,
+  });
 }
 
 const out = { popularCountryCodes: POPULAR, entries };

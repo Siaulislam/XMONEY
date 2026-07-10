@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/xmoney_theme.dart';
 import '../transfer/country_currency_option.dart';
-import '../transfer/country_currency_option.dart';
 import '../transfer/country_repository.dart';
 import 'currency_search_field.dart';
+import 'xm_country_flag.dart';
 
 /// Country-only searchable picker (all ISO countries).
 class CountryPicker extends StatefulWidget {
@@ -60,7 +60,9 @@ class _CountryPickerState extends State<CountryPicker> {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return _uniqueCountries;
     return _uniqueCountries.where((e) {
-      return e.countryName.toLowerCase().contains(q) || e.countryCode.toLowerCase().contains(q);
+      return e.countryName.toLowerCase().contains(q) ||
+          e.countryCode.toLowerCase().contains(q) ||
+          e.currencyCode.toLowerCase().contains(q);
     }).toList();
   }
 
@@ -138,16 +140,27 @@ class _CountryPickerState extends State<CountryPicker> {
     final selected = _selected == e.countryCode;
     return ListTile(
       onTap: () => Navigator.pop(context, e),
-      leading: Text(countryFlagEmoji(e.countryCode), style: const TextStyle(fontSize: 26)),
+      leading: XmCountryFlag(countryCode: e.countryCode),
       title: Text(e.countryName, style: const TextStyle(fontWeight: FontWeight.w600)),
-      trailing: selected
-          ? Container(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            e.currencyCode,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
+          ),
+          const SizedBox(width: 12),
+          if (selected)
+            Container(
               width: 22,
               height: 22,
               decoration: const BoxDecoration(color: XmoneyTheme.teal, shape: BoxShape.circle),
               child: const Icon(Icons.check, size: 14, color: Colors.white),
             )
-          : null,
+          else
+            const SizedBox(width: 22),
+        ],
+      ),
     );
   }
 }

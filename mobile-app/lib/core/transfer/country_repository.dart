@@ -8,7 +8,7 @@ class CountryRepository {
   static final CountryRepository instance = CountryRepository._();
 
   List<CountryCurrencyOption>? _all;
-  Set<String>? _popularCodes;
+  List<String>? _popularOrder;
 
   static const _popularCountryNames = [
     'United Arab Emirates',
@@ -32,15 +32,21 @@ class CountryRepository {
     try {
       final raw = await rootBundle.loadString('assets/data/country_currencies.json');
       final json = jsonDecode(raw) as Map<String, dynamic>;
-      _popularCodes = ((json['popularCountryCodes'] as List?) ?? [])
+      _popularOrder = ((json['popularCountryCodes'] as List?) ?? [])
           .map((e) => e.toString())
-          .toSet();
-      _all = ((json['entries'] as List?) ?? [])
-          .map((e) => CountryCurrencyOption.tryParse(e as Map<String, dynamic>))
-          .whereType<CountryCurrencyOption>()
           .toList();
+      final seen = <String>{};
+      _all = [];
+      for (final raw in (json['entries'] as List?) ?? []) {
+        final option = CountryCurrencyOption.tryParse(raw as Map<String, dynamic>);
+        if (option == null) continue;
+        if (seen.add(option.countryCode)) {
+          _all!.add(option);
+        }
+      }
+      _all!.sort((a, b) => a.countryName.compareTo(b.countryName));
     } catch (_) {
-      _popularCodes = {};
+      _popularOrder = [];
       _all = _fallbackEntries();
     }
   }
@@ -56,20 +62,20 @@ class CountryRepository {
   List<CountryCurrencyOption> get all => _all ?? [];
 
   List<CountryCurrencyOption> get popular {
-    final codes = _popularCodes ?? {};
-    if (codes.isNotEmpty) {
-      return all.where((e) => codes.contains(e.countryCode)).toList();
+    final order = _popularOrder ?? [];
+    if (order.isEmpty) {
+      return all
+          .where((e) => _popularCountryNames.contains(e.countryName))
+          .toList();
     }
-    return all
-        .where((e) => _popularCountryNames.contains(e.countryName))
-        .toList();
+    final byCode = {for (final e in all) e.countryCode: e};
+    return [
+      for (final code in order)
+        if (byCode.containsKey(code)) byCode[code]!,
+    ];
   }
 
-  List<CountryCurrencyOption> get allAlphabetical {
-    final copy = List<CountryCurrencyOption>.from(all);
-    copy.sort((a, b) => a.countryName.compareTo(b.countryName));
-    return copy;
-  }
+  List<CountryCurrencyOption> get allAlphabetical => List<CountryCurrencyOption>.from(all);
 
   List<CountryCurrencyOption> search(String query) {
     final q = query.trim().toLowerCase();
@@ -83,8 +89,11 @@ class CountryRepository {
   }
 
   CountryCurrencyOption? defaultForCountry(String countryCode) {
-    final matches = all.where((e) => e.countryCode == countryCode).toList();
-    return matches.isNotEmpty ? matches.first : null;
+    final cc = countryCode.toUpperCase();
+    for (final e in all) {
+      if (e.countryCode == cc) return e;
+    }
+    return null;
   }
 
   CountryCurrencyOption? tryFindById(String? id) {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../theme/xmoney_theme.dart';
 import '../transfer/country_currency_option.dart';
 import 'country_currency_picker.dart';
+import 'xm_country_flag.dart';
 
 /// Currency row with optional inline editable send amount.
 class CurrencySelector extends StatelessWidget {
@@ -70,7 +71,7 @@ class CurrencySelector extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            Text(countryFlagEmoji(option.countryCode), style: const TextStyle(fontSize: 28)),
+                            XmCountryFlag(countryCode: option.countryCode, width: 36, height: 27),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(

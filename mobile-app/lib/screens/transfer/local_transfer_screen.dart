@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
 import '../../core/responsive/xm_layout.dart';
 import '../../core/theme/xmoney_theme.dart';
-import '../../core/transfer/country_currency_option.dart';
+import '../../core/widgets/xm_country_flag.dart';
 import '../../core/transfer/customer_country_service.dart';
 import '../../core/transfer/local_transfer_repository.dart';
 import '../../core/wallets/country_wallet_mapping.dart';
@@ -213,7 +213,7 @@ class _CountryBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(countryFlagEmoji(code), style: const TextStyle(fontSize: 32)),
+          XmCountryFlag(countryCode: code, width: 40, height: 30),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

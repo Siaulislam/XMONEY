@@ -53,4 +53,10 @@ DART
 fi
 
 flutter pub get
+
+if command -v node >/dev/null 2>&1; then
+  node scripts/generate-country-currencies.js
+  node scripts/download-country-flags.js || echo "Flag download skipped (offline)"
+fi
+
 flutter analyze --no-fatal-infos --no-fatal-warnings

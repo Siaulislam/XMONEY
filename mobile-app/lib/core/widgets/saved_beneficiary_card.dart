@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../beneficiaries/beneficiary.dart';
-import '../transfer/country_currency_option.dart';
 import '../theme/xmoney_theme.dart';
-import '../transfer/country_currency_option.dart';
 import '../transfer/transfer_delivery_type.dart';
+import 'xm_country_flag.dart';
 
 class SavedBeneficiaryCard extends StatelessWidget {
   const SavedBeneficiaryCard({
@@ -42,7 +41,7 @@ class SavedBeneficiaryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(countryFlagEmoji(beneficiary.countryCode), style: const TextStyle(fontSize: 28)),
+                XmCountryFlag(countryCode: beneficiary.countryCode, width: 36, height: 27),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

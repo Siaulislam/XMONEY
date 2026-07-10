@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/xmoney_theme.dart';
 import '../transfer/country_currency_option.dart';
+import 'xm_country_flag.dart';
 
 class CurrencyTile extends StatelessWidget {
   const CurrencyTile({
@@ -24,7 +25,7 @@ class CurrencyTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           child: Row(
             children: [
-              Text(countryFlagEmoji(option.countryCode), style: const TextStyle(fontSize: 26)),
+              XmCountryFlag(countryCode: option.countryCode),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(

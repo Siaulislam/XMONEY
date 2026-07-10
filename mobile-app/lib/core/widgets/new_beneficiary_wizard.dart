@@ -9,6 +9,7 @@ import '../transfer/transfer_delivery_type.dart';
 import '../wallets/wallet_provider.dart';
 import '../wallets/wallet_repository.dart';
 import 'country_picker.dart';
+import 'xm_country_flag.dart';
 import 'wallet_selector.dart';
 import '../wallets/country_wallet_mapping.dart';
 
@@ -237,7 +238,12 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
 
   Widget _stepReceiver() => ListView(
         children: [
-          _fieldTile('Receiver country', _country.countryName, onTap: _pickCountry, leading: countryFlagEmoji(_country.countryCode)),
+          _fieldTile(
+            'Receiver country',
+            '${_country.countryName} · ${_country.currencyCode}',
+            onTap: _pickCountry,
+            leadingWidget: XmCountryFlag(countryCode: _country.countryCode),
+          ),
           _tf('Currency', _currency, readOnly: true),
           _tf('Transfer method', widget.deliveryMethod.label, readOnly: true),
           if (_isWallet && _walletMapping != null) ...[
@@ -301,7 +307,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
         ],
       );
 
-  Widget _fieldTile(String label, String value, {VoidCallback? onTap, String? leading}) => Padding(
+  Widget _fieldTile(String label, String value, {VoidCallback? onTap, Widget? leadingWidget}) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Material(
           color: const Color(0xFFF6F8FC),
@@ -313,7 +319,7 @@ class _NewBeneficiaryWizardState extends State<NewBeneficiaryWizard> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  if (leading != null) ...[Text(leading, style: const TextStyle(fontSize: 24)), const SizedBox(width: 10)],
+                  if (leadingWidget != null) ...[leadingWidget, const SizedBox(width: 10)],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
