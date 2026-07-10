@@ -33,9 +33,9 @@ gen_png "$BRAND/splash-android.png" 1080 1920 'XMONEY'
 gen_png "$BRAND/splash-ios.png" 1290 2796 'XMONEY'
 gen_png "$BRAND/app-icon-1024.png" 1024 1024 'XM'
 
-if [[ ! -f android/app/build.gradle ]]; then
-  echo "Generating Android/iOS platform folders…"
-  flutter create . --org com.smartdms.xmoney --project-name xmoney_app --platforms=android,ios
+if [[ ! -f android/app/build.gradle ]] || [[ ! -f web/index.html ]]; then
+  echo "Generating Android/iOS/Web platform folders…"
+  flutter create . --org com.smartdms.xmoney --project-name xmoney_app --platforms=android,ios,web
   # Remove default counter-app test if flutter create overwrote ours
   if grep -q "MyApp" test/widget_test.dart 2>/dev/null; then
     cat > test/widget_test.dart <<'DART'

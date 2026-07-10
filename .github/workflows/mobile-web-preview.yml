@@ -1,0 +1,77 @@
+# Build Flutter Web and deploy to GitHub Pages on every mobile-app change.
+# Preview URL: https://siaulislam.github.io/XMONEY/
+name: Mobile Web Preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile-app/**'
+      - '.github/workflows/mobile-web-preview.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-mobile-web-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    name: Flutter Web → GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    defaults:
+      run:
+        working-directory: mobile-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.27.4'
+          cache: true
+
+      - name: Install ImageMagick (branding placeholders)
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Prepare project (platforms, assets, analyze)
+        run: bash scripts/ci-prepare.sh
+
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href "/XMONEY/"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile-app/build/web
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Write preview URL to job summary
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          {
+            echo "## XMONEY Mobile Web Preview"
+            echo ""
+            echo "**Preview URL:** ${PAGE_URL}"
+            echo ""
+            echo "Redeploys automatically when \`mobile-app/\` changes on \`main\`."
+            echo ""
+            echo "> Enable **Settings → Pages → Build and deployment → GitHub Actions** if the first deploy fails."
+          } >> "$GITHUB_STEP_SUMMARY"

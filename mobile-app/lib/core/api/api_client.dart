@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +29,7 @@ class ApiClient {
       'Content-Type': 'application/json',
       'X-Device-Id': _deviceId,
       'X-Locale': XmStrings.instance.lang,
-      'X-Platform': Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other'),
+      'X-Platform': _platformHeader,
     };
     return headers;
   }
@@ -153,7 +152,8 @@ class ApiClient {
 
   Future<Map<String, dynamic>> uploadKyc({
     required String documentType,
-    required File file,
+    required List<int> bytes,
+    required String filename,
   }) async {
     final token = await session.accessToken;
     final req = http.MultipartRequest('POST', _uri('/v1/kyc/upload'));
@@ -161,13 +161,25 @@ class ApiClient {
     req.headers['X-Device-Id'] = _deviceId;
     if (token != null) req.headers['Authorization'] = 'Bearer $token';
     req.fields['document_type'] = documentType;
-    req.files.add(await http.MultipartFile.fromPath('document', file.path));
+    req.files.add(http.MultipartFile.fromBytes('document', bytes, filename: filename));
     final streamed = await req.send();
     final res = await http.Response.fromStream(streamed);
     try {
       return jsonDecode(res.body) as Map<String, dynamic>;
     } catch (_) {
       return {'success': false, 'message': 'Upload failed'};
+    }
+  }
+
+  static String get _platformHeader {
+    if (kIsWeb) return 'web';
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return 'ios';
+      case TargetPlatform.android:
+        return 'android';
+      default:
+        return 'other';
     }
   }
 

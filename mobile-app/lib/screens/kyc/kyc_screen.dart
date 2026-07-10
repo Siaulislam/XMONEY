@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../routes/app_router.dart';
@@ -38,7 +37,9 @@ class _KycScreenState extends State<KycScreen> {
     final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (file == null) return;
     setState(() => _uploading = true);
-    final res = await widget.router.api.uploadKyc(documentType: _type, file: File(file.path));
+    final bytes = await file.readAsBytes();
+    final name = file.name.isNotEmpty ? file.name : 'document.jpg';
+    final res = await widget.router.api.uploadKyc(documentType: _type, bytes: bytes, filename: name);
     if (!mounted) return;
     setState(() => _uploading = false);
     if (res['success'] == true) {

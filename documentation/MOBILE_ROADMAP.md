@@ -1,7 +1,7 @@
 # XMONEY Mobile — Development Roadmap
 
 **Primary focus:** Flutter mobile app (Android + iOS single codebase).  
-**Web:** maintenance only unless required for API/backend.
+**Web preview:** auto-deployed to GitHub Pages on every `mobile-app/` change — [https://siaulislam.github.io/XMONEY/](https://siaulislam.github.io/XMONEY/)
 
 ## Module status
 
@@ -27,8 +27,9 @@
 
 ## CI builds (no local Android Studio required)
 
-| Workflow | Trigger | Artifact |
-|----------|---------|----------|
+| Workflow | Trigger | Output |
+|----------|---------|--------|
+| **Mobile Web Preview** | Push to `main` (mobile-app changes) | [GitHub Pages preview](https://siaulislam.github.io/XMONEY/) |
 | **Mobile Debug APK** | Push to `main` (mobile-app changes) | `XMONEY-Debug-APK` |
 | **Mobile Release APK** | Manual | `XMONEY-Release-APK` |
 | **Mobile Release AAB** | Manual | `XMONEY-Release-AAB` |
