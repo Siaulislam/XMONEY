@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
 import '../../core/responsive/xm_layout.dart';
 import '../../core/theme/xmoney_theme.dart';
-import '../../core/transfer/local_transfer_shared.dart';
+import 'local_transfer_shared.dart';
 import '../../core/wallets/country_wallet_mapping.dart';
 import '../../core/wallets/wallet_provider.dart';
 import '../../core/wallets/wallet_repository.dart';

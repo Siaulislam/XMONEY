@@ -3,7 +3,7 @@ import '../../routes/app_router.dart';
 import '../../core/responsive/xm_layout.dart';
 import '../../core/theme/xmoney_theme.dart';
 import '../../core/transfer/local_transfer_repository.dart';
-import '../../core/transfer/local_transfer_shared.dart';
+import 'local_transfer_shared.dart';
 import '../../core/widgets/bank_selector.dart';
 import '../../core/widgets/xm_ui.dart';
 
