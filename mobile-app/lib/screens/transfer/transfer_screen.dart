@@ -3,10 +3,13 @@ import 'package:intl/intl.dart';
 import '../../routes/app_router.dart';
 import '../../core/l10n/xm_strings.dart';
 import '../../core/widgets/xm_ui.dart';
+import '../../core/widgets/send_money_options_sheet.dart';
 
 class TransferScreen extends StatefulWidget {
-  const TransferScreen({super.key, required this.router});
+  const TransferScreen({super.key, required this.router, this.channel});
+
   final AppRouter router;
+  final SendMoneyChannel? channel;
 
   @override
   State<TransferScreen> createState() => _TransferScreenState();
@@ -110,8 +113,22 @@ class _TransferScreenState extends State<TransferScreen> {
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '', decimalDigits: 2);
+    final channelLabel = _channelTitle(widget.channel);
+
     return Scaffold(
-      appBar: AppBar(title: Text(_s.t('nav.send', 'Send money'))),
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_s.t('nav.send', 'Send money')),
+            if (channelLabel != null)
+              Text(
+                channelLabel,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70),
+              ),
+          ],
+        ),
+      ),
       body: _loading
           ? const XmLoading()
           : SingleChildScrollView(
@@ -167,5 +184,24 @@ class _TransferScreenState extends State<TransferScreen> {
               ),
             ),
     );
+  }
+
+  String? _channelTitle(SendMoneyChannel? ch) {
+    switch (ch) {
+      case SendMoneyChannel.international:
+        return 'International Transfer';
+      case SendMoneyChannel.bank:
+        return 'Bank Transfer';
+      case SendMoneyChannel.cnic:
+        return 'CNIC Transfer';
+      case SendMoneyChannel.local:
+        return 'Local Transfer';
+      case SendMoneyChannel.otherWallets:
+        return 'Other Wallets';
+      case SendMoneyChannel.scanQr:
+        return 'Scan QR';
+      case null:
+        return null;
+    }
   }
 }

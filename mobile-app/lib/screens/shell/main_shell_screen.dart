@@ -8,6 +8,8 @@ import '../wallet/wallet_screen.dart';
 import '../transfer/transfer_screen.dart';
 import '../transactions/transactions_screen.dart';
 import '../more/more_screen.dart';
+import '../../core/widgets/send_money_options_sheet.dart';
+import '../../core/widgets/xm_ui.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key, required this.router, this.initialIndex = 0});
@@ -22,14 +24,33 @@ class MainShellScreen extends StatefulWidget {
 class _MainShellScreenState extends State<MainShellScreen> {
   late int _index = widget.initialIndex;
   final _s = XmStrings.instance;
+  SendMoneyChannel? _sendChannel;
 
   void _goTab(int i) => setState(() => _index = i);
+
+  Future<void> _openSendMoneyFlow() async {
+    final channel = await SendMoneyOptionsSheet.show(context);
+    if (!mounted || channel == null) return;
+
+    switch (channel) {
+      case SendMoneyChannel.scanQr:
+      case SendMoneyChannel.otherWallets:
+        showXmSnack(context, 'Coming soon');
+        return;
+      case SendMoneyChannel.international:
+      case SendMoneyChannel.bank:
+      case SendMoneyChannel.cnic:
+      case SendMoneyChannel.local:
+        setState(() => _sendChannel = channel);
+        _goTab(1);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(router: widget.router, onSend: () => _goTab(1), onTopUp: () => _goTab(3)),
-      TransferScreen(router: widget.router),
+      HomeScreen(router: widget.router, onSend: _openSendMoneyFlow, onTopUp: () => _goTab(3)),
+      TransferScreen(key: ValueKey(_sendChannel), router: widget.router, channel: _sendChannel),
       TransactionsScreen(router: widget.router),
       WalletScreen(router: widget.router),
       MoreScreen(router: widget.router),
@@ -54,7 +75,13 @@ class _MainShellScreenState extends State<MainShellScreen> {
           NavigationDestination(icon: const Icon(Icons.account_balance_wallet_outlined), selectedIcon: const Icon(Icons.account_balance_wallet), label: _s.t('nav.wallet', 'Wallet')),
           NavigationDestination(icon: const Icon(Icons.more_horiz), selectedIcon: const Icon(Icons.more_horiz), label: _s.t('nav.more', 'More')),
         ],
-        onDestinationSelected: _goTab,
+        onDestinationSelected: (i) {
+          if (i == 1) {
+            _openSendMoneyFlow();
+          } else {
+            _goTab(i);
+          }
+        },
       ),
     );
   }

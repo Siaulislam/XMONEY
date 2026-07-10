@@ -4,6 +4,7 @@ import '../../routes/app_router.dart';
 import '../../core/theme/xmoney_theme.dart';
 import '../../core/widgets/xm_action_buttons.dart';
 import '../../core/widgets/xm_ui.dart';
+import '../../core/widgets/send_money_options_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.router, this.onSend, this.onTopUp});
@@ -62,14 +63,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _soon(String label) => showXmSnack(context, '$label — coming soon');
 
+  void _sendMoney() => widget.onSend?.call();
+
   List<_ServiceItem> get _moreServices => [
-        _ServiceItem('Intl transfer', Icons.public, XmoneyTheme.blue, widget.onSend ?? () {}),
+        _ServiceItem('Intl transfer', Icons.public, XmoneyTheme.blue, _sendMoney),
         _ServiceItem('Gold & silver', Icons.trending_up, const Color(0xFFD4A017), () => _soon('Gold & silver')),
         _ServiceItem('Instant loan', Icons.campaign_outlined, XmoneyTheme.blue, () => _soon('Instant loan')),
         _ServiceItem('My cards', Icons.credit_card_outlined, XmoneyTheme.blue, widget.onTopUp ?? () {}),
         _ServiceItem('Bill & recharge', Icons.receipt_long_outlined, const Color(0xFF2E7D6B), () => _soon('Bill & recharge')),
         _ServiceItem('Salary card', Icons.badge_outlined, XmoneyTheme.blue, () => _soon('Salary card')),
-        _ServiceItem('Remittance', Icons.currency_exchange, const Color(0xFF2E7D6B), widget.onSend ?? () {}),
+        _ServiceItem('Remittance', Icons.currency_exchange, const Color(0xFF2E7D6B), _sendMoney),
         _ServiceItem('Insurance', Icons.health_and_safety_outlined, XmoneyTheme.teal, () => _soon('Insurance')),
         _ServiceItem('Credit score', Icons.speed_outlined, const Color(0xFF6B5B95), () => _soon('Credit score')),
         _ServiceItem('More', Icons.apps, XmoneyTheme.navyDeep, _showAllServices),
@@ -77,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAllServices() {
     final extra = [
+      _ServiceItem('Intl transfer', Icons.public, XmoneyTheme.blue, _sendMoney),
       _ServiceItem('Beneficiaries', Icons.people_outline, XmoneyTheme.teal, () => _open(AppRouter.beneficiaries)),
       _ServiceItem('View statement', Icons.description_outlined, const Color(0xFF5B6B7C), () => _open(AppRouter.transactions)),
       _ServiceItem('Mobile packages', Icons.sim_card_outlined, const Color(0xFF7C5CBF), () => _soon('Mobile packages')),
@@ -177,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Send money',
                         icon: Icons.near_me_outlined,
                         accent: XmoneyTheme.blue,
-                        onTap: widget.onSend ?? () {},
+                        onTap: _sendMoney,
                       ),
                       XmPrimaryActionButton(
                         compact: true,
