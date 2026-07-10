@@ -56,7 +56,7 @@ class _TransferScreenState extends State<TransferScreen> {
     return (w['available_balance'] as num?)?.toDouble() ?? (w['balance'] as num?)?.toDouble() ?? 0;
   }
 
-  Future<void> _quote() async {
+  Future<void> _fetchQuote() async {
     if (_selectedBen == null) {
       setState(() => _error = _s.t('mobile.transfer.selectBen', 'Select a beneficiary'));
       return;
@@ -149,7 +149,7 @@ class _TransferScreenState extends State<TransferScreen> {
                       Text(_error!, style: const TextStyle(color: Colors.red)),
                     ],
                     const SizedBox(height: 12),
-                    OutlinedButton(onPressed: _quote, child: Text(_s.t('transfer.getQuote', 'Get quote'))),
+                    OutlinedButton(onPressed: _fetchQuote, child: Text(_s.t('transfer.getQuote', 'Get quote'))),
                     if (_quote != null) ...[
                       const SizedBox(height: 12),
                       Text(_s.t('mobile.transfer.receive', 'Receive: {amount} {currency}')

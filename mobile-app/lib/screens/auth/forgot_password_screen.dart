@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
-import '../../core/widgets/xm_ui.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key, required this.router});

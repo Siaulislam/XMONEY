@@ -33,20 +33,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF000000),
+    return Scaffold(
+      backgroundColor: const Color(0xFF000000),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image(
-              image: AssetImage('assets/branding/xmoney-logo-full.png'),
+            Image.asset(
+              'assets/branding/xmoney-logo-full.png',
               width: 280,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(Icons.account_balance, size: 80, color: Color(0xFFFFC107)),
+              errorBuilder: (_, __, ___) => const Icon(Icons.account_balance, size: 80, color: Color(0xFFFFC107)),
             ),
-            SizedBox(height: 28),
-            CircularProgressIndicator(
+            const SizedBox(height: 28),
+            const CircularProgressIndicator(
               color: Color(0xFFFFC107),
               strokeWidth: 2.5,
             ),

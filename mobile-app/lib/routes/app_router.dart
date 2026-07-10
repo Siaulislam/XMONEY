@@ -7,13 +7,8 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/shell/main_shell_screen.dart';
-import '../screens/home/home_screen.dart';
-import '../screens/wallet/wallet_screen.dart';
-import '../screens/transfer/transfer_screen.dart';
-import '../screens/transactions/transactions_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/transactions/transaction_detail_screen.dart';
-import '../screens/profile/profile_edit_screen.dart';
 import '../screens/kyc/kyc_screen.dart';
 import '../screens/beneficiaries/beneficiaries_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
@@ -49,8 +44,8 @@ class AppRouter {
   final ThemeController? themeController;
   final ApiClient api;
 
-  Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
+  Route<dynamic>? onGenerateRoute(RouteSettings routeSettings) {
+    switch (routeSettings.name) {
       case splash:
         return MaterialPageRoute(builder: (_) => SplashScreen(router: this));
       case onboarding:
@@ -62,7 +57,7 @@ class AppRouter {
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => ForgotPasswordScreen(router: this));
       case verifyOtp:
-        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
           builder: (_) => OtpScreen(
             router: this,
@@ -81,7 +76,7 @@ class AppRouter {
       case profile:
         return MaterialPageRoute(builder: (_) => ProfileScreen(router: this));
       case transactionDetail:
-        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
           builder: (_) => TransactionDetailScreen(
             router: this,
@@ -99,7 +94,7 @@ class AppRouter {
       case security:
         return MaterialPageRoute(builder: (_) => SecurityScreen(router: this));
       case resetPassword:
-        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(
           builder: (_) => ResetPasswordScreen(
             router: this,

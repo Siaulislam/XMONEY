@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'xm_strings.dart';
+import '../l10n/xm_strings.dart';
 
 enum XmThemeMode { light, dark, system }
 

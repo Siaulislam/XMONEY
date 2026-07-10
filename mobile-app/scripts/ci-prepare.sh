@@ -36,11 +36,21 @@ gen_png "$BRAND/app-icon-1024.png" 1024 1024 'XM'
 if [[ ! -f android/app/build.gradle ]]; then
   echo "Generating Android/iOS platform folders…"
   flutter create . --org com.smartdms.xmoney --project-name xmoney_app --platforms=android,ios
+  # Remove default counter-app test if flutter create overwrote ours
+  if grep -q "MyApp" test/widget_test.dart 2>/dev/null; then
+    cat > test/widget_test.dart <<'DART'
+import 'package:flutter_test/flutter_test.dart';
+import 'package:xmoney_app/core/l10n/xm_strings.dart';
+
+void main() {
+  test('XmStrings loads English catalog', () async {
+    await XmStrings.instance.load('en');
+    expect(XmStrings.instance.t('nav.signin', 'Sign in'), isNotEmpty);
+  });
+}
+DART
+  fi
 fi
 
 flutter pub get
-
-# Analyze — do not block packaging on info-level hints
-if ! flutter analyze --no-fatal-infos --no-fatal-warnings; then
-  echo "::warning::flutter analyze reported issues — continuing build"
-fi
+flutter analyze --no-fatal-infos --no-fatal-warnings

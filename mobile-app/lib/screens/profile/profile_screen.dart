@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../routes/app_router.dart';
 import '../../core/l10n/xm_strings.dart';
+import 'profile_edit_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.router});
