@@ -1,13 +1,10 @@
-# Build Flutter Web and deploy to GitHub Pages on every mobile-app change.
+# Build Flutter Web and deploy to GitHub Pages on every push to main.
 # Preview URL: https://siaulislam.github.io/XMONEY/
 name: Mobile Web Preview
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'mobile-app/**'
-      - '.github/workflows/mobile-web-preview.yml'
   workflow_dispatch: {}
 
 permissions:
@@ -26,7 +23,7 @@ jobs:
     timeout-minutes: 30
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.verify.outputs.preview_url || steps.deploy.outputs.page_url }}
 
     defaults:
       run:
@@ -50,8 +47,13 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/XMONEY/"
 
+      - name: Add .nojekyll (required for Flutter assets on GitHub Pages)
+        run: touch build/web/.nojekyll
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -62,16 +64,43 @@ jobs:
         id: deploy
         uses: actions/deploy-pages@v4
 
-      - name: Write preview URL to job summary
+      - name: Verify preview is publicly accessible
+        id: verify
         env:
           PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          echo "Deployed to: ${PAGE_URL}"
+          echo "Waiting for GitHub Pages CDN (up to ~3 minutes)…"
+          ok=0
+          for attempt in $(seq 1 12); do
+            code="$(curl -sS -o /tmp/preview.html -w '%{http_code}' -L "${PAGE_URL}" || true)"
+            if [[ "$code" == "200" ]] && grep -qiE 'flutter|xmoney|main\.dart' /tmp/preview.html; then
+              ok=1
+              break
+            fi
+            echo "Attempt ${attempt}/12 — HTTP ${code}, retrying in 15s…"
+            sleep 15
+          done
+          if [[ "$ok" != "1" ]]; then
+            echo "::error::Preview not reachable at ${PAGE_URL}"
+            exit 1
+          fi
+          echo "preview_url=${PAGE_URL}" >> "$GITHUB_OUTPUT"
+          echo "Preview verified: ${PAGE_URL}"
+
+      - name: Write preview URL to job summary
+        env:
+          PAGE_URL: ${{ steps.verify.outputs.preview_url }}
         run: |
           {
             echo "## XMONEY Mobile Web Preview"
             echo ""
-            echo "**Preview URL:** ${PAGE_URL}"
+            echo "### Live Preview URL"
             echo ""
-            echo "Redeploys automatically when \`mobile-app/\` changes on \`main\`."
+            echo "**${PAGE_URL}**"
             echo ""
-            echo "> Enable **Settings → Pages → Build and deployment → GitHub Actions** if the first deploy fails."
+            echo "Open this URL in your browser to review the mobile app UI."
+            echo ""
+            echo "Redeploys automatically on every push to \`main\`."
           } >> "$GITHUB_STEP_SUMMARY"
